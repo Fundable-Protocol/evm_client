@@ -253,7 +253,7 @@
   }
 
   .btn-wrapper {
-    @apply relative inline-flex overflow-hidden rounded-full p-[2.5px] h-[2.rem];
+    @apply relative inline-flex overflow-hidden rounded-full p-[2.5px] h-[2.55rem];
   }
 
   .btn-grad {

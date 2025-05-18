@@ -28,7 +28,7 @@ const GradientButton = ({
         disabled={!mounted}
       >
         {!mounted ? <Loader2 /> : null}
-        {title}
+        {!mounted ? "Please wait" : title}
       </Button>
     </div>
   );

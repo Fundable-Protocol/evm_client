@@ -1,7 +1,15 @@
+import DashboardLayout from "@/components/layouts/DashboardLayout";
+import AppSelect from "@/components/molecules/AppSelect";
 import React from "react";
 
-const AdminPage = () => {
-  return <div>AdminPage</div>;
+const DistributePage = () => {
+  return (
+    <DashboardLayout title="Create Distribution">
+      <div className="">
+        <AppSelect />
+      </div>
+    </DashboardLayout>
+  );
 };
 
-export default AdminPage;
+export default DistributePage;
