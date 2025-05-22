@@ -6,17 +6,32 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const AppSelect = () => {
+const AppSelect = ({
+  title,
+  options,
+}: {
+  title: string;
+  options: { label: string; value: string }[];
+}) => {
   return (
     <Select>
-      <SelectTrigger className="w-[180px] border-none bg-[#1E212F] text-white">
-        <SelectValue placeholder="STRK" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="light">Light</SelectItem>
-        <SelectItem value="dark">Dark</SelectItem>
-        <SelectItem value="system">System</SelectItem>
-      </SelectContent>
+      <div className="flex flex-col w-full">
+        <h3 className="font-semibold mb-3">{title}</h3>
+        <SelectTrigger className="w-full border-none bg-fundable-mid-grey text-white">
+          <SelectValue placeholder="STRK" />
+        </SelectTrigger>
+        <SelectContent>
+          {options?.map((option) => (
+            <SelectItem
+              key={option.value}
+              value={option.value}
+              className="text-white bg-[#252939] hover:bg-[#252939] hover:text-white"
+            >
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </div>
     </Select>
   );
 };

@@ -16,6 +16,7 @@
   --color-fundable-dark: var(--fundable-dark);
   --color-fundable-mid-dark: var(--fundable-mid-dark);
   --color-fundable-grey: var(--fundable-grey);
+  --color-fundable-mid-grey: var(--fundable-mid-grey);
   --color-fundable-violet: var(--fundable-violet);
   --color-fundable-purple: var(--fundable-purple);
   --color-fundable-purple-2: var(--fundable-purple-2);
@@ -101,6 +102,7 @@
   --fundable-dark: #0d0019;
   --fundable-mid-dark: #151617;
   --fundable-grey: #4a4949;
+  --fundable-mid-grey: #252939;
   --fundable-purple: #b102cd;
   --fundable-purple-2: #8256ff;
   --fundable-violet: #5b21b6;
@@ -262,5 +264,20 @@
 
   .btn-bottom-grad {
     @apply inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-black px-3 py-0.5 text-sm font-medium text-fundable-white backdrop-blur-3xl hover:bg-slate-700;
+  }
+}
+
+@layer utilities {
+  .border-dash-wide {
+    border-style: dashed;
+    border-width: 2px;
+    border-image: repeating-linear-gradient(
+        90deg,
+        #ccc 0,
+        #ccc 12px,
+        transparent 12px,
+        transparent 24px
+      )
+      10;
   }
 }
