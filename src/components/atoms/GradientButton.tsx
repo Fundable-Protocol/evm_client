@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { Loader2 } from "lucide-react";
 import { useMount } from "@/hooks/useMount";
+import { Skeleton } from "../ui/skeleton";
 
 export interface ConnectWalletBtnProps {
   onClick?: () => void;
@@ -17,6 +18,8 @@ const GradientButton = ({
 }: ConnectWalletBtnProps) => {
   const mounted = useMount();
 
+  if (!mounted) return <Skeleton className="w-36 h-8" />;
+
   return (
     <div className="btn-wrapper">
       <span className={cn("btn-grad", !mounted ? "hidden" : "")} />
@@ -28,7 +31,7 @@ const GradientButton = ({
         disabled={!mounted}
       >
         {!mounted ? <Loader2 /> : null}
-        {title}
+        {!mounted ? "Please wait" : title}
       </Button>
     </div>
   );

@@ -1,5 +1,14 @@
-import { clsx, type ClassValue } from "clsx";
+import { v4 as uuidv4 } from "uuid";
 import { twMerge } from "tailwind-merge";
+import { clsx, type ClassValue } from "clsx";
+
+import { IDistributionRowData } from "@/types/distribution";
+import {
+  MAINNET_CONTRACT_ADDRESS,
+  MAINNET_SUPPORTED_TOKENS,
+  TESTNET_CONTRACT_ADDRESS,
+  TESTNET_SUPPORTED_TOKENS,
+} from "./constant";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -26,3 +35,15 @@ export const isMobileDevice = () => {
   // Combine checks: Must match user agent AND (touch support OR small screen)
   return isMobileUA && (hasTouchSupport || isSmallScreen);
 };
+
+export const createEmptyRow = (): IDistributionRowData => ({
+  id: uuidv4(),
+  address: "",
+  amount: "",
+});
+
+export const getContractAddress = (isMainnet: boolean) =>
+  isMainnet ? MAINNET_CONTRACT_ADDRESS : TESTNET_CONTRACT_ADDRESS;
+
+export const getSupportedTokens = (isMainnet: boolean) =>
+  isMainnet ? MAINNET_SUPPORTED_TOKENS : TESTNET_SUPPORTED_TOKENS;
