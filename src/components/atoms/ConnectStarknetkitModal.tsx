@@ -1,5 +1,5 @@
-import { useConnectWallet } from "@/hooks/useConnectWallet";
 import GradientButton, { ConnectWalletBtnProps } from "./GradientButton";
+import { useConnectWallet } from "@/hooks/useConnectWallet";
 
 const ConnectStarknetkitModal = ({ type, onClick }: ConnectWalletBtnProps) => {
   const { connectWallet } = useConnectWallet();

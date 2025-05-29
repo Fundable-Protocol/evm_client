@@ -33,6 +33,11 @@ export function useConnectWallet() {
       });
 
       lsRef.current?.set("aktInfo", { isPrevConnected: true, address });
+    } else {
+      lsRef.current?.set("aktInfo", {
+        isPrevConnected: false,
+        address: undefined,
+      });
     }
   }, [address]);
 
@@ -56,6 +61,10 @@ export function useConnectWallet() {
       }
 
       await connectAsync({ connector: connector as Connector });
+      setWallet({
+        isConnected: true,
+        address: "",
+      });
     } catch {
       // console.log("ERRRRR::::", err);
     }

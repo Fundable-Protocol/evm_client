@@ -1,5 +1,6 @@
 "use client";
 
+import { useAccount } from "@starknet-react/core";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -58,7 +59,9 @@ const items = [
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const { disConnectWallet, address } = useConnectWallet();
+  const { disConnectWallet } = useConnectWallet();
+
+  const { address } = useAccount();
 
   return (
     <Sidebar className="pt-7" aria-label="Main navigation">
