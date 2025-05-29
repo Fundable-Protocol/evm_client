@@ -7,7 +7,7 @@ import DistributionTable from "@/components/modules/distribution/DistributionTab
 import { IDistributionType } from "@/types/distribution";
 import { useNetwork } from "@starknet-react/core";
 import DistributionSelector from "@/components/modules/distribution/DistributionSelector";
-import { getContractAddress, getSupportedTokens } from "@/lib/utils";
+import { getSupportedTokens } from "@/lib/utils";
 
 const DistributePage = () => {
   // const { address, status, account } = useAccount();
@@ -30,7 +30,7 @@ const DistributePage = () => {
     equalAmountType: "amount_per_address",
   });
   // Derive current contract address and supported tokens based on network
-  const CONTRACT_ADDRESS = getContractAddress(isMainNet);
+  // const CONTRACT_ADDRESS = getContractAddress(isMainNet);
 
   return (
     <DashboardLayout
