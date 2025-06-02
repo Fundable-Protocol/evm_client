@@ -3,8 +3,8 @@ import { ChangeEvent } from "react";
 import { equalDistributionType } from "@/lib/constant";
 
 import {
-  DistributionSelectorProps,
   distributionTypeKey,
+  DistributionSelectorProps,
 } from "@/types/distribution";
 
 import { Input } from "@/components/ui/input";
@@ -33,7 +33,7 @@ const DistributionSelector = ({
 
   return (
     <div className="flex flex-col xl:flex-row gap-y-6 xl:gap-y-0 gap-x-12 justify-between">
-      <div className="flex gap-6 flex-col md:flex-row md:items-center">
+      <div className="flex gap-6 flex-col md:flex-row md:items-center pl-1">
         <AppSelect
           title="Token"
           placeholder="STRK"

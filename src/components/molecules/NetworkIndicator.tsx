@@ -14,7 +14,7 @@ const NetworkIndicator = ({
   const isMainNet = chain?.network === "mainnet";
 
   return (
-    <div className={`px-4 py-2 rounded-full flex items-center gap-2 $`}>
+    <div className={`px-4 py-2 rounded-full flex items-center gap-2`}>
       <span
         className={`size-3 rounded-full animate-pulse ${
           isMainNet ? "bg-green-400" : "bg-yellow-300"

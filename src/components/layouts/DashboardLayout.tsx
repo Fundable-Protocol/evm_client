@@ -15,7 +15,9 @@ const DashboardLayout = ({
       <h1 className="font-syne font-medium border-b border-b-gray-700 pb-4 w-full">
         {title}
       </h1>
-      <main className={cn("flex-1 my-4 h-full overflow-y-auto", className)}>
+      <main
+        className={cn("flex-1 my-4 h-full overflow-y-auto px-2", className)}
+      >
         {children}
       </main>
     </main>

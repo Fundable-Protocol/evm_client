@@ -9,7 +9,7 @@ const AppProvider = ({ children }: { children: ReactNode }) => {
   return (
     <main>
       <StarknetProvider>{children}</StarknetProvider>;
-      <Toaster position="bottom-left" />
+      <Toaster position="bottom-right" />
     </main>
   );
 };

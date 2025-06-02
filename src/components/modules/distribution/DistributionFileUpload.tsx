@@ -7,35 +7,54 @@ import { useDropzone } from "react-dropzone";
 import { useCallback } from "react";
 import toast from "react-hot-toast";
 import { validateCsvData } from "@/validations";
+import { DistributionDataProps } from "@/types/distribution";
 
-function FileUploadZone() {
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
+function DistributionFileUpload({
+  distributionData,
+  setDistributionData,
+}: DistributionDataProps) {
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      const file = acceptedFiles[0];
 
-    papaParse(file, {
-      complete: (result) => {
-        const { data: csvData, errors } = result;
+      papaParse(file, {
+        complete: (result) => {
+          const { data: csvData, errors } = result;
 
-        if (errors.length) {
-          toast.error(
-            "Error uploading CSV. Make sure it's properly formatted with only address, amount, and label (if enabled)."
+          if (errors.length) {
+            toast.error(
+              "Error uploading CSV. Make sure it's properly formatted with only address, amount, and label (if enabled)."
+            );
+            return;
+          }
+
+          const { success, data, message } = validateCsvData(csvData);
+
+          console.log(data);
+
+          if (!success) {
+            toast.error(message!);
+            return;
+          }
+
+          const nonEmptyRows = distributionData?.filter(
+            (data) => data.address || data.starkAddress
           );
+
+          if (nonEmptyRows?.length) {
+            setDistributionData((prevData) => [...prevData, ...nonEmptyRows]);
+          } else {
+            setDistributionData(data!);
+          }
+
           return;
-        }
-
-        const { success, data, message } = validateCsvData(csvData);
-
-        if (!success) {
-          toast.error(message!);
-          return;
-        }
-
-        console.log(data);
-      },
-      header: false,
-      skipEmptyLines: true,
-    });
-  }, []);
+        },
+        header: false,
+        skipEmptyLines: true,
+      });
+    },
+    [setDistributionData]
+  );
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
@@ -65,4 +84,4 @@ function FileUploadZone() {
   );
 }
 
-export default FileUploadZone;
+export default DistributionFileUpload;

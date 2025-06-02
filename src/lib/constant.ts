@@ -62,3 +62,10 @@ export const TESTNET_CONTRACT_ADDRESS =
 
 export const MAINNET_CONTRACT_ADDRESS =
   "0x67a27274b63fa3b070cabf7adf59e7b1c1e5b768b18f84b50f6cb85f59c42e5";
+
+export const distributionState = [
+  "process-started",
+  "process-completed",
+  "request-confirmed",
+  "request-confirmation",
+] as const;

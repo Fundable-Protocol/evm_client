@@ -1,3 +1,6 @@
+import { createEmptyRow } from "@/lib/utils";
+import { IDistributionData } from "@/types/distribution";
+import { parseUnits } from "ethers";
 import { validateAndParseAddress } from "starknet";
 
 export const isValidStarknetAddress = (address: string): boolean => {
@@ -7,6 +10,52 @@ export const isValidStarknetAddress = (address: string): boolean => {
   } catch {
     return false;
   }
+};
+export const isSnsAddress = (address: string) => {
+  if (!address) return false;
+
+  return address?.toLowerCase().endsWith(".stark");
+};
+
+export const isEmptyDistributionData = (
+  distributionData: IDistributionData[]
+) => {
+  if (!distributionData.length) return true;
+
+  return distributionData.every((row) => !row.address && !row.starkAddress);
+};
+
+export const isDuplicateAddress = (distributionData: IDistributionData[]) => {
+  const addressSet = new Set();
+
+  return distributionData.some((row) => {
+    if (row.address) {
+      if (addressSet.has(row.address)) return true;
+      addressSet.add(row.address);
+    }
+
+    if (row.starkAddress) {
+      if (addressSet.has(row.starkAddress)) return true;
+      addressSet.add(row.starkAddress);
+    }
+
+    return false;
+  });
+};
+
+export const isValidAmount = (amount: string): boolean => {
+  if (!amount) return false;
+
+  try {
+    const bn = parseUnits(amount, 18);
+    return bn >= parseUnits("0", 18);
+  } catch {
+    return false;
+  }
+};
+
+export const isEmptyAmount = (distributionData: IDistributionData[]) => {
+  return distributionData.every((row) => !row.amount);
 };
 
 export const validateCsvData = (data: unknown) => {
@@ -34,12 +83,12 @@ export const validateCsvData = (data: unknown) => {
 
       if (i === 1 && hasHeader) return null;
 
-      if (isValidStarknetAddress(address)) {
-        return {
-          address,
+      if (isValidStarknetAddress(address) || isSnsAddress(address)) {
+        return createEmptyRow({
           amount,
           ...(label && label),
-        };
+          ...(isSnsAddress(address) ? { starkAddress: address } : { address }),
+        });
       }
 
       return null;
@@ -54,5 +103,5 @@ export const validateCsvData = (data: unknown) => {
     };
   }
 
-  return { success: true, data: transformedData };
+  return { success: true, data: transformedData as IDistributionData[] };
 };
