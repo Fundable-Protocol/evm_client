@@ -1,4 +1,5 @@
 import { ChangeEvent } from "react";
+import toast from "react-hot-toast";
 
 import { equalDistributionType } from "@/lib/constant";
 
@@ -11,10 +12,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import AppSelect from "@/components/molecules/AppSelect";
 import DistributionTypeSwitch from "./DistributionSwitch";
+import { calculateLumpSumAmount } from "@/validations/distribution";
 
 const DistributionSelector = ({
   supportedTokens,
+  distributionData,
   distributionType,
+  setDistributionData,
   setDistributionType,
 }: DistributionSelectorProps) => {
   const handleDistributionTypeChange = (
@@ -29,6 +33,24 @@ const DistributionSelector = ({
 
   const updateEqualDistributionAmount = (e: ChangeEvent<HTMLInputElement>) => {
     handleDistributionTypeChange("amount", e.target.value);
+  };
+
+  const handleLumpSumCalculation = () => {
+    const result = calculateLumpSumAmount({
+      distributionType,
+      setDistributionType,
+      distributionData: distributionData!,
+      setDistributionData: setDistributionData!,
+    });
+
+    if (result) {
+      const { success, message } = result;
+      if (!success) {
+        toast.error(message);
+      } else {
+        toast.success(message);
+      }
+    }
   };
 
   return (
@@ -74,7 +96,11 @@ const DistributionSelector = ({
                   placeholder="Amount"
                   onChange={updateEqualDistributionAmount}
                 />
-                <Button variant="gradient" className="rounded h-10">
+                <Button
+                  variant="gradient"
+                  className="rounded h-10"
+                  onClick={handleLumpSumCalculation}
+                >
                   Calculate
                 </Button>
               </div>

@@ -11,19 +11,20 @@ import {
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { generateUUID } from "@/lib/utils";
+import {
+  distributionStatus,
+  distributionType,
+  supportedNetwork,
+} from "@/lib/constant";
 
-export const distribution_status = pgEnum("distribution_status", [
-  "COMPLETED",
-  "FAILED",
-  "PENDING",
-]);
+export const distribution_status = pgEnum(
+  "distribution_status",
+  distributionStatus
+);
 
-export const distribution_type = pgEnum("distribution_type", [
-  "EQUAL",
-  "WEIGHTED",
-]);
+export const distribution_type = pgEnum("distribution_type", distributionType);
 
-export const network = pgEnum("network", ["MAINNET", "TESTNET"]);
+export const network = pgEnum("network", supportedNetwork);
 
 export const distributionModel = pgTable(
   "Distribution",
@@ -41,14 +42,14 @@ export const distributionModel = pgTable(
     fee_amount: numeric("fee_amount", { precision: 65, scale: 30 }).notNull(),
     total_recipients: integer("total_recipients").notNull(),
     distribution_type: distribution_type("distribution_type").notNull(),
-    status: distribution_status().default("PENDING").notNull(),
+    status: distribution_status().default("pending").notNull(),
     // You can use { mode: "bigint" } if numbers are exceeding js number limitations
     block_number: bigint("block_number", { mode: "number" }),
     block_timestamp: timestamp("block_timestamp", {
       precision: 3,
       mode: "date",
     }),
-    network: network().default("MAINNET").notNull(),
+    network: network().default("mainnet").notNull(),
     created_at: timestamp("created_at", { precision: 3, mode: "date" })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),

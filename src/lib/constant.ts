@@ -1,8 +1,12 @@
 import { TokenOption } from "@/types";
 
-export const PROJECT_ID = "4f854415eedab0dd9258793f029e728d";
+export const projectId = "4f854415eedab0dd9258793f029e728d";
 
 export const distributionType = ["equal", "weighted"] as const;
+
+export const supportedNetwork = ["mainnet", "testnet"] as const;
+
+export const distributionStatus = ["completed", "failed", "pending"] as const;
 
 export const equalDistributionType = [
   { label: "Equal amount per address", value: "amount_per_address" },
@@ -69,3 +73,5 @@ export const distributionState = [
   "request-confirmed",
   "request-confirmation",
 ] as const;
+
+export const apiSecretKey = process.env.API_SECRET_KEY || "";

@@ -10,9 +10,10 @@ import {
 import { createEmptyRow } from "@/lib/utils";
 
 const DistributionTable = ({
-  setDistributionData,
+  isConnected,
   distributionData,
   handleDistribution,
+  setDistributionData,
 }: DistributionDataProps) => {
   // Initialize rows with 3 empty rows
 
@@ -43,6 +44,7 @@ const DistributionTable = ({
         <Button
           variant="gradient"
           className="font-bold"
+          disabled={!isConnected}
           onClick={handleDistribution}
         >
           Distribute Token

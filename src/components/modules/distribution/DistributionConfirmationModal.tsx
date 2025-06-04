@@ -9,8 +9,12 @@ function DistributionConfirmationModal({
 }: DistributionConfirmationModalProps) {
   if (!isOpen) return null;
 
-  const { protocolFeePercentage, recipientCount, totalAmount, selectedToken } =
-    distributionState;
+  const {
+    protocolFeePercentage,
+    recipientCount,
+    displayableAmount,
+    selectedToken,
+  } = distributionState;
 
   return (
     <div className="fixed inset-0 bg-fundable-dark/50 backdrop-blur-xs flex justify-center items-center z-10">
@@ -25,7 +29,7 @@ function DistributionConfirmationModal({
               Total Amount + {protocolFeePercentage / 100}% Fee
             </p>
             <p className="text-white font-semibold">
-              {totalAmount} {selectedToken}
+              {displayableAmount} {selectedToken}
             </p>
           </div>
 

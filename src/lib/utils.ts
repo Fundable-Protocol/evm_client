@@ -1,3 +1,5 @@
+import crypto from "crypto";
+import { parseUnits } from "ethers";
 import { v4 as uuidv4 } from "uuid";
 import { twMerge } from "tailwind-merge";
 import { clsx, type ClassValue } from "clsx";
@@ -10,6 +12,7 @@ import {
 } from "./constant";
 import { IDistributionData } from "@/types/distribution";
 import { isValidAmount, isValidStarknetAddress } from "@/validations";
+import { ErrorWithCode, PromiseResult, TokenOption } from "@/types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -73,11 +76,53 @@ export const validateDistribution = (
 };
 
 export const calculateTotalDistributionAmount = (
-  distributions: IDistributionData[]
+  distributions: IDistributionData[],
+  selectedToken: Readonly<TokenOption>,
+  protocolFeePercentage = 0
 ) => {
-  return distributions
-    .reduce((sum, dist) => {
-      return sum + Number.parseFloat(dist.amount);
-    }, 0)
-    .toString();
+  const amounts = distributions.map((dist) =>
+    BigInt(parseUnits(dist.amount || "0", selectedToken.decimals))
+  );
+
+  const totalAmount = amounts.reduce(
+    (sum, amount) => sum + BigInt(amount),
+    BigInt(0)
+  );
+
+  const protocolFee =
+    (totalAmount * BigInt(protocolFeePercentage || 0)) / BigInt(10000);
+
+  const totalAmountWithFee = totalAmount + protocolFee;
+
+  const totalAmountString = (
+    Number(totalAmountWithFee) /
+    10 ** selectedToken.decimals
+  ).toString();
+
+  return {
+    amounts,
+    totalAmount,
+    protocolFee,
+    totalAmountString,
+    totalAmountWithFee,
+  };
 };
+
+export function generateUUID() {
+  return crypto.randomUUID();
+}
+
+export const generateKey = crypto.randomBytes(32).toString("hex");
+
+// Main wrapper function
+
+export async function tryCatch<T, E = ErrorWithCode>(
+  promise: Promise<T>
+): Promise<PromiseResult<T, E>> {
+  try {
+    const data = await promise;
+    return { data, error: null, success: true };
+  } catch (error) {
+    return { data: null, success: false, error: error as E };
+  }
+}

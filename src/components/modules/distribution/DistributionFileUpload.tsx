@@ -30,8 +30,6 @@ function DistributionFileUpload({
 
           const { success, data, message } = validateCsvData(csvData);
 
-          console.log(data);
-
           if (!success) {
             toast.error(message!);
             return;
@@ -53,7 +51,7 @@ function DistributionFileUpload({
         skipEmptyLines: true,
       });
     },
-    [setDistributionData]
+    [distributionData, setDistributionData]
   );
 
   const { getRootProps, getInputProps } = useDropzone({

@@ -17,14 +17,6 @@ export const isSnsAddress = (address: string) => {
   return address?.toLowerCase().endsWith(".stark");
 };
 
-export const isEmptyDistributionData = (
-  distributionData: IDistributionData[]
-) => {
-  if (!distributionData.length) return true;
-
-  return distributionData.every((row) => !row.address && !row.starkAddress);
-};
-
 export const isDuplicateAddress = (distributionData: IDistributionData[]) => {
   const addressSet = new Set();
 
