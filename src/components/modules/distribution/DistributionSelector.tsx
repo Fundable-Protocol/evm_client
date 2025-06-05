@@ -38,7 +38,6 @@ const DistributionSelector = ({
   const handleLumpSumCalculation = () => {
     const result = calculateLumpSumAmount({
       distributionType,
-      setDistributionType,
       distributionData: distributionData!,
       setDistributionData: setDistributionData!,
     });

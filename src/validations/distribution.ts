@@ -23,19 +23,23 @@ export const isEmptyDistributionData = (
   return distributionData.every((row) => !row.address && !row.starkAddress);
 };
 
-export function calculateDistributionAmounts(
+const isInvalidAmount = (amount: number) => {
+  return amount === 0 || Number.isNaN(amount) || amount < 0;
+};
+
+export async function calculateDistributionAmounts(
   data: ICalculateDistributionAmounts
-): { success: boolean; message?: string } {
+): Promise<{ success: boolean; message?: string }> {
   const { distributionInfo, distributionData, setDistributionData } = data;
 
   const firstAmount = Number(distributionData[0]?.amount);
 
-  const generalAmount = distributionInfo?.amount;
+  const generalAmount = Number(distributionInfo?.amount);
 
-  const isAmountPerAddress =
-    distributionInfo.equalAmountType === "amount_per_address";
+  // const isAmountPerAddress =
+  //   distributionInfo.equalAmountType === "amount_per_address";
 
-  if (!firstAmount && !generalAmount) {
+  if (isInvalidAmount(firstAmount) && isInvalidAmount(generalAmount)) {
     return {
       success: false,
       message: "Valid amount is required for distribution.",
@@ -47,18 +51,17 @@ export function calculateDistributionAmounts(
       (dist) => dist.amount !== String(firstAmount)
     );
 
-    if (isAmountPerAddress && hasUnEqualAmount) {
+    if (hasUnEqualAmount) {
       setDistributionData((prev) =>
         prev.map((data) => ({
           ...data,
-          amount: String(generalAmount ?? firstAmount),
+          amount: String(
+            isInvalidAmount(generalAmount) ? firstAmount : generalAmount
+          ),
         }))
       );
-    } else {
     }
-  }
-
-  if (distributionInfo.type === "weighted") {
+  } else {
     const hasEmptyAmount = distributionData.some((dist) => !dist.amount);
 
     if (hasEmptyAmount) {
@@ -120,12 +123,7 @@ export function validateIndividualDistributions(
 }
 
 export function calculateLumpSumAmount(data: ICalculateLumpSumAmount) {
-  const {
-    distributionData,
-    distributionType,
-    setDistributionType,
-    setDistributionData,
-  } = data;
+  const { distributionData, distributionType, setDistributionData } = data;
 
   if (distributionType["equalAmountType"] !== "lump_sum") return;
 
@@ -135,6 +133,7 @@ export function calculateLumpSumAmount(data: ICalculateLumpSumAmount) {
       message: "Please add at least one address to distribute to.",
     };
   }
+
   const value = distributionType.amount;
 
   if (!value || Number.isNaN(Number(value))) {
@@ -145,13 +144,8 @@ export function calculateLumpSumAmount(data: ICalculateLumpSumAmount) {
   }
 
   const perAddressAmount = (Number(value) / distributionData!.length).toFixed(
-    2
+    3
   );
-
-  setDistributionType((prev) => ({
-    ...prev,
-    amount: parseFloat(perAddressAmount),
-  }));
 
   setDistributionData((prev) =>
     prev.map((data) => ({

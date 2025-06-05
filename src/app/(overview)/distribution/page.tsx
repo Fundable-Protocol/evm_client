@@ -105,7 +105,7 @@ const DistributePage = () => {
       const {
         success: equalDistributionSuccess,
         message: equalDistributionMessage,
-      } = calculateDistributionAmounts({
+      } = await calculateDistributionAmounts({
         distributionInfo,
         distributionData,
         setDistributionData,
@@ -116,19 +116,21 @@ const DistributePage = () => {
         return;
       }
 
-      const {
-        message,
-        success,
-        data: protocolFeePercentage,
-      } = await fetchProtocolFee({
-        account,
-        contractAddress: CONTRACT_ADDRESS,
-      });
+      // const {
+      //   message,
+      //   success,
+      //   data: protocolFeePercentage,
+      // } = await fetchProtocolFee({
+      //   account,
+      //   contractAddress: CONTRACT_ADDRESS,
+      // });
 
-      if (!success) {
-        toast.error(message);
-        return;
-      }
+      // if (!success) {
+      //   toast.error(message);
+      //   return;
+      // }
+
+      const protocolFeePercentage = 2500;
 
       const { totalAmountString, amounts, protocolFee, totalAmount } =
         calculateTotalDistributionAmount(

@@ -130,6 +130,5 @@ export interface ICalculateDistributionAmounts {
 export interface ICalculateLumpSumAmount {
   distributionType: IDistributionType;
   distributionData: IDistributionData[];
-  setDistributionType: Dispatch<SetStateAction<IDistributionType>>;
   setDistributionData: Dispatch<SetStateAction<IDistributionData[]>>;
 }
