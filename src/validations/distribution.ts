@@ -4,7 +4,7 @@ import { isDuplicateAddress } from ".";
 import { validateDistribution } from "@/lib/utils";
 import {
   IDistributionData,
-  ICalculateDistributionAmounts,
+  IValidateDistributionAmounts,
   ICalculateLumpSumAmount,
 } from "@/types/distribution";
 
@@ -27,19 +27,14 @@ const isInvalidAmount = (amount: number) => {
   return amount === 0 || Number.isNaN(amount) || amount < 0;
 };
 
-export async function calculateDistributionAmounts(
-  data: ICalculateDistributionAmounts
+export async function validateDistributionAmounts(
+  data: IValidateDistributionAmounts
 ): Promise<{ success: boolean; message?: string }> {
-  const { distributionInfo, distributionData, setDistributionData } = data;
+  const { distributionInfo, distributionData } = data;
 
   const firstAmount = Number(distributionData[0]?.amount);
 
-  const generalAmount = Number(distributionInfo?.amount);
-
-  // const isAmountPerAddress =
-  //   distributionInfo.equalAmountType === "amount_per_address";
-
-  if (isInvalidAmount(firstAmount) && isInvalidAmount(generalAmount)) {
+  if (isInvalidAmount(firstAmount)) {
     return {
       success: false,
       message: "Valid amount is required for distribution.",
@@ -52,14 +47,10 @@ export async function calculateDistributionAmounts(
     );
 
     if (hasUnEqualAmount) {
-      setDistributionData((prev) =>
-        prev.map((data) => ({
-          ...data,
-          amount: String(
-            isInvalidAmount(generalAmount) ? firstAmount : generalAmount
-          ),
-        }))
-      );
+      return {
+        success: false,
+        message: "Amounts are not equal.",
+      };
     }
   } else {
     const hasEmptyAmount = distributionData.some((dist) => !dist.amount);

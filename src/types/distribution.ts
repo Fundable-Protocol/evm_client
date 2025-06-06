@@ -52,6 +52,7 @@ export type distributionTypeKey = keyof IDistributionType;
 export interface DistributionDataProps {
   isConnected?: boolean;
   handleDistribution?: () => void;
+  distributionType?: IDistributionType;
   distributionData?: IDistributionData[];
   setDistributionData: Dispatch<SetStateAction<IDistributionData[]>>;
 }
@@ -121,10 +122,9 @@ export interface UpdateDistributionInput {
   status?: DistributionAttributes["status"];
 }
 
-export interface ICalculateDistributionAmounts {
+export interface IValidateDistributionAmounts {
   distributionInfo: IDistributionType;
   distributionData: IDistributionData[];
-  setDistributionData: Dispatch<SetStateAction<IDistributionData[]>>;
 }
 
 export interface ICalculateLumpSumAmount {

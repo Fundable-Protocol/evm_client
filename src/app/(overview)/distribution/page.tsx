@@ -28,7 +28,7 @@ import { fetchProtocolFee } from "@/lib/api";
 import DistributionConfirmationModal from "@/components/modules/distribution/DistributionConfirmationModal";
 import {
   checkDistributionDataValidity,
-  calculateDistributionAmounts,
+  validateDistributionAmounts,
   validateIndividualDistributions,
 } from "@/validations/distribution";
 import { ErrorWithCode } from "@/types";
@@ -105,10 +105,9 @@ const DistributePage = () => {
       const {
         success: equalDistributionSuccess,
         message: equalDistributionMessage,
-      } = await calculateDistributionAmounts({
+      } = await validateDistributionAmounts({
         distributionInfo,
         distributionData,
-        setDistributionData,
       });
 
       if (!equalDistributionSuccess) {

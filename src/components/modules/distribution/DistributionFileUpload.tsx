@@ -11,6 +11,7 @@ import { DistributionDataProps } from "@/types/distribution";
 
 function DistributionFileUpload({
   distributionData,
+  distributionType,
   setDistributionData,
 }: DistributionDataProps) {
   const onDrop = useCallback(
@@ -60,6 +61,8 @@ function DistributionFileUpload({
     accept: { "text/csv": [".csv"] },
   });
 
+  const isEqualDistribution = distributionType?.type === "equal";
+
   return (
     <div
       {...getRootProps()}
@@ -74,7 +77,8 @@ function DistributionFileUpload({
           Drag and drop a CSV file here, or click to select a file
         </h3>
         <p className="text-xs md:text-sm text-gray-400 font-normal mb-4">
-          CSV format: address, amount (one per line)
+          CSV format: {isEqualDistribution ? "address" : "address, amount"} (one
+          per line)
         </p>
         <input {...getInputProps()} />
       </div>

@@ -35,6 +35,8 @@ const DistributionSelector = ({
     handleDistributionTypeChange("amount", e.target.value);
   };
 
+  const isLumpSum = distributionType["equalAmountType"] === "lump_sum";
+
   const handleLumpSumCalculation = () => {
     const result = calculateLumpSumAmount({
       distributionType,
@@ -50,6 +52,15 @@ const DistributionSelector = ({
         toast.success(message);
       }
     }
+  };
+
+  const shareAmount = () => {
+    setDistributionData!((prev) =>
+      prev.map((data) => ({
+        ...data,
+        amount: String(distributionType.amount),
+      }))
+    );
   };
 
   return (
@@ -87,30 +98,21 @@ const DistributionSelector = ({
                 : "Lump sum to distribute."}
             </h3>
 
-            {distributionType["equalAmountType"] === "lump_sum" ? (
-              <div className="flex gap-x-3 items-center">
-                <Input
-                  className="border-none bg-fundable-mid-grey rounded"
-                  name="amount"
-                  placeholder="Amount"
-                  onChange={updateEqualDistributionAmount}
-                />
-                <Button
-                  variant="gradient"
-                  className="rounded h-10"
-                  onClick={handleLumpSumCalculation}
-                >
-                  Calculate
-                </Button>
-              </div>
-            ) : (
+            <div className="flex gap-x-3 items-center">
               <Input
                 className="border-none bg-fundable-mid-grey rounded"
                 name="amount"
                 placeholder="Amount"
                 onChange={updateEqualDistributionAmount}
               />
-            )}
+              <Button
+                variant="gradient"
+                className="rounded h-10"
+                onClick={isLumpSum ? handleLumpSumCalculation : shareAmount}
+              >
+                {isLumpSum ? "Calculate" : "Share"}
+              </Button>
+            </div>
           </div>
         </div>
       ) : null}
