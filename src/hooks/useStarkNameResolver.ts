@@ -1,55 +1,80 @@
-import { useState, useEffect } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  Dispatch,
+  SetStateAction,
+} from "react";
 import { useStarkAddress } from "@starknet-react/core";
 import {
-  DistributionDataProps,
+  IDistributionData,
   starkNameResolverState,
 } from "@/types/distribution";
 
-export const useStarkNameResolver = ({
-  distributionData,
-  setDistributionData,
-}: DistributionDataProps) => {
+export const useStarkNameResolver = (
+  setDistributionData: Dispatch<SetStateAction<IDistributionData[]>>
+) => {
   const [starkNameState, setStarkNameState] = useState<starkNameResolverState>(
     {}
   );
 
-  // Get first Stark name to resolve from state
-  const firstKey = Object.keys(starkNameState)[0];
-  const firstItem = firstKey ? starkNameState[Number(firstKey)] : undefined;
-  const nameToResolve = firstItem?.starkName;
+  // Memoize the first item to prevent unnecessary recalculations
+  const { firstKey, nameToResolve } = useMemo(() => {
+    const firstKey = Object.keys(starkNameState)[0];
+
+    const firstItem = firstKey ? starkNameState[Number(firstKey)] : undefined;
+
+    return {
+      firstKey,
+      nameToResolve: firstItem?.starkName,
+    };
+  }, [starkNameState]);
 
   // Use the hook to resolve address from stark name
-  const { data: resolvedAddress } = useStarkAddress({ name: nameToResolve });
+  const { data: resolvedAddress } = useStarkAddress({
+    name: nameToResolve,
+  });
 
   // When resolvedAddress changes, update distributions and remove resolved entry from state
   useEffect(() => {
-    if (resolvedAddress && firstKey) {
-      const index = Number(firstKey);
+    if (!resolvedAddress || !firstKey) return;
 
-      const updatedDistributions = [...distributionData!];
+    const index = Number(firstKey);
 
+    setDistributionData((prevData) => {
+      const updatedDistributions = [...prevData];
       updatedDistributions[index] = {
         ...updatedDistributions[index],
         address: resolvedAddress,
       };
+      return updatedDistributions;
+    });
 
-      setDistributionData(updatedDistributions);
+    setStarkNameState((prev) => {
+      const newState = { ...prev };
+      delete newState[index];
+      return newState;
+    });
+  }, [resolvedAddress, firstKey, setDistributionData]);
+
+  // Memoize the queue function to prevent recreation on every render
+  const queueStarkNameResolution = useCallback(
+    (index: number, starkName: string) => {
+      if (!starkName.endsWith(".stark")) return;
 
       setStarkNameState((prev) => {
-        const newState = { ...prev };
-        delete newState[index];
-        return newState;
-      });
-    }
-  }, [resolvedAddress, firstKey, distributionData, setDistributionData]);
+        // Only update if the entry doesn't exist or has changed
+        if (prev[index]?.starkName === starkName) return prev;
 
-  // Public function to queue a new stark name for resolution
-  const queueStarkNameResolution = (index: number, starkName: string) => {
-    setStarkNameState((prev) => ({
-      ...prev,
-      [index]: { resolving: true, starkName },
-    }));
-  };
+        return {
+          ...prev,
+          [index]: { resolving: true, starkName },
+        };
+      });
+    },
+    []
+  );
 
   return {
     starkNameState,

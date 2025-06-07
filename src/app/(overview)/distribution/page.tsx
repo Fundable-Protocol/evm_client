@@ -7,7 +7,7 @@ import DistributionTable from "@/components/modules/distribution/DistributionTab
 import {
   IDistributionData,
   IDistributionState,
-  IDistributionType,
+  IDistributionInfo,
 } from "@/types/distribution";
 import { useAccount, useNetwork } from "@starknet-react/core";
 import DistributionSelector from "@/components/modules/distribution/DistributionSelector";
@@ -19,7 +19,6 @@ import {
   tryCatch,
 } from "@/lib/utils";
 import toast from "react-hot-toast";
-import { isSnsAddress } from "@/validations";
 import { useStarkNameResolver } from "@/hooks/useStarkNameResolver";
 
 import { cairo } from "starknet";
@@ -28,9 +27,11 @@ import { fetchProtocolFee } from "@/lib/api";
 import DistributionConfirmationModal from "@/components/modules/distribution/DistributionConfirmationModal";
 import {
   checkDistributionDataValidity,
+  snsAddressValidation,
   validateDistributionAmounts,
   validateIndividualDistributions,
 } from "@/validations/distribution";
+
 import { ErrorWithCode } from "@/types";
 import { createDistributionAction } from "@/app/actions/distributionActions";
 
@@ -48,9 +49,10 @@ const DistributePage = () => {
     value: token.symbol,
   }));
 
-  const [distributionInfo, setDistributionInfo] = useState<IDistributionType>({
+  const [distributionInfo, setDistributionInfo] = useState<IDistributionInfo>({
     amount: 0,
     type: "equal",
+    showLabel: false,
     equalAmountType: "amount_per_address",
     selectedToken: supportedTokens[0].value, // Default to STRK token
   });
@@ -66,10 +68,8 @@ const DistributePage = () => {
     [createEmptyRow()]
   );
 
-  const { queueStarkNameResolution } = useStarkNameResolver({
-    distributionData,
-    setDistributionData,
-  });
+  const { queueStarkNameResolution } =
+    useStarkNameResolver(setDistributionData);
 
   // Calculate total amount including protocol fee
   const selectedToken = SUPPORTED_TOKENS[distributionInfo.selectedToken];
@@ -79,61 +79,86 @@ const DistributePage = () => {
 
   const handleDistribution = async () => {
     try {
-      const { success: dataValiditySuccess, message: dataValidityMessage } =
-        checkDistributionDataValidity(distributionData);
+      setDistributionState((prev) => ({
+        ...prev,
+        currentState: "initiate-distribution",
+      }));
 
-      if (!dataValiditySuccess) {
-        toast.error(dataValidityMessage);
-        return;
+      // Create updated distribution data for calculations
+      let updatedDistributionData = distributionData;
+
+      const { success: dataValiditySuccess, message: dataValidityMessage } =
+        checkDistributionDataValidity(
+          updatedDistributionData,
+          distributionInfo
+        );
+
+      if (!dataValiditySuccess) throw new Error(dataValidityMessage);
+
+      const isAmountPerAddressDistribution =
+        distributionInfo.type === "equal" &&
+        distributionInfo.equalAmountType === "amount_per_address";
+
+      if (isAmountPerAddressDistribution) {
+        updatedDistributionData = distributionData.map((data) => ({
+          ...data,
+          amount: String(distributionInfo.amount),
+        }));
+
+        // Update state for UI
+        setDistributionData(updatedDistributionData);
       }
 
-      distributionData.forEach((data, i) => {
-        const hasSnsAddress = isSnsAddress(data.address!);
-        const hasSnsName = isSnsAddress(data.starkAddress!);
+      // Check for unresolved SNS addresses before validation
 
-        if (hasSnsAddress) {
-          queueStarkNameResolution(i, data.address!);
-          return;
-        }
+      const { success, message } = snsAddressValidation(
+        updatedDistributionData,
+        queueStarkNameResolution,
+        isMainNet
+      );
 
-        if (hasSnsName) {
-          queueStarkNameResolution(i, data.starkAddress!);
-          return;
-        }
-      });
+      if (!success) throw new Error(message!);
 
       const {
         success: equalDistributionSuccess,
         message: equalDistributionMessage,
       } = await validateDistributionAmounts({
         distributionInfo,
-        distributionData,
+        distributionData: updatedDistributionData,
       });
 
       if (!equalDistributionSuccess) {
-        toast.error(equalDistributionMessage!);
-        return;
+        throw new Error(equalDistributionMessage!);
       }
 
-      // const {
-      //   message,
-      //   success,
-      //   data: protocolFeePercentage,
-      // } = await fetchProtocolFee({
-      //   account,
-      //   contractAddress: CONTRACT_ADDRESS,
-      // });
+      // Now validate individual distributions after ensuring no SNS addresses
+      const {
+        success: individualValidationSuccess,
+        message: individualValidationMessage,
+      } = validateIndividualDistributions(updatedDistributionData);
 
-      // if (!success) {
-      //   toast.error(message);
-      //   return;
-      // }
+      if (!individualValidationSuccess) {
+        throw new Error(individualValidationMessage!);
+      }
 
-      const protocolFeePercentage = 2500;
+      const {
+        message: protocolFeeMessage,
+        success: protocolFeeSuccess,
+        data: protocolFeePercentage,
+      } = await fetchProtocolFee({
+        account,
+        contractAddress: CONTRACT_ADDRESS,
+      });
+
+      if (!protocolFeeSuccess) {
+        throw new Error(protocolFeeMessage);
+      }
+
+      // const protocolFeePercentage = 2500;
 
       const { totalAmountString, amounts, protocolFee, totalAmount } =
         calculateTotalDistributionAmount(
-          distributionData,
+          updatedDistributionData,
           selectedToken,
           protocolFeePercentage
         );
@@ -145,32 +170,28 @@ const DistributePage = () => {
         currentState: "request-confirmed",
         distributionAmountsBigInt: amounts,
         displayableAmount: totalAmountString,
-        recipientCount: distributionData.length,
+        recipientCount: updatedDistributionData.length,
         protocolFeePercentage: protocolFeePercentage!,
       }));
     } catch (error) {
       if ((error as ErrorWithCode)?.code === "INVALID_ARGUMENT") {
         toast.error("Invalid amount — please provide a valid amount");
-        return;
+      } else if ((error as ErrorWithCode)?.message) {
+        toast.error((error as ErrorWithCode)?.message);
       } else {
         toast.error("Something went wrong, please refresh.");
       }
+
+      setDistributionState((prev) => ({
+        ...prev,
+        currentState: "request-confirmation",
+      }));
 
       return;
     }
   };
 
   const handleModalConfirmation = async () => {
-    const {
-      success: individualValidationSuccess,
-      message: individualValidationMessage,
-    } = validateIndividualDistributions(distributionData);
-
-    if (!individualValidationSuccess) {
-      toast.error(individualValidationMessage!);
-      return;
-    }
-
     try {
       setDistributionState((prev) => ({
         ...prev,
@@ -264,11 +285,6 @@ const DistributePage = () => {
         throw new Error("Distribution failed, please try again.");
       }
 
-      //  const distributionsWithLabels = distributions.map((dist, index) => ({
-      //    ...dist,
-      //    label: labels[index],
-      //  }));
-
       const baseAmount = distributionData
         .reduce((sum, dist) => {
           return sum + Number.parseFloat(dist.amount);
@@ -291,7 +307,9 @@ const DistributePage = () => {
           recipients: distributionData.map((d) => ({
             address: d.address!,
             amount: d.amount!,
-            // ...(showLabels && d.label ? { label: d.label } : {}),
+            ...(distributionInfo.showLabel && d.label
+              ? { label: d.label }
+              : {}),
           })),
         },
       };
@@ -305,11 +323,20 @@ const DistributePage = () => {
         return;
       }
 
+      setDistributionData([createEmptyRow()]);
+
+      if (distributionInfo.type === "equal") {
+        setDistributionInfo((prev) => ({
+          ...prev,
+          amount: 0,
+        }));
+      }
+
       toast.dismiss();
 
       toast.success(
         `Successfully distributed tokens to ${recipients.length} addresses`,
-        { duration: 1000 }
+        { duration: 800 }
       );
     } catch {
       toast.error("Distribution failed, please try again.");
@@ -328,6 +355,12 @@ const DistributePage = () => {
     }));
   };
 
+  const disableDistributionBtn =
+    !!account ||
+    ["process-started", "initiate-distribution"].includes(
+      distributionState.currentState
+    );
+
   return (
     <DashboardLayout
       title="Create Distribution"
@@ -340,11 +373,13 @@ const DistributePage = () => {
         setDistributionType={setDistributionInfo}
         setDistributionData={setDistributionData}
       />
-      <DistributionFileUpload setDistributionData={setDistributionData} />
+      <DistributionFileUpload
+        distributionType={distributionInfo}
+        setDistributionData={setDistributionData}
+      />
       <DistributionTable
-        isConnected={
-          distributionState.currentState === "process-started" || !!account
-        }
+        isConnected={disableDistributionBtn}
+        distributionType={distributionInfo}
         distributionData={distributionData}
         handleDistribution={handleDistribution}
         setDistributionData={setDistributionData}

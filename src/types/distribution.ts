@@ -10,10 +10,11 @@ import { AppSelectProps } from ".";
 
 export type DistributionType = (typeof distributionType)[number];
 
-export interface IDistributionType {
-  selectedToken: string;
+export interface IDistributionInfo {
   amount?: number;
+  selectedToken: string;
   type: DistributionType;
+  showLabel?: boolean;
   equalAmountType?: (typeof equalDistributionType)[number]["value"];
 }
 
@@ -31,28 +32,30 @@ export interface IDistribution {
   distributionType: DistributionType;
 }
 
-export type DistributionRowField = "address" | "amount";
+export type DistributionRowField = "address" | "amount" | "label";
 
 export interface IDistributionRow {
   row: IDistributionData;
+  isEqualDistribution: boolean;
+  addLabel: boolean;
   onChange: (id: string, value: string, field: DistributionRowField) => void;
   onDelete: (id: string) => void;
 }
 
 export interface DistributionSelectorProps {
-  distributionType: IDistributionType;
+  distributionType: IDistributionInfo;
   distributionData?: IDistributionData[];
   supportedTokens?: AppSelectProps["options"];
-  setDistributionType: Dispatch<SetStateAction<IDistributionType>>;
+  setDistributionType: Dispatch<SetStateAction<IDistributionInfo>>;
   setDistributionData?: Dispatch<SetStateAction<IDistributionData[]>>;
 }
 
-export type distributionTypeKey = keyof IDistributionType;
+export type distributionTypeKey = keyof IDistributionInfo;
 
 export interface DistributionDataProps {
   isConnected?: boolean;
   handleDistribution?: () => void;
-  distributionType?: IDistributionType;
+  distributionType?: IDistributionInfo;
   distributionData?: IDistributionData[];
   setDistributionData: Dispatch<SetStateAction<IDistributionData[]>>;
 }
@@ -123,12 +126,12 @@ export interface UpdateDistributionInput {
 }
 
 export interface IValidateDistributionAmounts {
-  distributionInfo: IDistributionType;
+  distributionInfo: IDistributionInfo;
   distributionData: IDistributionData[];
 }
 
 export interface ICalculateLumpSumAmount {
-  distributionType: IDistributionType;
+  distributionType: IDistributionInfo;
   distributionData: IDistributionData[];
   setDistributionData: Dispatch<SetStateAction<IDistributionData[]>>;
 }

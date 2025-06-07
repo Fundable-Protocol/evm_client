@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import AppSelect from "@/components/molecules/AppSelect";
 import DistributionTypeSwitch from "./DistributionSwitch";
 import { calculateLumpSumAmount } from "@/validations/distribution";
+import DistributionLabelSwitch from "./DistributionLabelSwitch";
 
 const DistributionSelector = ({
   supportedTokens,
@@ -54,25 +55,21 @@ const DistributionSelector = ({
     }
   };
 
-  const shareAmount = () => {
-    setDistributionData!((prev) =>
-      prev.map((data) => ({
-        ...data,
-        amount: String(distributionType.amount),
-      }))
-    );
-  };
-
   return (
     <div className="flex flex-col xl:flex-row gap-y-6 xl:gap-y-0 gap-x-12 justify-between">
       <div className="flex gap-6 flex-col md:flex-row md:items-center pl-1">
         <AppSelect
           title="Token"
-          placeholder="STRK"
+          placeholder={distributionType.selectedToken}
           options={supportedTokens!}
           setValue={(value) =>
             handleDistributionTypeChange("selectedToken", value)
           }
+        />
+
+        <DistributionLabelSwitch
+          distributionType={distributionType}
+          setDistributionType={setDistributionType}
         />
 
         <DistributionTypeSwitch
@@ -105,13 +102,15 @@ const DistributionSelector = ({
                 placeholder="Amount"
                 onChange={updateEqualDistributionAmount}
               />
-              <Button
-                variant="gradient"
-                className="rounded h-10"
-                onClick={isLumpSum ? handleLumpSumCalculation : shareAmount}
-              >
-                {isLumpSum ? "Calculate" : "Share"}
-              </Button>
+              {isLumpSum ? (
+                <Button
+                  variant="gradient"
+                  className="rounded h-10"
+                  onClick={handleLumpSumCalculation}
+                >
+                  Calculate
+                </Button>
+              ) : null}
             </div>
           </div>
         </div>

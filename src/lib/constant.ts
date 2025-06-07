@@ -69,6 +69,7 @@ export const MAINNET_CONTRACT_ADDRESS =
 
 export const distributionState = [
   "process-started",
+  "initiate-distribution",
   "process-completed",
   "request-confirmed",
   "request-confirmation",

@@ -1,11 +1,12 @@
 import { z } from "zod";
 
-import { isDuplicateAddress } from ".";
+import { isDuplicateAddress, isSnsAddress } from ".";
 import { validateDistribution } from "@/lib/utils";
 import {
   IDistributionData,
   IValidateDistributionAmounts,
   ICalculateLumpSumAmount,
+  IDistributionInfo,
 } from "@/types/distribution";
 
 const csvRowSchema = z.object({
@@ -20,7 +21,7 @@ export const isEmptyDistributionData = (
 ) => {
   if (!distributionData.length) return true;
 
-  return distributionData.every((row) => !row.address && !row.starkAddress);
+  return distributionData.some((row) => !row.address && !row.starkAddress);
 };
 
 const isInvalidAmount = (amount: number) => {
@@ -66,7 +67,10 @@ export async function validateDistributionAmounts(
   return { success: true };
 }
 
-export function checkDistributionDataValidity(data: IDistributionData[]): {
+export function checkDistributionDataValidity(
+  data: IDistributionData[],
+  distributionInfo: IDistributionInfo
+): {
   success: boolean;
   message: string;
 } {
@@ -84,6 +88,12 @@ export function checkDistributionDataValidity(data: IDistributionData[]): {
     };
   }
 
+  if (distributionInfo.type === "equal" && !distributionInfo.amount) {
+    return {
+      success: false,
+      message: "Please enter a valid amount for distribution",
+    };
+  }
   return {
     success: true,
     message: "Distribution data is valid.",
@@ -152,3 +162,44 @@ export function calculateLumpSumAmount(data: ICalculateLumpSumAmount) {
     } addresses`,
   };
 }
+
+export const snsAddressValidation = (
+  data: IDistributionData[],
+  queueStarkNameResolution: (index: number, starkName: string) => void,
+  isMainNet: boolean
+) => {
+  const hasUnresolvedSns = data.some((data) => {
+    const hasSnsAddress = isSnsAddress(data.address!);
+    const hasSnsName = isSnsAddress(data.starkAddress!);
+    return hasSnsAddress || (hasSnsName && !data.address);
+  });
+
+  if (hasUnresolvedSns && !isMainNet) {
+    return {
+      success: false,
+      hasUnresolvedSns,
+      message: "SNS addresses are not supported on testnet.",
+    };
+  }
+
+  if (!hasUnresolvedSns) return { success: true };
+
+  data.forEach((data, i) => {
+    const hasSnsAddress = isSnsAddress(data.address!);
+    const hasSnsName = isSnsAddress(data.starkAddress!);
+
+    if (hasSnsAddress) {
+      queueStarkNameResolution(i, data.address!);
+    }
+
+    if (hasSnsName && !data.address) {
+      queueStarkNameResolution(i, data.starkAddress!);
+    }
+  });
+
+  return {
+    success: false,
+    message:
+      "Please wait for SNS addresses to resolve or enter a valid starknet address, and try again.",
+  };
+};
