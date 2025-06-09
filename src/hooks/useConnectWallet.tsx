@@ -103,9 +103,7 @@ export function useConnectWallet() {
         isConnected: true,
         address: "",
       });
-    } catch {
-      // console.log("ERRRRR::::", err);
-    }
+    } catch {}
   }, [starknetkitConnectModal, connectAsync]);
 
   const disConnectWallet = useCallback(() => {

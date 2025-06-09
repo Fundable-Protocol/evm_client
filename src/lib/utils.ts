@@ -114,7 +114,13 @@ export function generateUUID() {
 
 export const generateKey = crypto.randomBytes(32).toString("hex");
 
-// Main wrapper function
+export const formatThousandNumber = (number: number) => {
+  if (!number) return "0";
+
+  if (number >= 1000) return `${(number / 1000).toFixed(1)}K`;
+
+  return String(number);
+};
 
 export async function tryCatch<T, E = ErrorWithCode>(
   promise: Promise<T>
@@ -125,4 +131,8 @@ export async function tryCatch<T, E = ErrorWithCode>(
   } catch (error) {
     return { data: null, success: false, error: error as E };
   }
+}
+
+export function roundToTwoDecimals(num: number): number {
+  return Math.round(num * 100) / 100;
 }

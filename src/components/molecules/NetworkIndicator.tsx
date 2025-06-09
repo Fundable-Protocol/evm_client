@@ -21,7 +21,7 @@ const NetworkIndicator = ({
         }`}
       />
 
-      <span className="font-semibold text-white text-sm">
+      <span className="font-semibold text-white text-sm text-wrap">
         {isMainNet ? "Mainnet" : "Testnet"}
       </span>
     </div>

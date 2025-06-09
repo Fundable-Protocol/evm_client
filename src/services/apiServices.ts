@@ -1,10 +1,13 @@
 // services/apiService.ts
 
+import { z } from "zod";
+
 import {
   createDistributionSchema,
   updateDistributionSchema,
 } from "@/policies/distribution";
-import { z } from "zod";
+
+import { PriceCache } from "@/types/dashboard";
 
 const distributionBaseUrl = "/api/distributions";
 
@@ -59,4 +62,49 @@ export const apiService = {
 
     return res.json();
   },
+};
+
+let priceCache: PriceCache | null = null;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+export const fetchTokenPrices = async (tokenIds: string[]) => {
+  // In-memory cache for token prices
+
+  const now = Date.now();
+
+  // Check if we have a valid cache
+  if (
+    priceCache &&
+    now - priceCache.timestamp < CACHE_DURATION &&
+    tokenIds.every((id) => id in priceCache!.prices)
+  ) {
+    return priceCache.prices;
+  }
+
+  try {
+    const response = await fetch(
+      `https://api.coingecko.com/api/v3/simple/price?ids=${tokenIds.join(
+        ","
+      )}&vs_currencies=usd`
+    );
+
+    if (!response.ok) throw new Error("Failed to fetch token prices");
+
+    const data = await response.json();
+
+    // Update cache with new prices
+    priceCache = {
+      prices: data,
+      timestamp: now,
+    };
+
+    return data;
+  } catch {
+    // console.error("Error fetching token prices:", error);
+
+    // If we have cached data, return it even if expired
+    if (priceCache) return priceCache.prices;
+
+    return {};
+  }
 };

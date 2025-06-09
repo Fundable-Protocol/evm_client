@@ -1,12 +1,19 @@
-import { DistributionAttributes } from "@/types/distribution";
-import { and, count, desc, eq } from "drizzle-orm";
-import { db } from "../../db/drizzle";
-import { distributionModel } from "../../db/schema";
+import CurrencyJs from "currency.js";
+
 import { z } from "zod";
+import { DistributionAttributes } from "@/types/distribution";
+import { and, count, desc, eq, ilike, sum } from "drizzle-orm";
+
+import { db } from "../../db/drizzle";
+
+import { distributionModel } from "../../db/schema";
 import {
   createDistributionSchema,
   updateDistributionSchema,
 } from "@/policies/distribution";
+import { distributionStatus } from "@/lib/constant";
+import { fetchTokenPrices } from "./apiServices";
+import { tryCatch } from "@/lib/utils";
 
 export class DistributionService {
   /**
@@ -61,7 +68,7 @@ export class DistributionService {
   /**
    * Get a distribution by ID
    */
-  static async getDistribution(
+  static async getDistributionById(
     id: string
   ): Promise<DistributionAttributes | null> {
     const [dist] = await db
@@ -70,7 +77,7 @@ export class DistributionService {
       .where(eq(distributionModel.id, id))
       .limit(1); // Fetch single row
 
-    return (dist as DistributionAttributes) || null;
+    return (dist as DistributionAttributes) ?? null;
   }
 
   /**
@@ -79,22 +86,25 @@ export class DistributionService {
   static async getDistributionsByUser(
     user_address: string,
     page = 1,
-    limit = 10
+    limit = 10,
+    status?: DistributionAttributes["status"]
   ): Promise<{ distributions: DistributionAttributes[]; total: number }> {
     const skip = (page - 1) * limit;
+
+    const andQuery = and(
+      eq(distributionModel.user_address, user_address),
+      status ? ilike(distributionModel.status, status) : undefined
+    );
 
     const [distributions, total] = await Promise.all([
       db
         .select()
         .from(distributionModel)
-        .where(eq(distributionModel.user_address, user_address))
+        .where(andQuery)
         .orderBy(desc(distributionModel.created_at))
         .limit(limit)
         .offset(skip),
-      db
-        .select({ cnt: count() })
-        .from(distributionModel)
-        .where(eq(distributionModel.user_address, user_address)),
+      db.select({ cnt: count() }).from(distributionModel).where(andQuery),
     ]);
 
     return {
@@ -106,76 +116,66 @@ export class DistributionService {
   /**
    * Get all distributions with pagination
    */
-  static async getAllDistributions(
-    page = 1,
-    limit = 10,
-    status?: DistributionAttributes["status"]
-  ): Promise<{ distributions: DistributionAttributes[]; total: number }> {
-    const skip = (page - 1) * limit;
+  // static async getAllDistributions(
+  //   page = 1,
+  //   limit = 10,
+  //   status?: DistributionAttributes["status"]
+  // ): Promise<{ distributions: DistributionAttributes[]; total: number }> {
+  //   const skip = (page - 1) * limit;
 
-    const baseQuery = db.select().from(distributionModel);
+  //   const baseQuery = db.select().from(distributionModel);
 
-    const listQuery = status
-      ? baseQuery.where(eq(distributionModel.status, status))
-      : baseQuery;
+  //   const listQuery = status
+  //     ? baseQuery.where(eq(distributionModel.status, status))
+  //     : baseQuery;
 
-    const countQuery = status
-      ? db
-          .select({ cnt: count() })
-          .from(distributionModel)
-          .where(eq(distributionModel.status, status))
-      : db.select({ cnt: count() }).from(distributionModel);
+  //   const countQuery = status
+  //     ? db
+  //         .select({ cnt: count() })
+  //         .from(distributionModel)
+  //         .where(eq(distributionModel.status, status))
+  //     : db.select({ cnt: count() }).from(distributionModel);
 
-    const [distributions, total] = await Promise.all([
-      listQuery
-        .orderBy(desc(distributionModel.created_at))
-        .limit(limit)
-        .offset(skip),
-      countQuery,
-    ]);
+  //   const [distributions, total] = await Promise.all([
+  //     listQuery
+  //       .orderBy(desc(distributionModel.created_at))
+  //       .limit(limit)
+  //       .offset(skip),
+  //     countQuery,
+  //   ]);
 
-    return {
-      distributions: distributions as DistributionAttributes[],
-      total: Number(total[0]?.cnt ?? 0),
-    };
-  }
+  //   return {
+  //     distributions: distributions as DistributionAttributes[],
+  //     total: Number(total[0]?.cnt ?? 0),
+  //   };
+  // }
 
   /**
    * Get distributions statistics
    */
-  static async getDistributionStats(user_address?: string) {
-    const baseWhere = user_address
-      ? eq(distributionModel.user_address, user_address)
-      : undefined;
+  static async getDistributionStats(user_address: string) {
+    const userAddressQuery = eq(distributionModel.user_address, user_address);
 
     const [total, completed, failed, pending] = await Promise.all([
-      baseWhere
-        ? db.select({ cnt: count() }).from(distributionModel).where(baseWhere)
-        : db.select({ cnt: count() }).from(distributionModel),
+      db
+        .select({ cnt: count() })
+        .from(distributionModel)
+        .where(userAddressQuery),
+
       db
         .select({ cnt: count() })
         .from(distributionModel)
         .where(
-          baseWhere
-            ? and(baseWhere, eq(distributionModel.status, "completed"))
-            : eq(distributionModel.status, "completed")
+          and(userAddressQuery, eq(distributionModel.status, "completed"))
         ),
       db
         .select({ cnt: count() })
         .from(distributionModel)
-        .where(
-          baseWhere
-            ? and(baseWhere, eq(distributionModel.status, "failed"))
-            : eq(distributionModel.status, "failed")
-        ),
+        .where(and(userAddressQuery, eq(distributionModel.status, "failed"))),
       db
         .select({ cnt: count() })
         .from(distributionModel)
-        .where(
-          baseWhere
-            ? and(baseWhere, eq(distributionModel.status, "pending"))
-            : eq(distributionModel.status, "pending")
-        ),
+        .where(and(userAddressQuery, eq(distributionModel.status, "pending"))),
     ]);
 
     return {
@@ -184,5 +184,103 @@ export class DistributionService {
       failed: Number(failed[0]?.cnt ?? 0),
       pending: Number(pending[0]?.cnt ?? 0),
     };
+  }
+
+  /**
+   * Get total amount sent by a user
+   */
+  static async getTotalAmount(user_address: string) {
+    const result = await db
+      .select({
+        tokenSymbol: distributionModel.token_symbol,
+        totalAmount: sum(distributionModel.total_amount),
+      })
+      .from(distributionModel)
+      .where(
+        and(
+          eq(distributionModel.user_address, user_address),
+          eq(
+            distributionModel.status,
+            "COMPLETED" as (typeof distributionStatus)[number]
+          )
+        )
+      )
+      .groupBy(distributionModel.token_symbol);
+
+    const { data } = await tryCatch(fetchTokenPrices(["starknet", "ethereum"]));
+
+    const starknetUsdPrice = data?.["starknet"]?.usd ?? 0;
+
+    const ethereumPrice = data?.["ethereum"]?.usd ?? 0;
+
+    const totalAmount = result
+      .map((row) => {
+        const usdPrice =
+          row.tokenSymbol === "STRK"
+            ? CurrencyJs(Number(row?.totalAmount ?? 0), {
+                precision: 4,
+              }).multiply(starknetUsdPrice).value
+            : row.tokenSymbol === "ETH"
+            ? CurrencyJs(Number(row?.totalAmount ?? 0), {
+                precision: 4,
+              }).multiply(ethereumPrice).value
+            : Number(row?.totalAmount ?? 0);
+
+        return {
+          ...row,
+          totalAmount: usdPrice,
+        };
+      })
+      .reduce(
+        (acc, curr) =>
+          CurrencyJs(acc, { precision: 4 }).add(curr.totalAmount).value,
+        0
+      );
+
+    return totalAmount ?? 0;
+  }
+
+  /**
+   * Get total distributions made by a user
+   */
+  static async getTotalDistributions(user_address: string) {
+    if (!user_address) return 0;
+
+    const [result] = await db
+      .select({ total_distributions: count() })
+      .from(distributionModel)
+      .where(
+        and(
+          eq(distributionModel.user_address, user_address),
+          eq(
+            distributionModel.status,
+            "COMPLETED" as (typeof distributionStatus)[number]
+          )
+        )
+      );
+
+    return Number(result?.total_distributions ?? 0);
+  }
+
+  /**
+   * Get user's total addresses funded
+   */
+  static async getTotalFundedAddresses(user_address: string) {
+    if (!user_address) return 0;
+
+    const [result] = await db
+      .select({ total_recipients: sum(distributionModel.total_recipients) })
+      .from(distributionModel)
+      .where(
+        and(
+          eq(distributionModel.user_address, user_address),
+          eq(
+            distributionModel.status,
+            "COMPLETED" as (typeof distributionStatus)[number]
+          )
+        )
+      );
+
+    return Number(result?.total_recipients ?? 0);
   }
 }

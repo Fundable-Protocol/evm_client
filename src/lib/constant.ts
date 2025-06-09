@@ -1,4 +1,10 @@
+import { config } from "dotenv";
+
+config({ path: ".env" }); // or .env.local
+
 import { TokenOption } from "@/types";
+
+export const databaseUrl = process.env.DATABASE_URL ?? "";
 
 export const projectId = "4f854415eedab0dd9258793f029e728d";
 
@@ -74,5 +80,13 @@ export const distributionState = [
   "request-confirmed",
   "request-confirmation",
 ] as const;
+
+export const transactionCardTypes = [
+  "amount",
+  "distributions",
+  "addresses",
+] as const;
+
+export const featureCardImgTypes = ["airdrop", "stream"] as const;
 
 export const apiSecretKey = process.env.API_SECRET_KEY || "";
