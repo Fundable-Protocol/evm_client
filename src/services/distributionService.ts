@@ -283,4 +283,118 @@ export class DistributionService {
 
     return Number(result?.total_recipients ?? 0);
   }
+
+  /**
+   * Get total amount sent by a user with percentage change
+   */
+  static async getTotalAmountWithChange(user_address: string) {
+    const currentAmount = await this.getTotalAmount(user_address);
+
+    // Get amount from 24 hours ago
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    const previousAmount = await db
+      .select({
+        totalAmount: sum(distributionModel.total_amount),
+      })
+      .from(distributionModel)
+      .where(
+        and(
+          eq(distributionModel.user_address, user_address),
+          eq(
+            distributionModel.status,
+            "COMPLETED" as (typeof distributionStatus)[number]
+          ),
+          eq(distributionModel.created_at, twentyFourHoursAgo)
+        )
+      );
+
+    const previousAmountValue = Number(previousAmount[0]?.totalAmount ?? 0);
+
+    const percentageChange =
+      previousAmountValue === 0
+        ? 100
+        : ((currentAmount - previousAmountValue) / previousAmountValue) * 100;
+
+    return {
+      currentAmount,
+      percentageChange: Number(percentageChange.toFixed(2)),
+    };
+  }
+
+  /**
+   * Get total distributions with percentage change
+   */
+  static async getTotalDistributionsWithChange(user_address: string) {
+    const currentDistributions = await this.getTotalDistributions(user_address);
+
+    // Get distributions from 24 hours ago
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const [previousDistributions] = await db
+      .select({ total_distributions: count() })
+      .from(distributionModel)
+      .where(
+        and(
+          eq(distributionModel.user_address, user_address),
+          eq(
+            distributionModel.status,
+            "COMPLETED" as (typeof distributionStatus)[number]
+          ),
+          eq(distributionModel.created_at, twentyFourHoursAgo)
+        )
+      );
+
+    const previousDistributionsValue = Number(
+      previousDistributions?.total_distributions ?? 0
+    );
+    const percentageChange =
+      previousDistributionsValue === 0
+        ? 100
+        : ((currentDistributions - previousDistributionsValue) /
+            previousDistributionsValue) *
+          100;
+
+    return {
+      currentDistributions,
+      percentageChange: Number(percentageChange.toFixed(2)),
+    };
+  }
+
+  /**
+   * Get total funded addresses with percentage change
+   */
+  static async getTotalFundedAddressesWithChange(user_address: string) {
+    const currentAddresses = await this.getTotalFundedAddresses(user_address);
+
+    // Get addresses from 24 hours ago
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const [previousAddresses] = await db
+      .select({ total_recipients: sum(distributionModel.total_recipients) })
+      .from(distributionModel)
+      .where(
+        and(
+          eq(distributionModel.user_address, user_address),
+          eq(
+            distributionModel.status,
+            "COMPLETED" as (typeof distributionStatus)[number]
+          ),
+          eq(distributionModel.created_at, twentyFourHoursAgo)
+        )
+      );
+
+    const previousAddressesValue = Number(
+      previousAddresses?.total_recipients ?? 0
+    );
+    const percentageChange =
+      previousAddressesValue === 0
+        ? 100
+        : ((currentAddresses - previousAddressesValue) /
+            previousAddressesValue) *
+          100;
+
+    return {
+      currentAddresses,
+      percentageChange: Number(percentageChange.toFixed(2)),
+    };
+  }
 }

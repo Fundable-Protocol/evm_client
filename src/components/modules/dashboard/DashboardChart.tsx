@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   ChartConfig,
   ChartContainer,
@@ -36,46 +36,6 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 function DashboardChart() {
-  const [transactionData, setTransactionData] = useState<
-    TransactionDataPoint[]
-  >([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function loadTransactionData() {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const data = await getTransactionData();
-        setTransactionData(data);
-      } catch (err) {
-        setError("Failed to load transaction data");
-        console.error("Error loading transaction data:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadTransactionData();
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="max-h-[24rem] w-full bg-fundable-mid-grey/30 rounded-md pt-2 flex items-center justify-center text-white">
-        Loading transaction data...
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="max-h-[24rem] w-full bg-fundable-mid-grey/30 rounded-md pt-2 flex items-center justify-center text-red-500">
-        {error}
-      </div>
-    );
-  }
-
   return (
     <ChartContainer
       config={chartConfig}

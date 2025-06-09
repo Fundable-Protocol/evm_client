@@ -38,30 +38,37 @@ export async function updateDistributionAction(
 export async function getCardStatsAction(user_address: string) {
   if (!user_address) throw new Error("User address is required");
 
-  const { data: totalAmount, error: totalAmountError } = await tryCatch(
-    DistributionService.getTotalAmount(user_address)
+  const { data: totalAmountData, error: totalAmountError } = await tryCatch(
+    DistributionService.getTotalAmountWithChange(user_address)
   );
 
-  // if (totalAmountError) throw new Error(totalAmountError?.message);
+  const { data: totalDistributionsData, error: totalDistributionsError } =
+    await tryCatch(
+      DistributionService.getTotalDistributionsWithChange(user_address)
+    );
 
-  const { data: totalDistributions, error: totalDistributionsError } =
-    await tryCatch(DistributionService.getTotalDistributions(user_address));
-
-  // if (totalDistributionsError) {
-  //   throw new Error(totalDistributionsError?.message);
-  // }
-
-  const { data: totalFundedAddresses, error: totalFundedAddressesError } =
-    await tryCatch(DistributionService.getTotalFundedAddresses(user_address));
-
-  // if (totalFundedAddressesError) {
-  //   throw new Error(totalFundedAddressesError?.message);
-  // }
+  const { data: totalFundedAddressesData, error: totalFundedAddressesError } =
+    await tryCatch(
+      DistributionService.getTotalFundedAddressesWithChange(user_address)
+    );
 
   return {
-    totalAmount: totalAmountError ? 0 : totalAmount,
-    totalDistributions: totalDistributionsError ? 0 : totalDistributions,
-    totalFundedAddresses: totalFundedAddressesError ? 0 : totalFundedAddresses,
+    totalAmount: totalAmountError ? 0 : totalAmountData?.currentAmount ?? 0,
+    totalAmountPercentageChange: totalAmountError
+      ? 0
+      : totalAmountData?.percentageChange ?? 0,
+    totalDistributions: totalDistributionsError
+      ? 0
+      : totalDistributionsData?.currentDistributions ?? 0,
+    totalDistributionsPercentageChange: totalDistributionsError
+      ? 0
+      : totalDistributionsData?.percentageChange ?? 0,
+    totalFundedAddresses: totalFundedAddressesError
+      ? 0
+      : totalFundedAddressesData?.currentAddresses ?? 0,
+    totalFundedAddressesPercentageChange: totalFundedAddressesError
+      ? 0
+      : totalFundedAddressesData?.percentageChange ?? 0,
   };
 }
 
