@@ -4,9 +4,6 @@ const FeatureCards = () => {
   const airDrop =
     "Effortlessly distribute funds to recipients, with complete transparency, robust security, and real-time tracking.";
 
-  // const payment =
-  //   "Streamline your payment workflows with automated solutions for recurring payments, salaries, subscriptions, and more, reducing administrative burdens and minimizing errors.";
-
   const stream =
     "Reduce administrative burdens and minimize errors with automated solutions for recurring payments, salaries, subscriptions, and more.";
 
@@ -20,18 +17,21 @@ const FeatureCards = () => {
         linkText="Create Distribution"
         description={distribution}
         imgType="airdrop"
+        link="/distribution"
       />
       <FeatureCard
         title="Airdrops"
         linkText="Create Campaign"
         description={airDrop}
         imgType="airdrop"
+        link="/airdrop"
       />
       <FeatureCard
         title="Payment Stream"
         linkText="Create Stream"
         description={stream}
         imgType="stream"
+        link="/payment-stream"
       />
     </div>
   );

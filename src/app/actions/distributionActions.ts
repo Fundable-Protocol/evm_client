@@ -6,9 +6,12 @@ import {
   updateDistributionSchema,
   createDistributionSchema,
 } from "@/policies/distribution";
-
-import { DistributionService } from "@/services/distributionService";
 import { tryCatch } from "@/lib/utils";
+
+import { supportedTokenSymbol } from "@/lib/constant";
+import { ITransactionDataPoint } from "@/types/dashboard";
+import { DistributionService } from "@/services/distributionService";
+import { IHistoryQueryParams } from "@/types/history";
 
 export async function createDistributionAction(
   data: z.infer<typeof createDistributionSchema>
@@ -72,38 +75,68 @@ export async function getCardStatsAction(user_address: string) {
   };
 }
 
-// export async function getDistributionsAction(
-//   params: Partial<z.infer<typeof distributionQuerySchema>>
-// ) {
-//   // Validate params using zod
-//   const validatedParams = distributionQuerySchema.parse(params);
+export async function getChartDataAction(user_address: string, date?: number) {
+  if (!user_address) throw new Error("User address is required");
 
-//   const { page = 1, limit = 10, status, user_address } = validatedParams;
+  const distributions = await DistributionService.getChartData(
+    user_address,
+    date
+  );
 
-//   if (user_address) {
-//     return DistributionService.getDistributionsByUser(
-//       user_address,
-//       page,
-//       limit
-//     );
-//   }
+  // Initialize data for all months
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
 
-//   return DistributionService.getAllDistributions(page, limit, status);
-// }
+  const groupedData = monthNames.reduce((acc, month) => {
+    acc[month] = {
+      time: month,
+      USDT: 0,
+      STRK: 0,
+      USDC: 0,
+      ETH: 0,
+    };
+    return acc;
+  }, {} as Record<string, ITransactionDataPoint>);
 
-// export async function getDistributionsByAddress(userAddress: string) {
-//   try {
-//     const rows = await DistributionService.getTotalAmount(userAddress!);
+  // Group data by month and token
+  distributions.forEach((curr) => {
+    const date = new Date(curr.created_at);
+    const month = monthNames[date.getMonth()];
+    const token = curr.token_symbol as (typeof supportedTokenSymbol)[number];
+    const amount = Number(curr.total_amount);
 
-//     const response = rows.map((row) => ({
-//       tokenSymbol: row.tokenSymbol,
-//       totalAmount: roundToTwoDecimals(+(row.totalAmount ?? 0)),
-//     }));
+    groupedData[month][token] += amount;
+  });
 
-//     return response;
-//   } catch (error) {
-//     throw new Error(
-//       (error as Error)?.message ?? "Failed to fetch total amount"
-//     );
-//   }
-// }
+  // Convert to array (already sorted by month order)
+  const chartData = Object.values(groupedData);
+
+  return chartData;
+}
+
+export async function getDistributionsAction(params: IHistoryQueryParams) {
+  if (!params?.user_address) throw new Error("User address is required");
+
+  const { data, error } = await tryCatch(
+    DistributionService.getAllDistributions(params)
+  );
+
+  // console.log(data, error, success);
+
+  return {
+    data: error ? [] : data?.distributions,
+    error: error ? error.message : null,
+  };
+}

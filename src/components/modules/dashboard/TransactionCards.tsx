@@ -31,12 +31,6 @@ const TransactionCards = () => {
     totalFundedAddressesPercentageChange,
   } = totalDistributionAmount ?? {};
 
-  console.log(
-    totalAmountPercentageChange,
-    totalDistributionsPercentageChange,
-    totalFundedAddressesPercentageChange
-  );
-
   return (
     <div className="grid grid-cols-[repeat(auto-fit,minmax(20rem,1fr))] gap-4 md:gap-8">
       <TransactionCard

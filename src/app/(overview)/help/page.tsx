@@ -1,7 +1,12 @@
-import React from "react";
+import DashboardLayout from "@/components/layouts/DashboardLayout";
 
-const Airdrop = () => {
-  return <div>Airdrop</div>;
+const HelpPage = () => {
+  return (
+    <DashboardLayout
+      title="Help"
+      className="flex flex-col gap-y-6 h-full"
+    ></DashboardLayout>
+  );
 };
 
-export default Airdrop;
+export default HelpPage;

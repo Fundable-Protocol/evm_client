@@ -11,6 +11,7 @@ export interface FeatureCardProps {
   title: string;
   linkText: string;
   description: string;
+  link: string;
   imgType: (typeof featureCardImgTypes)[number];
 }
 
@@ -18,4 +19,12 @@ export interface FeatureCardProps {
 export interface PriceCache {
   prices: Record<string, number>;
   timestamp: number;
+}
+
+export interface ITransactionDataPoint {
+  time: string;
+  USDT: number;
+  STRK: number;
+  USDC: number;
+  ETH?: number;
 }

@@ -2,7 +2,7 @@ import CurrencyJs from "currency.js";
 
 import { z } from "zod";
 import { DistributionAttributes } from "@/types/distribution";
-import { and, count, desc, eq, ilike, sum } from "drizzle-orm";
+import { and, count, desc, eq, gte, ilike, lte, sum, sql } from "drizzle-orm";
 
 import { db } from "../../db/drizzle";
 
@@ -14,6 +14,8 @@ import {
 import { distributionStatus } from "@/lib/constant";
 import { fetchTokenPrices } from "./apiServices";
 import { tryCatch } from "@/lib/utils";
+import { IHistoryQueryParams } from "@/types/history";
+import currency from "currency.js";
 
 export class DistributionService {
   /**
@@ -116,39 +118,78 @@ export class DistributionService {
   /**
    * Get all distributions with pagination
    */
-  // static async getAllDistributions(
-  //   page = 1,
-  //   limit = 10,
-  //   status?: DistributionAttributes["status"]
-  // ): Promise<{ distributions: DistributionAttributes[]; total: number }> {
-  //   const skip = (page - 1) * limit;
+  static async getAllDistributions({
+    type,
+    status,
+    page = 1,
+    limit = 10,
+    user_address,
+  }: IHistoryQueryParams): Promise<{
+    distributions: DistributionAttributes[];
+    total: number;
+  }> {
+    const skip = (page - 1) * limit;
 
-  //   const baseQuery = db.select().from(distributionModel);
+    const andQuery = and(
+      eq(distributionModel.user_address, user_address),
+      status
+        ? eq(
+            distributionModel.status,
+            status.toUpperCase() as DistributionAttributes["status"]
+          )
+        : undefined,
+      type
+        ? eq(
+            distributionModel.distribution_type,
+            type.toUpperCase() as DistributionAttributes["distribution_type"]
+          )
+        : undefined
+    );
 
-  //   const listQuery = status
-  //     ? baseQuery.where(eq(distributionModel.status, status))
-  //     : baseQuery;
+    const baseQuery = db
+      .select({
+        id: distributionModel.id,
+        status: distributionModel.status,
+        created_at: distributionModel.created_at,
+        network: distributionModel.network,
+        metadata: sql`${distributionModel.metadata}->>'recipients'`,
+        user_address: distributionModel.user_address,
+        token_symbol: distributionModel.token_symbol,
+        total_amount: distributionModel.total_amount,
+        total_recipients: distributionModel.total_recipients,
+        distribution_type: distributionModel.distribution_type,
+      })
+      .from(distributionModel);
 
-  //   const countQuery = status
-  //     ? db
-  //         .select({ cnt: count() })
-  //         .from(distributionModel)
-  //         .where(eq(distributionModel.status, status))
-  //     : db.select({ cnt: count() }).from(distributionModel);
+    const listQuery = baseQuery.where(andQuery);
 
-  //   const [distributions, total] = await Promise.all([
-  //     listQuery
-  //       .orderBy(desc(distributionModel.created_at))
-  //       .limit(limit)
-  //       .offset(skip),
-  //     countQuery,
-  //   ]);
+    const countQuery = db
+      .select({ cnt: count() })
+      .from(distributionModel)
+      .where(andQuery);
 
-  //   return {
-  //     distributions: distributions as DistributionAttributes[],
-  //     total: Number(total[0]?.cnt ?? 0),
-  //   };
-  // }
+    const [distributions, total] = await Promise.all([
+      listQuery
+        .orderBy(desc(distributionModel.created_at))
+        .limit(limit)
+        .offset(skip),
+      countQuery,
+    ]);
+
+    return {
+      distributions: distributions?.map((distribution, i) => ({
+        sn: i + 1,
+        ...distribution,
+        token_symbol: distribution.token_symbol,
+        total_recipients: Number(distribution.total_recipients),
+        created_at: new Date(distribution.created_at).toLocaleString(),
+        total_amount: currency(distribution.total_amount, {
+          precision: 5,
+        }).value,
+      })) as unknown as DistributionAttributes[],
+      total: Number(total[0]?.cnt ?? 0),
+    };
+  }
 
   /**
    * Get distributions statistics
@@ -396,5 +437,41 @@ export class DistributionService {
       currentAddresses,
       percentageChange: Number(percentageChange.toFixed(2)),
     };
+  }
+
+  static async getChartData(
+    user_address: string,
+    date: number = new Date().getTime()
+  ) {
+    const currentYear = new Date(date).getFullYear();
+    const startOfYear = new Date(currentYear, 0, 1); // January 1st
+    const endOfYear = new Date(currentYear, 11, 31); // December 31st
+
+    const distributions = await db
+      .select({
+        created_at: distributionModel.created_at,
+        token_symbol: distributionModel.token_symbol,
+        total_amount: distributionModel.total_amount,
+      })
+      .from(distributionModel)
+      .where(
+        and(
+          eq(distributionModel.user_address, user_address),
+          eq(
+            distributionModel.status,
+            "COMPLETED" as (typeof distributionStatus)[number]
+          ),
+          gte(distributionModel.created_at, startOfYear),
+          lte(distributionModel.created_at, endOfYear)
+        )
+      )
+      .orderBy(distributionModel.created_at);
+
+    return distributions.map((distribution) => ({
+      ...distribution,
+      total_amount: CurrencyJs(distribution.total_amount, {
+        precision: 2,
+      }).value,
+    }));
   }
 }

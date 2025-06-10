@@ -10,24 +10,21 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { LineChart, Line, XAxis, YAxis } from "recharts";
-// import { getTransactionData } from "@/app/actions/getTransactionData";
-
-type TransactionDataPoint = {
-  time: string;
-  USDT: number;
-  STRK: number;
-  USDC: number;
-};
+import { useQuery } from "@tanstack/react-query";
+import { useAccount } from "@starknet-react/core";
+import { ITransactionDataPoint } from "@/types/dashboard";
+import { getChartDataAction } from "@/app/actions/distributionActions";
+import DashboardChartSkeleton from "./DashboardChartSkeleton";
 
 // Define chart configuration for the 3 cryptocurrencies
 const chartConfig = {
-  USDT: {
-    label: "USDT",
-    color: "#31AFD6", // USDT green
-  },
   STRK: {
     label: "STRK",
     color: "#FB49C0", // Bright pink for STRK
+  },
+  USDT: {
+    label: "USDT",
+    color: "#31AFD6", // USDT green
   },
   USDC: {
     label: "USDC",
@@ -36,10 +33,38 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 function DashboardChart() {
+  const { address } = useAccount();
+
+  const { data: transactionData = [], isPending } = useQuery<
+    ITransactionDataPoint[]
+  >({
+    queryKey: ["transactionChartData", address],
+    queryFn: () => getChartDataAction(address!),
+    enabled: !!address,
+    refetchInterval: 1000,
+    refetchOnWindowFocus: true,
+  });
+
+  if (isPending) return <DashboardChartSkeleton />;
+
+  // Calculate min and max values for Y axis
+  const allValues = transactionData.flatMap((point: ITransactionDataPoint) => [
+    point.USDT,
+    point.STRK,
+    point.USDC,
+    // point.ETH,
+  ]);
+
+  const minValue = Math.min(...allValues, transactionData[0]?.STRK ?? 0);
+  const maxValue = Math.max(
+    ...allValues,
+    transactionData[transactionData.length - 1]?.STRK ?? 1000
+  );
+
   return (
     <ChartContainer
       config={chartConfig}
-      className="max-h-[24rem] w-full bg-fundable-mid-grey/30 rounded-md pt-2"
+      className="max-h-[24rem] w-full bg-fundable-mid-grey/30 rounded-md pt-2 pr-4"
     >
       <LineChart
         accessibilityLayer
@@ -47,12 +72,12 @@ function DashboardChart() {
         margin={{
           top: 20,
           right: 30,
-          left: 20,
+          left: 0,
           bottom: 20,
         }}
       >
         <XAxis dataKey="time" />
-        <YAxis domain={[2000, 6000]} />
+        <YAxis domain={[minValue, maxValue]} />
         <ChartTooltip content={<ChartTooltipContent />} />
         <ChartLegend
           content={<ChartLegendContent />}
@@ -63,20 +88,22 @@ function DashboardChart() {
 
         <Line
           type="monotone"
-          dataKey="USDT"
-          stroke={chartConfig.USDT.color}
-          strokeWidth={2}
-          dot={{ r: 4 }}
-          activeDot={{ r: 6 }}
-        />
-        <Line
-          type="monotone"
           dataKey="STRK"
           stroke={chartConfig.STRK.color}
           strokeWidth={2}
           dot={{ r: 4 }}
           activeDot={{ r: 6 }}
         />
+
+        <Line
+          type="monotone"
+          dataKey="USDT"
+          stroke={chartConfig.USDT.color}
+          strokeWidth={2}
+          dot={{ r: 4 }}
+          activeDot={{ r: 6 }}
+        />
+
         <Line
           type="monotone"
           dataKey="USDC"

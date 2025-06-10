@@ -136,3 +136,16 @@ export async function tryCatch<T, E = ErrorWithCode>(
 export function roundToTwoDecimals(num: number): number {
   return Math.round(num * 100) / 100;
 }
+
+export const getStatusColor = (status: string) => {
+  switch (status) {
+    case "COMPLETED":
+      return "bg-green-500";
+    case "FAILED":
+      return "bg-red-500";
+    case "PENDING":
+      return "bg-yellow-500";
+    default:
+      return "bg-gray-500";
+  }
+};

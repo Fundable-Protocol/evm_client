@@ -5,7 +5,7 @@ import Abstract2 from "../../../../public/svgs/abstract2.svg";
 import Abstract3 from "../../../../public/svgs/abstract3.svg";
 
 import FeatureCards from "@/components/modules/dashboard/FeatureCards";
-// import DashboardChart from "@/components/modules/dashboard/DashboardChart";
+import DashboardChart from "@/components/modules/dashboard/DashboardChart";
 import TransactionCards from "@/components/modules/dashboard/TransactionCards";
 
 const DashboardPage = async () => {
@@ -13,7 +13,7 @@ const DashboardPage = async () => {
     <main className="h-full overflow-y-auto space-y-4 md:space-y-12">
       <TransactionCards />
       <FeatureCards />
-      {/* <DashboardChart /> */}
+      <DashboardChart />
       <Image
         priority
         src={Abstract1}

@@ -10,8 +10,10 @@ import AirDropImg from "../../../../public/svgs/airdrop.svg";
 
 import FeatureGradient from "../../../../public/svgs/feature-card-gradient.svg";
 import FeatureGradient2 from "../../../../public/svgs/feature-card-gradient-2.svg";
+import Link from "next/link";
 
 const FeatureCard = ({
+  link,
   title,
   imgType,
   linkText,
@@ -28,10 +30,10 @@ const FeatureCard = ({
       <p className="text-base lg:text-balance tracking-wide leading-7 text-gray-300 font-bricolage">
         {description}
       </p>
-      <div className="flex items-center gap-x-2">
+      <Link className="flex items-center gap-x-2" href={link}>
         <span className="text-[#E1E4EA] font-semibold">{linkText}</span>
         <ArrowRightIcon />
-      </div>
+      </Link>
 
       <Image
         priority
