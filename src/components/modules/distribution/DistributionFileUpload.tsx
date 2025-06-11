@@ -1,7 +1,7 @@
 "use client";
 
 import UploadIcon from "@/components/svgs/UploadIcon";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utills";
 import { parse as papaParse } from "papaparse";
 import { useDropzone } from "react-dropzone";
 import { useCallback } from "react";

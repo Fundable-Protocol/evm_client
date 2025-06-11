@@ -92,6 +92,7 @@ export interface DistributionConfirmationModalProps {
 export interface RecipientData {
   address: string;
   amount: string;
+  label?: string;
 }
 
 export interface DistributionAttributes {
@@ -111,6 +112,7 @@ export interface DistributionAttributes {
   network: (typeof supportedNetwork)[number];
   created_at: Date | string;
   metadata?: { recipients: Array<RecipientData> } | null;
+  recipients?: Array<RecipientData>;
 }
 
 export interface DistributionResponseAttributes {

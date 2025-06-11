@@ -6,7 +6,7 @@ import LeftShadeSvg from "../../../../public/svgs/leftShade.svg";
 import RightArrowSvg from "../../../../public/svgs/rightArrowFu.svg";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utills";
 
 interface FeatureCardProps {
   title: string;

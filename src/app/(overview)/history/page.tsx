@@ -2,75 +2,51 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useAccount } from "@starknet-react/core";
+import { useState } from "react";
 
-import { IHistoryData } from "@/types/history";
-import { columns } from "@/components/modules/history/columns";
-import DataTable from "@/components/modules/history/data-table";
+import { columns } from "@/components/modules/history/Columns";
+import HistoryTable from "@/components/modules/history/HistoryTable";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { getDistributionsAction } from "@/app/actions/distributionActions";
 import HistoryTableSkeleton from "@/components/modules/history/HistoryTableSkeleton";
-
-export const data: IHistoryData[] = [
-  {
-    id: "m5gr84i9",
-    recipients: "0x1234...5678",
-    amount: 316,
-    type: "STRK",
-    date: "2024-03-20",
-    status: "success",
-    network: "Ethereum",
-  },
-  {
-    id: "3u1reuv4",
-    recipients: "0x8765...4321",
-    amount: 242,
-    type: "USDC",
-    date: "2024-03-19",
-    status: "success",
-    network: "Polygon",
-  },
-  {
-    id: "derv1ws0",
-    recipients: "0x9876...1234",
-    amount: 837,
-    type: "USDT",
-    date: "2024-03-18",
-    status: "pending",
-    network: "BSC",
-  },
-  {
-    id: "5kma53ae",
-    recipients: "0x5678...9012",
-    amount: 874,
-    type: "ETH",
-    date: "2024-03-17",
-    status: "success",
-    network: "Arbitrum",
-  },
-  {
-    id: "bhqecj4p",
-    recipients: "0x3456...7890",
-    amount: 721,
-    type: "STRK",
-    date: "2024-03-16",
-    status: "failed",
-    network: "Ethereum",
-  },
-];
+import { DistributionAttributes } from "@/types/distribution";
+import {
+  distributionFilterType,
+  distributionFilterValueType,
+} from "@/types/history";
 
 const HistoryPage = () => {
   const { address } = useAccount();
+  const [distributionFilter, setDistributionFilter] = useState<{
+    status: DistributionAttributes["status"] | "all";
+    type: DistributionAttributes["distribution_type"] | "all";
+  }>({ status: "all", type: "all" });
 
   const { data: distributionsData, isPending } = useQuery({
-    queryKey: ["distributions"],
+    queryKey: ["distributions-table", distributionFilter],
     queryFn: () =>
       getDistributionsAction({
         user_address: address ?? "",
         page: 1,
         limit: 10,
+        status:
+          distributionFilter.status !== "all"
+            ? distributionFilter.status
+            : undefined,
+        type:
+          distributionFilter.type !== "all"
+            ? distributionFilter.type
+            : undefined,
       }),
     enabled: !!address,
   });
+
+  const handleDistributionFilter = (
+    filter: distributionFilterType,
+    value: distributionFilterValueType
+  ) => {
+    setDistributionFilter((prev) => ({ ...prev, [filter]: value }));
+  };
 
   return (
     <DashboardLayout
@@ -78,10 +54,27 @@ const HistoryPage = () => {
       className="flex flex-col gap-y-6 overflow-y-hidden"
     >
       <div className="h-dvh">
-        {isPending ? (
+        {address && isPending ? (
           <HistoryTableSkeleton />
         ) : (
-          <DataTable columns={columns} data={distributionsData?.data ?? []} />
+          <HistoryTable
+            columns={columns}
+            data={distributionsData?.data ?? []}
+            statusFilter={distributionFilter.status}
+            typeFilter={distributionFilter.type}
+            onStatusFilterChange={(value) =>
+              handleDistributionFilter(
+                "status",
+                value as typeof distributionFilter.status
+              )
+            }
+            onTypeFilterChange={(value) =>
+              handleDistributionFilter(
+                "type",
+                value as typeof distributionFilter.type
+              )
+            }
+          />
         )}
       </div>
     </DashboardLayout>

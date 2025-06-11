@@ -13,7 +13,7 @@ import {
 } from "@/policies/distribution";
 import { distributionStatus } from "@/lib/constant";
 import { fetchTokenPrices } from "./apiServices";
-import { tryCatch } from "@/lib/utils";
+import { tryCatch } from "@/lib/utills";
 import { IHistoryQueryParams } from "@/types/history";
 import currency from "currency.js";
 
@@ -158,6 +158,8 @@ export class DistributionService {
         total_amount: distributionModel.total_amount,
         total_recipients: distributionModel.total_recipients,
         distribution_type: distributionModel.distribution_type,
+        transaction_hash: distributionModel.transaction_hash,
+        fee_amount: distributionModel.fee_amount,
       })
       .from(distributionModel);
 
@@ -177,16 +179,27 @@ export class DistributionService {
     ]);
 
     return {
-      distributions: distributions?.map((distribution, i) => ({
-        sn: i + 1,
-        ...distribution,
-        token_symbol: distribution.token_symbol,
-        total_recipients: Number(distribution.total_recipients),
-        created_at: new Date(distribution.created_at).toLocaleString(),
-        total_amount: currency(distribution.total_amount, {
-          precision: 5,
-        }).value,
-      })) as unknown as DistributionAttributes[],
+      distributions: distributions?.map((distribution, i) => {
+        const { metadata, ...distributionData } = distribution;
+
+        const recipients = JSON.parse(metadata as string);
+
+        return {
+          ...distributionData,
+          sn: i + 1,
+          token_symbol: distributionData.token_symbol,
+          total_recipients: Number(distributionData.total_recipients),
+          created_at: new Date(distributionData.created_at).toLocaleString(),
+          total_amount: currency(distributionData.total_amount, {
+            precision: 5,
+          }).value,
+          fee_amount: currency(distributionData.fee_amount, {
+            precision: 5,
+          }).value,
+          recipients: Array.isArray(recipients) ? recipients : [],
+        };
+      }) as unknown as DistributionAttributes[],
+
       total: Number(total[0]?.cnt ?? 0),
     };
   }

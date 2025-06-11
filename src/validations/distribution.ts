@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { isDuplicateAddress, isSnsAddress } from ".";
-import { validateDistribution } from "@/lib/utils";
+import { validateDistribution } from "@/lib/utills";
 import {
   IDistributionData,
   IValidateDistributionAmounts,

@@ -1,7 +1,7 @@
 import { FC } from "react";
 import { Trash2Icon } from "lucide-react";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utills";
 import { Input } from "@/components/ui/input";
 import { IDistributionRow } from "@/types/distribution";
 

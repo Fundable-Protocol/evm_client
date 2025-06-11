@@ -1,6 +1,12 @@
 "use client";
 
+import { cairo } from "starknet";
+import toast from "react-hot-toast";
+import type { Call } from "starknet";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAccount, useNetwork } from "@starknet-react/core";
+
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import DistributionFileUpload from "@/components/modules/distribution/DistributionFileUpload";
 import DistributionTable from "@/components/modules/distribution/DistributionTable";
@@ -9,35 +15,31 @@ import {
   IDistributionState,
   IDistributionInfo,
 } from "@/types/distribution";
-import { useAccount, useNetwork } from "@starknet-react/core";
 import DistributionSelector from "@/components/modules/distribution/DistributionSelector";
+
 import {
-  calculateTotalDistributionAmount,
+  tryCatch,
   createEmptyRow,
   getContractAddress,
   getSupportedTokens,
-  tryCatch,
-} from "@/lib/utils";
-import toast from "react-hot-toast";
-import { useStarkNameResolver } from "@/hooks/useStarkNameResolver";
+  calculateTotalDistributionAmount,
+} from "@/lib/utills";
 
-import { cairo } from "starknet";
-import type { Call } from "starknet";
-import { fetchProtocolFee } from "@/lib/api";
-import DistributionConfirmationModal from "@/components/modules/distribution/DistributionConfirmationModal";
 import {
-  checkDistributionDataValidity,
   snsAddressValidation,
   validateDistributionAmounts,
+  checkDistributionDataValidity,
   validateIndividualDistributions,
 } from "@/validations/distribution";
-
 import { ErrorWithCode } from "@/types";
+import { fetchProtocolFee } from "@/lib/api";
+import { useStarkNameResolver } from "@/hooks/useStarkNameResolver";
 import { createDistributionAction } from "@/app/actions/distributionActions";
+import DistributionConfirmationModal from "@/components/modules/distribution/DistributionConfirmationModal";
 
 const DistributePage = () => {
   const { account, address } = useAccount();
-
+  const router = useRouter();
   const { chain } = useNetwork();
 
   const isMainNet = chain.network === "mainnet";
@@ -338,6 +340,8 @@ const DistributePage = () => {
         `Successfully distributed tokens to ${recipients.length} addresses`,
         { duration: 800 }
       );
+
+      router.push(`/history`);
     } catch {
       toast.error("Distribution failed, please try again.");
     } finally {

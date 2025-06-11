@@ -7,7 +7,7 @@ import {
   boolean,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
-import { generateUUID } from "@/lib/utils";
+import { generateUUID } from "@/lib/utills";
 
 export const userModel = pgTable(
   "User",

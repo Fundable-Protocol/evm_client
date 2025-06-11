@@ -6,7 +6,7 @@ import {
   updateDistributionSchema,
   createDistributionSchema,
 } from "@/policies/distribution";
-import { tryCatch } from "@/lib/utils";
+import { tryCatch } from "@/lib/utills";
 
 import { supportedTokenSymbol } from "@/lib/constant";
 import { ITransactionDataPoint } from "@/types/dashboard";

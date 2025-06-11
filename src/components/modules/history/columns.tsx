@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { DistributionAttributes } from "@/types/distribution";
-import { getStatusColor } from "@/lib/utils";
+import { getStatusColor } from "@/lib/utills";
 import ActionsCell from "./ActionsCell";
 
 export const columns: ColumnDef<DistributionAttributes>[] = [

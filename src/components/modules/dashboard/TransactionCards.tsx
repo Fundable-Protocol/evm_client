@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAccount } from "@starknet-react/core";
 
-import { formatThousandNumber } from "@/lib/utils";
+import { formatThousandNumber } from "@/lib/utills";
 
 import TransactionCard from "./TransactionCard";
 import TransactionSkeletonLoader from "./TransactionSkeletonLoader";

@@ -9,7 +9,7 @@ import {
   MAINNET_SUPPORTED_TOKENS,
   TESTNET_CONTRACT_ADDRESS,
   TESTNET_SUPPORTED_TOKENS,
-} from "./constant";
+} from "../constant";
 import { IDistributionData } from "@/types/distribution";
 import { isValidAmount, isValidStarknetAddress } from "@/validations";
 import { ErrorWithCode, PromiseResult, TokenOption } from "@/types";
@@ -20,6 +20,12 @@ export function cn(...inputs: ClassValue[]) {
 
 export const sliceAddress = (address: string) => {
   return `${address?.slice(0, 6)}...${address?.slice(-4)}`;
+};
+
+export const capitalizeWord = (str: string) => {
+  if (!str) return "";
+
+  return str.charAt(0).toUpperCase() + str.slice(1);
 };
 
 export const isMobileDevice = () => {

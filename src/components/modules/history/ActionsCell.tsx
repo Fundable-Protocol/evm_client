@@ -2,22 +2,61 @@
 
 import { useState } from "react";
 import { MoreHorizontal, FileDown, Eye, ExternalLink } from "lucide-react";
-import { DistributionAttributes } from "@/types/distribution";
+
+import {
+  getExplorerUrl,
+  generateDistributionPDF,
+  generateDistributionCSV,
+} from "@/lib/utills/history";
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuContent,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { ActionsCellProps, IAction } from "@/types/history";
 import DistributionDetailsModal from "./DistributionDetailsModal";
 
-interface ActionsCellProps {
-  distribution: DistributionAttributes;
-}
+const actions: IAction[] = [
+  {
+    label: "View Details",
+    icon: Eye,
+    onClick: () => {},
+  },
+  {
+    label: "Export as PDF",
+    icon: FileDown,
+    onClick: (distribution: ActionsCellProps["distribution"]) =>
+      generateDistributionPDF(distribution),
+  },
+  {
+    label: "Export as CSV",
+    icon: FileDown,
+    onClick: (distribution: ActionsCellProps["distribution"]) =>
+      generateDistributionCSV(distribution),
+  },
+  {
+    label: "View on Explorer",
+    icon: ExternalLink,
+    onClick: (distribution: ActionsCellProps["distribution"]) => {
+      const url = getExplorerUrl(distribution);
+      if (url) window.open(url, "_blank");
+    },
+  },
+];
 
 const ActionsCell = ({ distribution }: ActionsCellProps) => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+
+  const handleViewDetails = () => {
+    setIsDetailsModalOpen((prev) => !prev);
+  };
+
+  const handleActionClick = (action: IAction) => {
+    if (action.label === "View Details") handleViewDetails();
+    else action.onClick(distribution);
+  };
 
   return (
     <>
@@ -35,50 +74,23 @@ const ActionsCell = ({ distribution }: ActionsCellProps) => {
           align="end"
           className="bg-fundable-mid-dark border-gray-700"
         >
-          <DropdownMenuItem
-            className="text-white hover:bg-fundable-violet cursor-pointer focus:bg-fundable-violet focus:text-white"
-            onClick={() => setIsDetailsModalOpen(true)}
-          >
-            <Eye className="mr-2 h-4 w-4" />
-            View Details
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="text-white hover:bg-fundable-violet cursor-pointer focus:bg-fundable-violet focus:text-white"
-            onClick={() => {
-              // TODO: Implement export as PDF
-              console.log("Export PDF:", distribution.id);
-            }}
-          >
-            <FileDown className="mr-2 h-4 w-4" />
-            Export as PDF
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="text-white hover:bg-fundable-violet cursor-pointer focus:bg-fundable-violet focus:text-white"
-            onClick={() => {
-              // TODO: Implement export as CSV
-              console.log("Export CSV:", distribution.id);
-            }}
-          >
-            <FileDown className="mr-2 h-4 w-4" />
-            Export as CSV
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="text-white hover:bg-fundable-violet cursor-pointer focus:bg-fundable-violet focus:text-white"
-            onClick={() => {
-              // TODO: Implement view on explorer
-              console.log("View on explorer:", distribution.id);
-            }}
-          >
-            <ExternalLink className="mr-2 h-4 w-4" />
-            View on Explorer
-          </DropdownMenuItem>
+          {actions.map((action) => (
+            <DropdownMenuItem
+              key={action.label}
+              className="text-white hover:bg-fundable-violet cursor-pointer focus:bg-fundable-violet focus:text-white"
+              onClick={() => handleActionClick(action)}
+            >
+              <action.icon className="mr-2 h-4 w-4" />
+              {action.label}
+            </DropdownMenuItem>
+          ))}
         </DropdownMenuContent>
       </DropdownMenu>
 
       <DistributionDetailsModal
         distribution={distribution}
         isOpen={isDetailsModalOpen}
-        onClose={() => setIsDetailsModalOpen(false)}
+        onClose={handleViewDetails}
       />
     </>
   );

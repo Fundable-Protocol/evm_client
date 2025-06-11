@@ -5,7 +5,7 @@ import { type CarouselApi } from "@/components/ui/carousel";
 import { CircleChevronLeft, CircleChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import BlogCarouselWrapper from "./BlogCarouselWrapper";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utills";
 
 const BlogSection = () => {
   const [api, setApi] = useState<CarouselApi>();

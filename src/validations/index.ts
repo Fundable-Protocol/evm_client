@@ -1,4 +1,4 @@
-import { createEmptyRow } from "@/lib/utils";
+import { createEmptyRow } from "@/lib/utills";
 import { IDistributionData } from "@/types/distribution";
 import { parseUnits } from "ethers";
 import { validateAndParseAddress } from "starknet";
