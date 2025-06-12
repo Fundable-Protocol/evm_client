@@ -11,6 +11,7 @@ const DistributionRow: FC<IDistributionRow> = ({
   row,
   isEqualDistribution,
   addLabel,
+  equalAmount,
 }) => {
   const isEqualStyle = cn("flex items-center w-full pb-3 md:pb-0 gap-x-3", {
     "md:w-1/2": !isEqualDistribution,
@@ -37,15 +38,14 @@ const DistributionRow: FC<IDistributionRow> = ({
       />
 
       <div className={isEqualStyle}>
-        {!isEqualDistribution ? (
-          <Input
-            className="border-none rounded h-12 md:h-14"
-            name="amount"
-            placeholder="Amount"
-            value={row.amount}
-            onChange={(e) => onChange(row.id, e.target.value, "amount")}
-          />
-        ) : null}
+        <Input
+          className="border-none rounded h-12 md:h-14"
+          name="amount"
+          placeholder="Amount"
+          value={isEqualDistribution ? equalAmount?.toString() || "0" : row.amount}
+          onChange={(e) => onChange(row.id, e.target.value, "amount")}
+          disabled={isEqualDistribution}
+        />
 
         <button
           type="button"

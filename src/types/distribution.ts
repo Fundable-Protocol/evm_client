@@ -40,6 +40,7 @@ export interface IDistributionRow {
   addLabel: boolean;
   onChange: (id: string, value: string, field: DistributionRowField) => void;
   onDelete: (id: string) => void;
+  equalAmount?: number;
 }
 
 export interface DistributionSelectorProps {

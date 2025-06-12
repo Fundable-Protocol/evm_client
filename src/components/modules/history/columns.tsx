@@ -19,6 +19,10 @@ export const columns: ColumnDef<DistributionAttributes>[] = [
     header: "Amount",
   },
   {
+    accessorKey: "token_symbol",
+    header: "Token",
+  },
+  {
     accessorKey: "distribution_type",
     header: "Type",
   },

@@ -65,6 +65,7 @@ const DistributionTable = ({
             key={`distribution-row-${i}`}
             addLabel={distributionType?.showLabel || false}
             isEqualDistribution={isNotEqualPerAddressDistribution}
+            equalAmount={distributionType?.amount}
           />
         ))}
       </div>
