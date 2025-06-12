@@ -1,20 +1,25 @@
 import { ChangeEvent } from "react";
+import toast from "react-hot-toast";
 
 import { equalDistributionType } from "@/lib/constant";
 
 import {
-  DistributionSelectorProps,
   distributionTypeKey,
+  DistributionSelectorProps,
 } from "@/types/distribution";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import AppSelect from "@/components/molecules/AppSelect";
 import DistributionTypeSwitch from "./DistributionSwitch";
+import { calculateLumpSumAmount } from "@/validations/distribution";
+import DistributionLabelSwitch from "./DistributionLabelSwitch";
 
 const DistributionSelector = ({
   supportedTokens,
+  distributionData,
   distributionType,
+  setDistributionData,
   setDistributionType,
 }: DistributionSelectorProps) => {
   const handleDistributionTypeChange = (
@@ -31,16 +36,40 @@ const DistributionSelector = ({
     handleDistributionTypeChange("amount", e.target.value);
   };
 
+  const isLumpSum = distributionType["equalAmountType"] === "lump_sum";
+
+  const handleLumpSumCalculation = () => {
+    const result = calculateLumpSumAmount({
+      distributionType,
+      distributionData: distributionData!,
+      setDistributionData: setDistributionData!,
+    });
+
+    if (result) {
+      const { success, message } = result;
+      if (!success) {
+        toast.error(message);
+      } else {
+        toast.success(message);
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col xl:flex-row gap-y-6 xl:gap-y-0 gap-x-12 justify-between">
-      <div className="flex gap-6 flex-col md:flex-row md:items-center">
+      <div className="flex gap-6 flex-col md:flex-row md:items-center pl-1">
         <AppSelect
           title="Token"
-          placeholder="STRK"
+          placeholder={distributionType.selectedToken}
           options={supportedTokens!}
           setValue={(value) =>
             handleDistributionTypeChange("selectedToken", value)
           }
+        />
+
+        <DistributionLabelSwitch
+          distributionType={distributionType}
+          setDistributionType={setDistributionType}
         />
 
         <DistributionTypeSwitch
@@ -66,26 +95,23 @@ const DistributionSelector = ({
                 : "Lump sum to distribute."}
             </h3>
 
-            {distributionType["equalAmountType"] === "lump_sum" ? (
-              <div className="flex gap-x-3 items-center">
-                <Input
-                  className="border-none bg-fundable-mid-grey rounded"
-                  name="amount"
-                  placeholder="Amount"
-                  onChange={updateEqualDistributionAmount}
-                />
-                <Button variant="gradient" className="rounded h-10">
-                  Calculate
-                </Button>
-              </div>
-            ) : (
+            <div className="flex gap-x-3 items-center">
               <Input
                 className="border-none bg-fundable-mid-grey rounded"
                 name="amount"
                 placeholder="Amount"
                 onChange={updateEqualDistributionAmount}
               />
-            )}
+              {isLumpSum ? (
+                <Button
+                  variant="gradient"
+                  className="rounded h-10"
+                  onClick={handleLumpSumCalculation}
+                >
+                  Calculate
+                </Button>
+              ) : null}
+            </div>
           </div>
         </div>
       ) : null}

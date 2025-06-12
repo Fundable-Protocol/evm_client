@@ -10,7 +10,7 @@ import FundableLogo from "../../../public/svgs/fundable_logo.svg";
 import useMenuAnimation from "../../hooks/useAnimationHook";
 import GradientButton from "../atoms/GradientButton";
 import MenuButton from "../atoms/MenuButton";
-import { isMobileDevice } from "@/lib/utils";
+import { isMobileDevice } from "@/lib/utills";
 
 const links = [
   { name: "Blog", href: "#" },

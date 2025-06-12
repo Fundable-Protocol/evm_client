@@ -12,7 +12,7 @@ import { WebWalletConnector } from "starknetkit/webwallet";
 
 import { constants } from "starknet";
 import { StarknetkitConnector } from "starknetkit";
-import { PROJECT_ID } from "./constant";
+import { projectId } from "./constant";
 
 export const getAvailableConnectors = () => {
   const argentMobile = ArgentMobileConnector.init({
@@ -23,7 +23,7 @@ export const getAvailableConnectors = () => {
           ? window.location.href
           : "staging.fundable.finance",
       chainId: constants.NetworkName.SN_MAIN,
-      projectId: PROJECT_ID,
+      projectId: projectId,
       description: "Your web3 automated payment processor",
     },
   }) as StarknetkitConnector;

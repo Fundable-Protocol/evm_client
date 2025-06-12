@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utills";
 
 import { Button } from "../ui/button";
 import { Loader2 } from "lucide-react";

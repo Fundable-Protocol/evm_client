@@ -1,13 +1,13 @@
 "use client";
 
-import { useAccount } from "@starknet-react/core";
-import { usePathname } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { useAccount } from "@starknet-react/core";
 
-import Logo from "../../../public/svgs/fundable_logo.svg";
-import { Sidebar } from "@/components/ui/sidebar";
 import { User2 } from "lucide-react";
+import { Sidebar } from "@/components/ui/sidebar";
+import Logo from "../../../public/svgs/fundable_logo.svg";
 
 import { useConnectWallet } from "@/hooks/useConnectWallet";
 import DistributionIcon from "../svgs/DistributionIcon";
@@ -31,6 +31,11 @@ const items = [
     icon: <DistributionIcon aria-hidden="true" />,
   },
   {
+    title: "History",
+    url: "/history",
+    icon: <User2 aria-hidden="true" className="text-white size-5" />,
+  },
+  {
     title: "Payment Stream",
     url: "/payment-stream",
     icon: <StreamIcon aria-hidden="true" />,
@@ -46,11 +51,6 @@ const items = [
     icon: <BookIcon aria-hidden="true" />,
   },
   {
-    title: "History",
-    url: "/history",
-    icon: <User2 aria-hidden="true" className="text-white size-5" />,
-  },
-  {
     title: "Help",
     url: "/help",
     icon: <WalletIcon aria-hidden="true" />,
@@ -64,13 +64,16 @@ export function AppSidebar() {
   const { address } = useAccount();
 
   return (
-    <Sidebar className="pt-7" aria-label="Main navigation">
+    <Sidebar
+      className="pt-7 bg-fundable-mid-grey/10"
+      aria-label="Main navigation"
+    >
       <Link href="/">
         <Image src={Logo} alt="Fundable Logo" priority className="pl-8 mb-12" />
       </Link>
       <div className="pr-4 pl-5 pb-16 flex-1 flex flex-col justify-between">
         <nav
-          className=" flex flex-col gap-y-4 pr-2"
+          className="flex flex-col gap-y-4 pr-2"
           data-slot="sidebar-menu-wrapper"
           aria-label="Main menu"
         >
@@ -82,7 +85,7 @@ export function AppSidebar() {
                 <li key={link.title}>
                   <Link
                     href={link.url}
-                    className={`flex items-center gap-x-2 rounded p-2  transition-colors focus:outline-none focus:ring-1 focus:ring-fundable-purple-2 focus:ring-offset-2 focus:ring-offset-black
+                    className={`flex items-center gap-x-2 rounded p-2  transition-colors focus:outline-none focus:ring-1 focus:ring-fundable-purple-2 focus:ring-offset-2 focus:ring-offset-black 
                     ${
                       isActive
                         ? "bg-fundable-purple-2 text-black"
