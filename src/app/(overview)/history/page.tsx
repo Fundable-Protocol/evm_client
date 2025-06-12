@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAccount } from "@starknet-react/core";
 import { useState } from "react";
 
-import { columns } from "@/components/modules/history/Columns";
+import { columns } from "@/components/modules/history/columns";
 import HistoryTable from "@/components/modules/history/HistoryTable";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { getDistributionsAction } from "@/app/actions/distributionActions";
