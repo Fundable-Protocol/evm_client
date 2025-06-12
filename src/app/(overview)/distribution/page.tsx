@@ -304,7 +304,7 @@ const DistributePage = () => {
         total_recipients: distributionData.length,
         network: isMainNet ? "MAINNET" : "TESTNET",
         distribution_type: distributionInfo.type.toUpperCase(),
-        fee_amount: distributionState.protocolFee?.toString() || "0",
+        fee_amount: (Number(distributionState.protocolFee || BigInt(0)) / Math.pow(10, selectedToken.decimals)).toString(),
         metadata: {
           recipients: distributionData.map((d) => ({
             address: d.address!,
