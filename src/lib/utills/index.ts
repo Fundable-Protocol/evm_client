@@ -11,7 +11,7 @@ import {
   TESTNET_SUPPORTED_TOKENS,
 } from "../constant";
 import { IDistributionData } from "@/types/distribution";
-import { isValidAmount, isValidStarknetAddress } from "@/validations";
+import { isValidAmount } from "@/validations";
 import { ErrorWithCode, PromiseResult, TokenOption } from "@/types";
 
 export function cn(...inputs: ClassValue[]) {
@@ -56,7 +56,7 @@ export const createEmptyRow = (data?: IDistributionData): IDistributionData => {
     label: "",
     amount: "",
     address: "",
-    starkAddress: "",
+    // starkAddress: "",
   };
 };
 
@@ -70,14 +70,10 @@ export const validateDistribution = (
   address: string,
   amount: string
 ): { isValid: boolean; error?: string } => {
-  if (!isValidStarknetAddress(address)) {
-    return { isValid: false, error: "Invalid Starknet address" };
-  }
-
+  console.log("address", address);
   if (!isValidAmount(amount)) {
     return { isValid: false, error: "Invalid amount" };
   }
-
   return { isValid: true };
 };
 

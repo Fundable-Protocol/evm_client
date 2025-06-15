@@ -1,16 +1,7 @@
 import { createEmptyRow } from "@/lib/utills";
 import { IDistributionData } from "@/types/distribution";
 import { parseUnits } from "ethers";
-import { validateAndParseAddress } from "starknet";
 
-export const isValidStarknetAddress = (address: string): boolean => {
-  try {
-    validateAndParseAddress(address);
-    return true;
-  } catch {
-    return false;
-  }
-};
 export const isSnsAddress = (address: string) => {
   if (!address) return false;
 
@@ -26,10 +17,10 @@ export const isDuplicateAddress = (distributionData: IDistributionData[]) => {
       addressSet.add(row.address);
     }
 
-    if (row.starkAddress) {
-      if (addressSet.has(row.starkAddress)) return true;
-      addressSet.add(row.starkAddress);
-    }
+    // if (row.starkAddress) {
+    //   if (addressSet.has(row.starkAddress)) return true;
+    //   addressSet.add(row.starkAddress);
+    // }
 
     return false;
   });
@@ -75,7 +66,7 @@ export const validateCsvData = (data: unknown) => {
 
       if (i === 1 && hasHeader) return null;
 
-      if (isValidStarknetAddress(address) || isSnsAddress(address)) {
+      if (isSnsAddress(address)) {
         return createEmptyRow({
           amount,
           ...(label && label),

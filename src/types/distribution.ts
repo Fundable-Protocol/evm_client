@@ -23,7 +23,6 @@ export interface IDistributionData {
   amount: string;
   label?: string;
   address?: string;
-  starkAddress?: string;
 }
 
 export interface IDistribution {

@@ -17,7 +17,7 @@ const bricolageGrotesque = Bricolage_Grotesque({
 
 export const metadata: Metadata = {
   title: "Fundable",
-  description: "A decentralized funding application built on Starknet",
+  description: "A decentralized funding application.",
   icons: {
     icon: "/favicon_io/favicon.ico",
   },

@@ -37,7 +37,7 @@ function DistributionFileUpload({
           }
 
           const nonEmptyRows = distributionData?.filter(
-            (data) => data.address || data.starkAddress
+            (data) => data.address
           );
 
           if (nonEmptyRows?.length) {

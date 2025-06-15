@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { isDuplicateAddress, isSnsAddress } from ".";
+import { isDuplicateAddress } from ".";
 import { validateDistribution } from "@/lib/utills";
 import {
   IDistributionData,
@@ -21,7 +21,7 @@ export const isEmptyDistributionData = (
 ) => {
   if (!distributionData.length) return true;
 
-  return distributionData.some((row) => !row.address && !row.starkAddress);
+  return distributionData.some((row) => !row.address);
 };
 
 const isInvalidAmount = (amount: number) => {
@@ -163,43 +163,43 @@ export function calculateLumpSumAmount(data: ICalculateLumpSumAmount) {
   };
 }
 
-export const snsAddressValidation = (
-  data: IDistributionData[],
-  queueStarkNameResolution: (index: number, starkName: string) => void,
-  isMainNet: boolean
-) => {
-  const hasUnresolvedSns = data.some((data) => {
-    const hasSnsAddress = isSnsAddress(data.address!);
-    const hasSnsName = isSnsAddress(data.starkAddress!);
-    return hasSnsAddress || (hasSnsName && !data.address);
-  });
+// export const snsAddressValidation = (
+//   data: IDistributionData[],
+//   queueStarkNameResolution: (index: number, starkName: string) => void,
+//   isMainNet: boolean
+// ) => {
+//   const hasUnresolvedSns = data.some((data) => {
+//     const hasSnsAddress = isSnsAddress(data.address!);
+//     // const hasSnsName = isSnsAddress(data.starkAddress!);
+//     return hasSnsAddress || (hasSnsAddress && !data.address);
+//   });
 
-  if (hasUnresolvedSns && !isMainNet) {
-    return {
-      success: false,
-      hasUnresolvedSns,
-      message: "SNS addresses are not supported on testnet.",
-    };
-  }
+//   if (hasUnresolvedSns && !isMainNet) {
+//     return {
+//       success: false,
+//       hasUnresolvedSns,
+//       message: "SNS addresses are not supported on testnet.",
+//     };
+//   }
 
-  if (!hasUnresolvedSns) return { success: true };
+//   if (!hasUnresolvedSns) return { success: true };
 
-  data.forEach((data, i) => {
-    const hasSnsAddress = isSnsAddress(data.address!);
-    const hasSnsName = isSnsAddress(data.starkAddress!);
+//   data.forEach((data, i) => {
+//     const hasSnsAddress = isSnsAddress(data.address!);
+//     const hasSnsName = isSnsAddress(data.starkAddress!);
 
-    if (hasSnsAddress) {
-      queueStarkNameResolution(i, data.address!);
-    }
+//     if (hasSnsAddress) {
+//       queueStarkNameResolution(i, data.address!);
+//     }
 
-    if (hasSnsName && !data.address) {
-      queueStarkNameResolution(i, data.starkAddress!);
-    }
-  });
+//     if (hasSnsName && !data.address) {
+//       queueStarkNameResolution(i, data.starkAddress!);
+//     }
+//   });
 
-  return {
-    success: false,
-    message:
-      "Please wait for SNS addresses to resolve or enter a valid starknet address, and try again.",
-  };
-};
+//   return {
+//     success: false,
+//     message:
+//       "Please wait for SNS addresses to resolve or enter a valid starknet address, and try again.",
+//   };
+// };
