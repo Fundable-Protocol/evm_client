@@ -12,6 +12,7 @@ import { supportedTokenSymbol } from "@/lib/constant";
 import { ITransactionDataPoint } from "@/types/dashboard";
 import { DistributionService } from "@/services/distributionService";
 import { IHistoryQueryParams } from "@/types/history";
+import { createFeeConfigs } from "./feeConfigActions";
 
 export async function createDistributionAction(
   data: z.infer<typeof createDistributionSchema>
@@ -40,6 +41,10 @@ export async function updateDistributionAction(
 
 export async function getCardStatsAction(user_address: string) {
   if (!user_address) throw new Error("User address is required");
+
+  // const res = await createFeeConfigs();
+
+  // console.log("feeConfigRes", res);
 
   const { data: totalAmountData, error: totalAmountError } = await tryCatch(
     DistributionService.getTotalAmountWithChange(user_address)
