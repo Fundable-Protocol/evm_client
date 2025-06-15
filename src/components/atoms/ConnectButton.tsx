@@ -4,7 +4,7 @@ import { useEVM } from "@/hooks/useEVM";
 import GradientButton, { ConnectWalletBtnProps } from "./GradientButton";
 
 const ConnectButton = ({ type, onClick }: ConnectWalletBtnProps) => {
-  const { connect, isConnected, address } = useEVM();
+  const { connect, isConnected } = useEVM();
 
   const handleConnect = () => {
     onClick?.();

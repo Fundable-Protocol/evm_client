@@ -1,12 +1,10 @@
 "use client";
 
-import { cairo } from "starknet";
-import toast from "react-hot-toast";
-import type { Call } from "starknet";
+import toast from "react-hot-toast";  
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAccount, useSendCalls} from "wagmi";
-import { parseEther, encodeFunctionData } from "viem";
+import { encodeFunctionData } from "viem";
 
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import DistributionFileUpload from "@/components/modules/distribution/DistributionFileUpload";
@@ -33,7 +31,6 @@ import {
   validateIndividualDistributions,
 } from "@/validations/distribution";
 import { ErrorWithCode } from "@/types";
-import { fetchProtocolFee } from "@/lib/api";
 // import { useStarkNameResolver } from "@/hooks/useStarkNameResolver";
 import { createDistributionAction } from "@/app/actions/distributionActions";
 import DistributionConfirmationModal from "@/components/modules/distribution/DistributionConfirmationModal";
@@ -42,7 +39,7 @@ import { config } from "@/config";
 
 const DistributePage = () => {
   const { address, chain } = useAccount();
-  const { sendCallsAsync, data: bundle } = useSendCalls();
+  const { sendCallsAsync } = useSendCalls();
   // const { data: callReceipts, isSuccess, isError } = useWaitForCallsStatus({
   //   id: bundle?.id,
   //   pollingInterval: 1000,
@@ -277,7 +274,7 @@ const DistributePage = () => {
      const result = await sendCallsAsync({ calls: [approveCall, distributeCall] });
      console.log("result", result);
 
-     const {status, receipts} = await waitForCallsStatus(config, {
+     const { receipts } = await waitForCallsStatus(config, {
       id: result?.id,
       pollingInterval: 1000,
      });
