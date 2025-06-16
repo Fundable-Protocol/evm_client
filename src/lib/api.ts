@@ -1,13 +1,11 @@
-import { AccountInterface } from "starknet";
+import { supportedChainName, supportedNetwork } from "./constant";
+import { getProtocolFee } from "@/app/actions/feeConfigActions";
 
-export const fetchProtocolFee = async ({
-  account,
-  contractAddress,
-}: {
-  contractAddress: string;
-  account?: AccountInterface;
-}) => {
-  if (!account || !contractAddress) {
+export const fetchProtocolFee = async (
+  network: (typeof supportedNetwork)[number],
+  chainName: (typeof supportedChainName)[number]
+) => {
+  if (!network || !chainName) {
     return {
       success: false,
       message: "Please connect your wallet first!",
@@ -15,23 +13,15 @@ export const fetchProtocolFee = async ({
   }
 
   try {
-    const response = await account.callContract({
-      contractAddress,
-      entrypoint: "get_protocol_fee_percent",
-      calldata: [],
-    });
+    const { success, data } = await getProtocolFee(network, chainName);
 
-    const result = Array.isArray(response)
-      ? response
-      : (response as { result: string[] })?.result;
+    if (!success) throw new Error("Failed to fetch protocol fee.");
 
-    const resultValue = result[0];
-
-    const decimalValue = Number.parseInt(resultValue, 16);
+    const result = data?.protocolFee;
 
     return {
       success: true,
-      data: decimalValue,
+      data: result,
       message: "Protocol fee fetched successfully",
     };
   } catch {

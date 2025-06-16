@@ -33,9 +33,11 @@ import {
 } from "@/validations/distribution";
 import { ErrorWithCode } from "@/types";
 import { fetchProtocolFee } from "@/lib/api";
+import { fetchTokenPrices } from "@/services/apiServices";
 import { useStarkNameResolver } from "@/hooks/useStarkNameResolver";
 import { createDistributionAction } from "@/app/actions/distributionActions";
 import DistributionConfirmationModal from "@/components/modules/distribution/DistributionConfirmationModal";
+import currency from "currency.js";
 
 const DistributePage = () => {
   const { account, address } = useAccount();
@@ -147,16 +149,9 @@ const DistributePage = () => {
         message: protocolFeeMessage,
         success: protocolFeeSuccess,
         data: protocolFeePercentage,
-      } = await fetchProtocolFee({
-        account,
-        contractAddress: CONTRACT_ADDRESS,
-      });
+      } = await fetchProtocolFee(isMainNet ? "mainnet" : "testnet", "Starknet");
 
-      if (!protocolFeeSuccess) {
-        throw new Error(protocolFeeMessage);
-      }
-
-      // const protocolFeePercentage = 2500;
+      if (!protocolFeeSuccess) throw new Error(protocolFeeMessage);
 
       const { totalAmountString, amounts, protocolFee, totalAmount } =
         calculateTotalDistributionAmount(
@@ -293,18 +288,44 @@ const DistributePage = () => {
         }, 0)
         .toString();
 
+      const { data: tokenPrices } = await tryCatch(
+        fetchTokenPrices(["starknet", "ethereum"])
+      );
+
+      let usdRate =
+        selectedToken.symbol === "STRK"
+          ? tokenPrices?.["starknet"]?.usd ?? 1
+          : selectedToken.symbol === "ETH"
+          ? tokenPrices?.["ethereum"]?.usd ?? 1
+          : 1;
+
+      const totalBaseAmount = currency(baseAmount, {
+        precision: 6,
+      });
+
+      usdRate = currency(usdRate ?? 0, {
+        precision: 6,
+      }).value;
+
+      const totalUsdAmount = totalBaseAmount.multiply(usdRate).toString();
+
       const distribution = {
         status: "COMPLETED",
         transaction_hash: tx,
         user_address: address!,
         total_amount: baseAmount,
+        total_usd_amount: totalUsdAmount,
         token_symbol: selectedToken.symbol,
         token_address: selectedToken.address,
         token_decimals: selectedToken.decimals,
         total_recipients: distributionData.length,
         network: isMainNet ? "MAINNET" : "TESTNET",
+        usd_rate: usdRate?.toString(),
         distribution_type: distributionInfo.type.toUpperCase(),
-        fee_amount: (Number(distributionState.protocolFee || BigInt(0)) / Math.pow(10, selectedToken.decimals)).toString(),
+        fee_amount: (
+          Number(distributionState.protocolFee || BigInt(0)) /
+          Math.pow(10, selectedToken.decimals)
+        ).toString(),
         metadata: {
           recipients: distributionData.map((d) => ({
             address: d.address!,
@@ -360,7 +381,7 @@ const DistributePage = () => {
   };
 
   const disableDistributionBtn =
-    !!account ||
+    !account ||
     ["process-started", "initiate-distribution"].includes(
       distributionState.currentState
     );
