@@ -73,7 +73,9 @@ frontend-main/
 │   ├── lib/          # Utility functions and configurations
 │   ├── providers/    # React context providers
 │   └── store/        # State management
+|   └── types/        # TypeScript types
 ├── public/           # Static assets
+├── .env              # Environment variables
 └── ...config files
 ```
 
