@@ -40,6 +40,11 @@ export const distributionModel = pgTable(
       scale: 30,
     }).notNull(),
     fee_amount: numeric("fee_amount", { precision: 65, scale: 30 }).notNull(),
+    usd_rate: numeric("usd_rate", { precision: 65, scale: 30 }).default("0"),
+    total_usd_amount: numeric("total_usd_amount", {
+      precision: 65,
+      scale: 30,
+    }).default("0"),
     total_recipients: integer("total_recipients").notNull(),
     distribution_type: distribution_type("distribution_type").notNull(),
     status: distribution_status().default("pending").notNull(),

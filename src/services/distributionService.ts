@@ -1,7 +1,7 @@
 import CurrencyJs from "currency.js";
 
 import { z } from "zod";
-import { DistributionAttributes } from "@/types/distribution";
+import currency from "currency.js";
 import { and, count, desc, eq, gte, ilike, lte, sum, sql } from "drizzle-orm";
 
 import { db } from "../../db/drizzle";
@@ -12,10 +12,8 @@ import {
   updateDistributionSchema,
 } from "@/policies/distribution";
 import { distributionStatus } from "@/lib/constant";
-import { fetchTokenPrices } from "./apiServices";
-import { tryCatch } from "@/lib/utills";
 import { IHistoryQueryParams } from "@/types/history";
-import currency from "currency.js";
+import { DistributionAttributes } from "@/types/distribution";
 
 export class DistributionService {
   /**
@@ -247,7 +245,7 @@ export class DistributionService {
     const result = await db
       .select({
         tokenSymbol: distributionModel.token_symbol,
-        totalAmount: sum(distributionModel.total_amount),
+        totalUsdAmount: sum(distributionModel.total_usd_amount),
       })
       .from(distributionModel)
       .where(
@@ -261,24 +259,11 @@ export class DistributionService {
       )
       .groupBy(distributionModel.token_symbol);
 
-    const { data } = await tryCatch(fetchTokenPrices(["starknet", "ethereum"]));
-
-    const starknetUsdPrice = data?.["starknet"]?.usd ?? 0;
-
-    const ethereumPrice = data?.["ethereum"]?.usd ?? 0;
-
     const totalAmount = result
       .map((row) => {
-        const usdPrice =
-          row.tokenSymbol === "STRK"
-            ? CurrencyJs(Number(row?.totalAmount ?? 0), {
-                precision: 4,
-              }).multiply(starknetUsdPrice).value
-            : row.tokenSymbol === "ETH"
-            ? CurrencyJs(Number(row?.totalAmount ?? 0), {
-                precision: 4,
-              }).multiply(ethereumPrice).value
-            : Number(row?.totalAmount ?? 0);
+        const usdPrice = CurrencyJs(Number(row?.totalUsdAmount ?? 0), {
+          precision: 4,
+        }).value;
 
         return {
           ...row,

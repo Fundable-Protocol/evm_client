@@ -9,9 +9,9 @@ import {
 import { tryCatch } from "@/lib/utills";
 
 import { supportedTokenSymbol } from "@/lib/constant";
+import { IHistoryQueryParams } from "@/types/history";
 import { ITransactionDataPoint } from "@/types/dashboard";
 import { DistributionService } from "@/services/distributionService";
-import { IHistoryQueryParams } from "@/types/history";
 
 export async function createDistributionAction(
   data: z.infer<typeof createDistributionSchema>
