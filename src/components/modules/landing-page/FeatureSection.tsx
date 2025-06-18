@@ -1,5 +1,5 @@
 import RetroSvg from "../../../../public/svgs/retro.svg";
-import QuadraticSvg from "../../../../public/svgs/quadratic.svg";
+import StreamSvg from "../../../../public/svgs/stream.svg";
 import SolarImg from "../../../../public/imgs/solar.png";
 
 import FeatureCard from "./FeatureCard";
@@ -20,6 +20,8 @@ const FeatureSection = () => {
     description:
       "Automate continuous crypto payouts—subscriptions, salaries, and more—so you can focus on growth, not transfers.",
     link: "#",
+    imageSrc: StreamSvg,
+    imageAlt: "Streaming illustration",
   };
 
   const crowdfunding = {
