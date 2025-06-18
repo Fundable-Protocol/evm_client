@@ -20,24 +20,34 @@ const FaqAccordionSection = () => {
 
   const faqs = [
     {
-      question: "How do I create an account on the platform?",
-      answer:
-        "To create an account, visit the Sign Up page, enter your email and password, verify your email through the link sent to you, and complete your profile setup. Once done, you can start using the platform.",
+      question: "How do I get started with Fundable?",
+      answer: 
+        "To use Fundable, you'll need a Starknet-compatible wallet like ArgentX or Braavos. Once installed, connect your wallet to our platform by clicking the 'Launch App' button in the top right corner. You'll then have access to all our distribution and funding features.",
     },
     {
-      question: "What is the first step to set up my crypto wallet?",
+      question: "What tokens can I distribute on the platform?",
       answer:
-        "To create an account, visit the Sign Up page, enter your email and password, verify your email through the link sent to you, and complete your profile setup. Once done, you can start using the platform.",
+        "Currently, we support distributions of STRK (Starknet's native token) ETH, USDC, and USDT on both Starknet mainnet and testnet. We're actively working on adding support for more tokens to give you more flexibility in your distributions.",
     },
     {
-      question: "How can I connect my existing wallet to the platform?",
+      question: "How do distributions work on Fundable?",
       answer:
-        "To create an account, visit the Sign Up page, enter your email and password, verify your email through the link sent to you, and complete your profile setup. Once done, you can start using the platform.",
+        "Fundable offers two main types of distributions: Equal and Weighted. Equal distributions split tokens evenly among recipients, while Weighted distributions let you specify different amounts for each address. You can upload recipient lists via CSV or input them manually, and execute the distribution in a single transaction.",
     },
     {
-      question: "What are the requirements to start using the platform?",
+      question: "What are the fees for using Fundable?",
       answer:
-        "To create an account, visit the Sign Up page, enter your email and password, verify your email through the link sent to you, and complete your profile setup. Once done, you can start using the platform.",
+        "Fundable charges a small protocol fee on distributions to maintain and improve the platform. The exact fee is displayed before you confirm any transaction. You'll also need to pay the standard Starknet network fees for your transactions. All fees are transparent and shown upfront.",
+    },
+    {
+      question: "How can I track my distributions?",
+      answer:
+        "Every distribution you make is recorded on-chain and tracked in your distribution history. You can view detailed information about past distributions, including recipient addresses, amounts, transaction hashes, and timestamps. This provides complete transparency and makes it easy to audit and verify all your token distributions.",
+    },
+    {
+      question: "How does token streaming work?",
+      answer: 
+        "Token streaming allows you to automate continuous token payments over time - perfect for salaries, subscriptions, or vesting schedules. Simply specify the recipient, total amount, duration, and token type. The tokens are then streamed linearly, meaning the recipient can claim their earned portion at any time. All streams are fully transparent and managed by smart contracts.",
     },
   ];
 

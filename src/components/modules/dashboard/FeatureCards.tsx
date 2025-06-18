@@ -2,13 +2,13 @@ import FeatureCard from "./FeatureCard";
 
 const FeatureCards = () => {
   const airDrop =
-    "Effortlessly distribute funds to recipients, with complete transparency, robust security, and real-time tracking.";
+    "Launch your token distribution in seconds. Gas-optimized airdrops with smart eligibility rules. Start distributing now.";
 
   const stream =
-    "Reduce administrative burdens and minimize errors with automated solutions for recurring payments, salaries, subscriptions, and more.";
+    "Set up automated crypto payments once, run forever. Handle subscriptions, salaries, and recurring transfers automatically. Deploy your first stream.";
 
   const distribution =
-    "Recognize past achievements to motivate contributors while amplifying small efforts and ensuring inclusivity, so every voice matters.";
+    "Distribute tokens to thousands instantly. One transaction, multiple recipients. Equal or weighted splits with real-time tracking. Execute distribution.";
 
   return (
     <div className="grid grid-cols-[repeat(auto-fit,minmax(22rem,1fr))] gap-4 md:gap-8">
