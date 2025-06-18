@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAccount } from "@starknet-react/core";
 
@@ -18,7 +18,7 @@ import HistoryTableSkeleton from "@/components/modules/history/HistoryTableSkele
 import { useSearchParams } from "next/navigation";
 import { validPageLimits } from "@/lib/constant";
 
-const HistoryPage = () => {
+const HistoryPageContent = () => {
   const { address } = useAccount();
 
   const searchParams = useSearchParams();
@@ -94,6 +94,14 @@ const HistoryPage = () => {
         )}
       </div>
     </DashboardLayout>
+  );
+};
+
+const HistoryPage = () => {
+  return (
+    <Suspense fallback={<HistoryTableSkeleton />}>
+      <HistoryPageContent />
+    </Suspense>
   );
 };
 
