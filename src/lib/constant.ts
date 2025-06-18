@@ -68,10 +68,10 @@ export const TESTNET_SUPPORTED_TOKENS = Object.freeze({
 }) as Readonly<Record<string, Readonly<TokenOption>>>;
 
 export const TESTNET_CONTRACT_ADDRESS =
-  "0x6FBdcE344AA44B1Cc7B5431B7352642153b0e7A7";
+  "0x3aDF45db77F1B69Ab7b08745d7d2d3E0F36833ab";
 
 export const MAINNET_CONTRACT_ADDRESS =
-  "0x67a27274b63fa3b070cabf7adf59e7b1c1e5b768b18f84b50f6cb85f59c42e5";
+  "0x3aDF45db77F1B69Ab7b08745d7d2d3E0F36833ab";
 
 export const distributionState = [
   "process-started",

@@ -17,10 +17,10 @@ if (!projectId) {
 
 // Set up metadata
 const metadata = {
-  name: 'Your dApp Name',
-  description: 'Your dApp Description',
+  name: 'Fundable',
+  description: "A decentralized funding application.",
   url: typeof window !== 'undefined' ? window.location.origin : '',
-  icons: ['https://your-app-icon.com/icon.png']
+  icons: ["/favicon_io/favicon.ico"]
 }
 
 // Create the modal
