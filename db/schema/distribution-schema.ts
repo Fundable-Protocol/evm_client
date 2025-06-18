@@ -47,6 +47,7 @@ export const distributionModel = pgTable(
     }).default("0"),
     total_recipients: integer("total_recipients").notNull(),
     distribution_type: distribution_type("distribution_type").notNull(),
+    chain_name: text("chain_name").default(""),
     status: distribution_status().default("pending").notNull(),
     // You can use { mode: "bigint" } if numbers are exceeding js number limitations
     block_number: bigint("block_number", { mode: "number" }),

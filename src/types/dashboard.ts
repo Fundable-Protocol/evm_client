@@ -5,6 +5,7 @@ export interface TransactionCardProps {
   amount: string | number;
   percentage?: number;
   title: string;
+  isWalletConnected?: boolean;
 }
 
 export interface FeatureCardProps {

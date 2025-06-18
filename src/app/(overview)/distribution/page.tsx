@@ -319,6 +319,7 @@ const DistributePage = () => {
         token_address: selectedToken.address,
         token_decimals: selectedToken.decimals,
         total_recipients: distributionData.length,
+        chain_name: chain.name,
         network: isMainNet ? "MAINNET" : "TESTNET",
         usd_rate: usdRate?.toString(),
         distribution_type: distributionInfo.type.toUpperCase(),

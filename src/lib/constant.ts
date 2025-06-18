@@ -94,3 +94,5 @@ export const featureCardImgTypes = ["airdrop", "stream"] as const;
 export const apiSecretKey = process.env.API_SECRET_KEY || "";
 
 export const supportedChainName = ["Starknet", "Ethereum"] as const;
+
+export const validPageLimits = [10, 20, 50] as const;

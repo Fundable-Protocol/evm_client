@@ -1,0 +1,1 @@
+ALTER TABLE "Distribution" ADD COLUMN "chain_name" text DEFAULT '';

@@ -14,6 +14,7 @@ const TransactionCard = ({
   title,
   amount,
   percentage,
+  isWalletConnected,
 }: TransactionCardProps) => {
   const Icon =
     type === "amount" ? (
@@ -31,8 +32,16 @@ const TransactionCard = ({
     <div className="py-10 px-7 bg-fundable-mid-dark rounded-lg flex flex-col gap-y-10">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-x-2">
-          {Icon}
-          <span className="text-[#AEB9E1]">{title}</span>
+          {isWalletConnected ? (
+            <>
+              {Icon}
+              <span className="text-[#AEB9E1]">{title}</span>
+            </>
+          ) : (
+            <p className="text-white font-geist-sans text-xl font-bold">
+              Connect your wallet
+            </p>
+          )}
         </div>
 
         <div className="flex items-center gap-x-1">
@@ -46,20 +55,22 @@ const TransactionCard = ({
         <span className="text-3xl font-bold text-white font-geist-sans">
           {amount}
         </span>
-        <div
-          className={cn({
-            "flex items-center gap-x-1 text-xs py-1 px-1.5 rounded border":
-              true,
-            "bg-[#05c1692c] border-[#05c16945] text-[#05C168]":
-              isPercentageIncreased,
-            "bg-[#ff5a6530] border-[#ff5a6530] text-[#FF5A65]":
-              isPercentageDecreased,
-          })}
-        >
-          <span className="">{percentage}%</span>
-          {isPercentageIncreased ? <PercentageIncreaseIcon /> : null}
-          {isPercentageDecreased ? <PercentageDecreaseIcon /> : null}
-        </div>
+        {isWalletConnected ? (
+          <div
+            className={cn({
+              "flex items-center gap-x-1 text-xs py-1 px-1.5 rounded border":
+                true,
+              "bg-[#05c1692c] border-[#05c16945] text-[#05C168]":
+                isPercentageIncreased,
+              "bg-[#ff5a6530] border-[#ff5a6530] text-[#FF5A65]":
+                isPercentageDecreased,
+            })}
+          >
+            <span className="">{percentage}%</span>
+            {isPercentageIncreased ? <PercentageIncreaseIcon /> : null}
+            {isPercentageDecreased ? <PercentageDecreaseIcon /> : null}
+          </div>
+        ) : null}
       </div>
     </div>
   );
