@@ -17,9 +17,9 @@ const UtilitySection = () => {
       color: "efficient",
     },
     {
-      title: "Secure & Insured",
+      title: "Transparent & Trustworthy",
       description:
-        "Ensure transparent and secure funding distributions, building trust with your community and providing a clear audit trail for all transactions.",
+        "On-chain audit trails and robust security keep your distributions safe and your community confident.",
       image: SecureSvg,
       color: "secure",
     },
