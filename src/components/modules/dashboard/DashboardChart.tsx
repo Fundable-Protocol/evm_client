@@ -35,17 +35,16 @@ const chartConfig = {
 function DashboardChart() {
   const { address } = useAccount();
 
-  const { data: transactionData = [], isPending } = useQuery<
+  const { data: transactionData = [], isFetching } = useQuery<
     ITransactionDataPoint[]
   >({
     queryKey: ["transactionChartData", address],
     queryFn: () => getChartDataAction(address!),
     enabled: !!address,
-    refetchInterval: 1000,
     refetchOnWindowFocus: true,
   });
 
-  if (isPending) return <DashboardChartSkeleton />;
+  if (isFetching) return <DashboardChartSkeleton />;
 
   // Calculate min and max values for Y axis
   const allValues = transactionData.flatMap((point: ITransactionDataPoint) => [

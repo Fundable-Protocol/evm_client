@@ -16,7 +16,7 @@ const AppSelect = ({
   return (
     <Select onValueChange={setValue}>
       <div className="flex flex-col min-w-max">
-        <h3 className="font-semibold mb-3 text-nowrap">{title}</h3>
+        {!!title && <h3 className="font-semibold mb-3 text-nowrap">{title}</h3>}
         <SelectTrigger className="w-full border-none bg-fundable-mid-grey text-white">
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>

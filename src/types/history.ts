@@ -1,6 +1,6 @@
+import { Dispatch, SetStateAction } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { DistributionAttributes } from "./distribution";
-import { Dispatch, SetStateAction } from "react";
 
 export interface IHistoryData {
   id: string;
@@ -23,6 +23,9 @@ export interface DataTableProps<TData, TValue> {
   >;
   statusFilter: DistributionAttributes["status"] | "all";
   typeFilter: DistributionAttributes["distribution_type"] | "all";
+  totalCount?: number;
+  page: number;
+  limit: number;
 }
 
 export interface IHistoryQueryParams {
@@ -34,9 +37,9 @@ export interface IHistoryQueryParams {
 }
 
 export interface DistributionDetailsModalProps {
-  distribution: DistributionAttributes | null;
   isOpen: boolean;
   onClose: () => void;
+  distribution: DistributionAttributes | null;
 }
 
 export interface ActionsCellProps {

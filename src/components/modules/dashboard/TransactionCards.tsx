@@ -12,15 +12,14 @@ import { getCardStatsAction } from "@/app/actions/distributionActions";
 const TransactionCards = () => {
   const { address } = useAccount();
 
-  const { data: totalDistributionAmount, isPending } = useQuery({
+  const { data: totalDistributionAmount, isFetching } = useQuery({
     queryKey: ["totalDistributionAmount"],
     queryFn: () => getCardStatsAction(address!),
     enabled: !!address,
-    refetchInterval: 1000,
     refetchOnWindowFocus: true,
   });
 
-  if (isPending) return <TransactionSkeletonLoader />;
+  if (isFetching) return <TransactionSkeletonLoader />;
 
   const {
     totalAmount,
@@ -36,12 +35,14 @@ const TransactionCards = () => {
       <TransactionCard
         type="amount"
         title="Total Amount Sent"
+        isWalletConnected={!!address}
         amount={`$${formatThousandNumber(!address ? 0 : totalAmount ?? 0)}`}
         percentage={totalAmountPercentageChange ?? 0}
       />
 
       <TransactionCard
         type="distributions"
+        isWalletConnected={!!address}
         title="Total Distribution Made"
         amount={formatThousandNumber(!address ? 0 : totalDistributions ?? 0)}
         percentage={totalDistributionsPercentageChange ?? 0}
@@ -50,6 +51,7 @@ const TransactionCards = () => {
       <TransactionCard
         type="addresses"
         title="Total Address Funded"
+        isWalletConnected={!!address}
         amount={formatThousandNumber(!address ? 0 : totalFundedAddresses ?? 0)}
         percentage={totalFundedAddressesPercentageChange ?? 0}
       />

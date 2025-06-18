@@ -5,7 +5,7 @@ export interface TokenOption {
 }
 
 export interface AppSelectProps {
-  title: string;
+  title?: string;
   placeholder?: string;
   setValue: (value: string) => void;
   options: { label: string; value: string }[];
