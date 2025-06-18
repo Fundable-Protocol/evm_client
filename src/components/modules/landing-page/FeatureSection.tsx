@@ -7,34 +7,34 @@ import Image from "next/image";
 
 const FeatureSection = () => {
   const retroData = {
-    title: "Retroactive Funding",
+    title: "Token Distributions",
     description:
-      "Description: Reward contributors for their past work and achievements, fostering a sense of appreciation and motivating continued contributions.",
+      "Efficiently distribute tokens to multiple recipients in one transaction. Support for both equal and weighted distributions, with transparent fee structures and real-time transaction tracking.",
     link: "#",
     imageSrc: RetroSvg,
-    imageAlt: "Retroactive funding illustration",
-  };
-
-  const quaDraticFund = {
-    title: "Quadratic Funding",
-    description:
-      "Amplify the impact of small contributions, create a more inclusive funding model, and ensure that every voice is heard.",
-    link: "#",
-    imageSrc: QuadraticSvg,
-    imageAlt: "Quadratic funding illustration",
+    imageAlt: "Token distribution illustration",
   };
 
   const streaming = {
     title: "Streaming",
     description:
-      "Streamline your payment workflows with automated solutions for recurring payments, salaries, subscriptions, and more, reducing administrative burdens and minimizing errors.",
+      "Automate continuous crypto payouts—subscriptions, salaries, and more—so you can focus on growth, not transfers.",
     link: "#",
+  };
+
+  const crowdfunding = {
+    title: "Emergency Crowdfunding",
+    description: 
+      "When every second counts, our platform enables rapid fundraising for critical medical expenses and life-threatening emergencies. Connect with compassionate donors ready to help save lives and make a real difference.",
+    link: "#",
+    imageSrc: SolarImg,
+    imageAlt: "Emergency crowdfunding illustration",
   };
 
   const airdrop = {
     title: "AirDrops",
     description:
-      "Effortlessly distribute funds to recipients, with complete transparency, robust security, and real-time tracking.",
+      "Seamlessly distribute tokens to your community with our gas-optimized airdrop tool. Supports customizable distribution rules, and automated eligibility verification—making token distribution campaigns efficient and cost-effective.",
     link: "#",
   };
 
@@ -46,10 +46,9 @@ const FeatureSection = () => {
           Funding Made Easy
         </h1>
         <p className="text-center lg:text-right text-sm md:text-lg tracking-wider lg:leading-[1.875rem]">
-          Fundable: Decentralized funding for retroactive, quadratic,
-          <br className="hidden lg:inline-block" /> and giveaway distributions,
-          streamlining complex <br className="hidden lg:inline-block" />
-          payments.
+        Fundable simplifies crypto-native funding: 
+          <br className="hidden lg:inline-block" />mass token distributions, payment streaming,<br className="hidden lg:inline-block" />
+          crowdfunding, and airdrop payouts, all automated and gas-efficient.
         </p>
       </div>
       <div className="space-y-6">
@@ -58,14 +57,14 @@ const FeatureSection = () => {
           <FeatureCard {...retroData} />
 
           {/* Quadratic Funding */}
+          <FeatureCard {...streaming} />
 
-          <FeatureCard {...quaDraticFund} />
         </div>
 
         <div className="grid lg:grid-cols-[0.7fr_0.3fr] gap-6">
           {/* Streaming */}
 
-          <FeatureCard {...streaming} />
+          <FeatureCard {...crowdfunding} />
 
           {/* Airdrop */}
 

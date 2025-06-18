@@ -3,7 +3,7 @@ import Hero from "@/components/modules/landing-page/Hero";
 import FaqSection from "@/components/modules/landing-page/FaqSection";
 import FeatureSection from "@/components/modules/landing-page/FeatureSection";
 import UtilitySection from "@/components/modules/landing-page/UtilitySection";
-import BlogSection from "@/components/modules/landing-page/BlogSection";
+// import BlogSection from "@/components/modules/landing-page/BlogSection";
 import Footer from "@/components/organisms/Footer";
 
 export default function Home() {
@@ -15,7 +15,7 @@ export default function Home() {
         <FeatureSection />
         <UtilitySection />
         <FaqSection />
-        <BlogSection />
+        {/* <BlogSection /> */}
         <Footer />
       </div>
     </main>
