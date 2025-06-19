@@ -27,6 +27,7 @@
     "@starknet-react/core": "^3.7.2",
     "@tanstack/react-query": "^5.80.6",
     "@tanstack/react-table": "^8.21.3",
+    "@vercel/analytics": "^1.5.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "currency.js": "^2.0.4",
