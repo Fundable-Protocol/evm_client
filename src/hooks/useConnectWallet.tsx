@@ -8,6 +8,7 @@ import {
 import SecureLS from "secure-ls";
 import { setWallet } from "@/store/walletEntity";
 import { useEffect, useCallback, useRef, useState } from "react";
+import { saveWalletAction } from "@/app/actions/saveWalletActions";
 
 export function useConnectWallet() {
   const { address } = useAccount();
@@ -53,6 +54,10 @@ export function useConnectWallet() {
 
   // Move the success handler to useEffect to avoid re-renders
   useEffect(() => {
+    const saveWallet = async () => {
+      await saveWalletAction({ walletAddress: address as string });
+    };
+
     if (address) {
       setWallet({ isConnected: true, address });
 
@@ -61,6 +66,8 @@ export function useConnectWallet() {
       lsRef.current?.set("aktInfo", newInfo);
 
       setIsPrevConnected(true);
+
+      saveWallet();
     } else {
       // Only reset isPrevConnected to false if user was NOT previously connected
 
@@ -81,7 +88,7 @@ export function useConnectWallet() {
 
   const { starknetkitConnectModal } = useStarknetkitConnectModal({
     connectors: connectors as StarknetkitConnector[],
-    modalTheme: "dark",
+    modalTheme: "system",
   });
 
   // Use useCallback to memoize functions
@@ -99,9 +106,9 @@ export function useConnectWallet() {
       }
 
       await connectAsync({ connector: connector as Connector });
+
       setWallet({
         isConnected: true,
-        address: "",
       });
     } catch {}
   }, [starknetkitConnectModal, connectAsync]);
