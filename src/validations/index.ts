@@ -1,7 +1,15 @@
 import { createEmptyRow } from "@/lib/utills";
 import { IDistributionData } from "@/types/distribution";
+
+import { z } from "zod";
 import { parseUnits } from "ethers";
 import { validateAndParseAddress } from "starknet";
+
+export const saveWalletPolicy = z.object({
+  walletAddress: z.string().regex(/^0x[a-fA-F0-9]{64}$/, {
+    message: "Invalid wallet address format.",
+  }),
+});
 
 export const isValidStarknetAddress = (address: string): boolean => {
   try {
