@@ -24,8 +24,8 @@ import Link from "next/link";
 // Menu items.
 const items = [
   {
-    title: "Dashboard",
-    url: "/admin",
+    title: "Overview",
+    url: "/dashboard",
     icon: MenuSvg,
     attribute: "dashboard",
   },
@@ -81,7 +81,7 @@ export function AppSidebar() {
             />
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="mt-6 ">
+            <SidebarMenu className="mt-6">
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton

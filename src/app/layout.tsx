@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Bricolage_Grotesque } from "next/font/google";
+import { Analytics } from '@vercel/analytics/next';
 
 import "./globals.css";
 import AppProvider from "../providers/app-provider";
@@ -33,6 +34,7 @@ export default function RootLayout({
         className={`${bricolageGrotesque.variable} ${geistSans.variable} ${geistMono.variable} ${inter.className} ${syneSans.variable} ${urbanistFont.variable} antialiased bg-black overflow-hidden`}
       >
         <AppProvider>{children}</AppProvider>
+        <Analytics />
       </body>
     </html>
   );

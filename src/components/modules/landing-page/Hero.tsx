@@ -1,26 +1,33 @@
 import Image from "next/image";
-import Link from "next/link";
 
 import Marquee from "@/components/molecules/Marquee";
-import { Button } from "@/components/ui/button";
 
 import FundableHero from "../../../../public/svgs/fundableHero.svg";
-import FundableText from "../../../../public/svgs/hero-slide.svg";
+import { TextHoverEffect } from "@/components/ui/text-hover-effect";
+import { ContainerTextFlip } from "@/components/ui/container-text-flip";
 
 const Hero = () => {
+  const words = ["Grants", "Salaries", "Airdrops", "Subscriptions", "More..."];
+
   return (
     <header className="text-center container">
-      <Image src={FundableText} alt="Fundable text" className="ml-3" />
+      <div className="hidden md:inline-block h-[4rem]">
+        <TextHoverEffect text="FUNDABLE" />
+      </div>
 
-      <h1 className="font-syne text-5xl md:leading-[6rem] md:text-8xl font-bold">
-        Refining automated <br /> payments in web3
+      <h1 className="font-syne text-3xl md:leading-[6rem] md:text-8xl font-bold">
+        Refining Automated <br /> Payments in Web3
       </h1>
-      <p className="font-inter md:text-xl my-4 tracking-wide">
-        One stop solution for subscriptions, giveaways, salaries, SIPs and more
-        automated <br /> payments in web3.
-      </p>
-      <div className="flex flex-col justify-center items-center relative">
-        <div className="absolute space-x-4 md:space-x-8 md:top-40">
+      <div className="mt-4 md:flex md:items-center md:justify-center md:gap-x-2">
+        <p className="font-inter md:text-xl tracking-wide mb-2 md:mb-0">
+          Your one stop web3 <br className="md:hidden" />
+          distribution solution for
+        </p>
+        {/* <br className="inline md:hidden" /> */}
+        <ContainerTextFlip words={words} />
+      </div>
+      <div className="flex flex-col justify-center items-center relative mt-8">
+        {/* <div className="absolute space-x-4 md:space-x-8 md:top-40">
           <Link href="#" className="z-10">
             <Button
               className="bg-fundable-deep-purple hover:bg-fundable-purple"
@@ -39,7 +46,7 @@ const Hero = () => {
               Discover More
             </Button>
           </Link>
-        </div>
+        </div> */}
 
         <Image src={FundableHero} alt="Fundable hero image" priority />
 

@@ -3,43 +3,42 @@
 import Link from "next/link";
 import Image from "next/image";
 
+import { useRouter } from "next/navigation";
+
 import FundableLogo from "../../../public/svgs/fundable_logo.svg";
 
-import MenuButton from "../atoms/MenuButton";
-import ConnectWalletButton from "../atoms/ConnectWalletButton";
 import useMenuAnimation from "../../hooks/useAnimationHook";
+import GradientButton from "../atoms/GradientButton";
+import MenuButton from "../atoms/MenuButton";
+import { isMobileDevice } from "@/lib/utills";
 
 const links = [
-  { name: "Resources", href: "#" },
+  { name: "Blog", href: "#" },
   { name: "About", href: "#" },
   { name: "Contact", href: "#" },
 ];
 
 const Navbar = () => {
+  const router = useRouter();
+
   const { toggleMenu, navScope, topLineScope, bottomLineScope } =
     useMenuAnimation();
 
+  const routeToAdmin = () => {
+    router.push("/dashboard");
+
+    if (isMobileDevice()) toggleMenu();
+  };
+
   return (
     <nav className="container">
-      <div className="flex justify-between items-center container !max-w-full  py-6 font-geist-sans border-b border-fundable-dark">
+      <div className="flex justify-between items-center container !max-w-full  py-2 font-geist-sans border-b border-fundable-dark">
         <Image
           src={FundableLogo}
           alt="logo"
           className="w-28 md:w-24 z-20"
           priority
         />
-
-        <div className="hidden md:flex flex-grow justify-center gap-x-14 text-white">
-          {links.map((link) => (
-            <Link
-              href={link.href}
-              key={link.name}
-              className="hover:text-fundable-purple"
-            >
-              {link.name}
-            </Link>
-          ))}
-        </div>
 
         <div className="flex items-center z-20">
           <MenuButton
@@ -49,7 +48,7 @@ const Navbar = () => {
           />
 
           <div className="hidden md:inline-flex">
-            <ConnectWalletButton type="desktop" />
+            <GradientButton type="desktop" onClick={routeToAdmin} />
           </div>
         </div>
       </div>
@@ -61,7 +60,7 @@ const Navbar = () => {
         ref={navScope}
       >
         <div className="pt-28 pb-5 container !max-w-full">
-          <ConnectWalletButton onClick={toggleMenu} />
+          <GradientButton onClick={routeToAdmin} />
         </div>
 
         <div className="flex flex-col text-white">

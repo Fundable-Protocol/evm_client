@@ -1,6 +1,6 @@
 import Image, { StaticImageData } from "next/image";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utills";
 
 export interface UtilityDivProps {
   title: string;

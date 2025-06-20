@@ -1,8 +1,10 @@
 import Navbar from "@/components/organisms/Navbar";
 import Hero from "@/components/modules/landing-page/Hero";
+import FaqSection from "@/components/modules/landing-page/FaqSection";
 import FeatureSection from "@/components/modules/landing-page/FeatureSection";
 import UtilitySection from "@/components/modules/landing-page/UtilitySection";
-import FaqSection from "@/components/modules/landing-page/FaqSection";
+// import BlogSection from "@/components/modules/landing-page/BlogSection";
+import Footer from "@/components/organisms/Footer";
 
 export default function Home() {
   return (
@@ -13,6 +15,8 @@ export default function Home() {
         <FeatureSection />
         <UtilitySection />
         <FaqSection />
+        {/* <BlogSection /> */}
+        <Footer />
       </div>
     </main>
   );

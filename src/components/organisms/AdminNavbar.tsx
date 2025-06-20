@@ -1,82 +1,68 @@
-import Link from "next/link";
+"use client";
+
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 
-import FundableLogo from "../../../public/svgs/fundable_logo.svg";
+import ConnectStarknetkitModal from "@/components/atoms/ConnectStarknetkitModal";
+import AvaTar from "../../../public/svgs/avatar.svg";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import NotificationIcon from "@/components/svgs/NotificationIcon";
 
-// import MenuButton from "../atoms/MenuButton";
-// import ConnectWalletButton from "../atoms/ConnectWalletButton";
-// import useMenuAnimation from "../../hooks/useAnimationHook";
+import { sliceAddress } from "@/lib/utills";
+import { useMount } from "@/hooks/useMount";
+import SkeletonNavbar from "@/components/organisms/NavbarLoader";
+import NetworkIndicator from "@/components/molecules/NetworkIndicator";
 
-const links = [
-  { name: "Resources", href: "#" },
-  { name: "About", href: "#" },
-  { name: "Contact", href: "#" },
-];
+import { useConnectWallet } from "@/hooks/useConnectWallet";
 
-const Navbar = () => {
-  // const { toggleMenu, navScope, topLineScope, bottomLineScope } =
-  //   useMenuAnimation();
+const AdminNavbar = () => {
+  const isMounted = useMount();
+  const pathname = usePathname();
+
+  const { isConnected, address, isPrevConnected } = useConnectWallet();
+
+  const currentPath = pathname?.slice(1);
+
+  const connectAddress = address
+    ? sliceAddress(address as string)
+    : "Connecting";
+
+  if (!isMounted || (isPrevConnected && !isConnected)) {
+    return <SkeletonNavbar />;
+  }
 
   return (
-    <nav>
-      <div className="flex justify-between items-center container !max-w-full bg-black py-6">
-        <Image
-          src={FundableLogo}
-          alt="logo"
-          className="w-28 md:w-24 z-10"
-          priority
-        />
+    <nav className="py-3 px-3 md:px-5 flex justify-between items-center border-b border-b-fundable-mid-dark text-white">
+      <span className="flex items-center gap-x-2">
+        <SidebarTrigger />
+        <h2 className="hidden lg:block font-medium md:text-2xl font-bricolage capitalize">
+          {currentPath}
+        </h2>
+      </span>
+      <div className="flex items-center gap-x-4">
+        <NetworkIndicator isConnected={isConnected!} />
+        <span className="size-12 hidden md:grid place-content-center rounded-full bg-fundable-mid-dark">
+          <NotificationIcon />
+        </span>
 
-        <div className="hidden md:flex flex-grow justify-center gap-x-14 text-white">
-          {links.map((link) => (
-            <Link
-              href={link.href}
-              key={link.name}
-              className="hover:text-blue-200"
-            >
-              {link.name}
-            </Link>
-          ))}
-        </div>
-
-        <div className="flex items-center z-10">
-          {/* <MenuButton
-            onClick={toggleMenu}
-            topLineRef={topLineScope}
-            bottomLineRef={bottomLineScope}
-          /> */}
-
-          {/* <div className="hidden md:inline-flex">
-            <ConnectWalletButton type="desktop" />
-          </div> */}
-        </div>
+        {isConnected ? (
+          <div className="bg-gradient-to-r from-blue-500 via-purple-800 to-pink-500 rounded-sm px-2 md:px-3 py-1 md:py-2 text-sm font-medium flex gap-x-2 font-bricolage">
+            <Image
+              src={AvaTar}
+              alt="Avatar"
+              width={50}
+              height={50}
+              className="w-auto"
+              priority
+            />
+            {connectAddress}
+          </div>
+        ) : (
+          <ConnectStarknetkitModal />
+        )}
       </div>
-
-      {/* Mobile Nav*/}
-
-      {/* <div
-        className="fixed top-0 left-0 w-full h-0 overflow-hidden bg-black md:hidden"
-        ref={navScope}
-      >
-        <div className="pt-28 pb-5 container !max-w-full">
-          <ConnectWalletButton onClick={toggleMenu} />
-        </div>
-
-        <div className="flex flex-col text-white">
-          {links.map((link) => (
-            <Link
-              href={link.href}
-              key={link.name}
-              className="hover:text-blue-200 text-2xl py-6 container !max-w-full border-t last:border-b border-stone-800"
-              onClick={toggleMenu}
-            >
-              {link.name}
-            </Link>
-          ))}
-        </div>
-      </div> */}
     </nav>
   );
 };
 
-export default Navbar;
+export default AdminNavbar;

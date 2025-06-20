@@ -1,21 +1,15 @@
 "use client";
 
-import { sepolia, mainnet } from "@starknet-react/chains";
 import { StarknetConfig, publicProvider, voyager } from "@starknet-react/core";
+import { sepolia, mainnet } from "@starknet-react/chains";
+import { getAvailableConnectors } from "@/lib/connectors";
 
-import { InjectedConnector } from "starknetkit/injected";
-import { WebWalletConnector } from "starknetkit/webwallet";
+// import { RpcProvider, constants } from "starknet";
 
 export function StarknetProvider({ children }: { children: React.ReactNode }) {
-  const connectors = [
-    new InjectedConnector({ options: { id: "braavos", name: "Braavos" } }),
-    new InjectedConnector({ options: { id: "argentX", name: "Argent X" } }),
-    new InjectedConnector({ options: { id: "keplr", name: "Keplr" } }),
-    new InjectedConnector({ options: { id: "metamask", name: "MetaMask" } }),
-    new InjectedConnector({ options: { id: "okxwallet", name: "OKX" } }),
-    new InjectedConnector({ options: { id: "fordefi", name: "Fordefi" } }),
-    new WebWalletConnector({ url: "https://web.argent.xyz" }),
-  ];
+  const connectors = getAvailableConnectors();
+
+  if (connectors.length === 0) return null; // or a loader
 
   return (
     <StarknetConfig

@@ -14,9 +14,14 @@
   /* Fundable Colors Inline */
 
   --color-fundable-dark: var(--fundable-dark);
+  --color-fundable-mid-dark: var(--fundable-mid-dark);
+  --color-fundable-grey: var(--fundable-grey);
+  --color-fundable-mid-grey: var(--fundable-mid-grey);
   --color-fundable-violet: var(--fundable-violet);
   --color-fundable-purple: var(--fundable-purple);
+  --color-fundable-purple-2: var(--fundable-purple-2);
   --color-fundable-deep-purple: var(--fundable-deep-purple);
+  --color-fundable-white: #c9ccd2;
 
   --color-fundable-deep-purple-light: color-mix(
     in oklab,
@@ -95,7 +100,11 @@
   /* Fundable Colors */
 
   --fundable-dark: #0d0019;
+  --fundable-mid-dark: #151617;
+  --fundable-grey: #4a4949;
+  --fundable-mid-grey: #252939;
   --fundable-purple: #b102cd;
+  --fundable-purple-2: #8256ff;
   --fundable-violet: #5b21b6;
   --fundable-deep-purple: #440495;
 
@@ -124,11 +133,11 @@
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
+  --sidebar: transparent;
   --sidebar-foreground: oklch(0.141 0.005 285.823);
-  --sidebar-primary: oklch(0.21 0.006 285.885);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.967 0.001 286.375);
+  --sidebar-primary: #000;
+  --sidebar-primary-foreground: #000;
+  --sidebar-accent: #8256ff;
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
@@ -199,16 +208,16 @@
 
   .bg-fundable-gradient {
     background: linear-gradient(
-      95deg,
+      85deg,
       var(--fundable-deep-purple) 30%,
-      var(--fundable-purple) 100%,
-      var(--fundable-violet) 40%
+      var(--fundable-deep-purple) 100%,
+      var(--fundable-deep-purple) 40%
     );
   }
 
   .bg-fundable-gradient:hover {
     background: linear-gradient(
-      95deg,
+      50deg,
       var(--color-fundable-deep-purple-light) 30%,
       var(--color-fundable-purple-light) 100%,
       var(--color-fundable-violet-light) 40%
@@ -227,5 +236,48 @@
   .fundable-text {
     -webkit-text-fill-color: transparent;
     -webkit-text-stroke-width: 0.1px;
+  }
+
+  .faq-trigger {
+    @apply bg-transparent font-semibold w-fit rounded-full focus:ring-2 focus:ring-fundable-violet;
+  }
+
+  .faq-wrapper {
+    @apply relative inline-flex h-10 overflow-hidden rounded-full p-[2px];
+  }
+
+  .faq-top-grad {
+    @apply absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#b102cd_0%,#5b21b6_50%,#b102cd_100%)];
+  }
+
+  .faq-bottom-grad {
+    @apply inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-950 px-3 py-0.5 text-sm font-medium text-fundable-white backdrop-blur-3xl;
+  }
+
+  .btn-wrapper {
+    @apply relative inline-flex overflow-hidden rounded-full p-[2.5px] h-[2.55rem];
+  }
+
+  .btn-grad {
+    @apply absolute inset-[-1000%] animate-[spin_5s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#440495_30%,#b102cd_50%,#5b21b6_100%)] -z-10;
+  }
+
+  .btn-bottom-grad {
+    @apply inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-black px-3 py-0.5 text-sm font-medium text-fundable-white backdrop-blur-3xl hover:bg-slate-700;
+  }
+}
+
+@layer utilities {
+  .border-dash-wide {
+    border-style: dashed;
+    border-width: 2px;
+    border-image: repeating-linear-gradient(
+        90deg,
+        #ccc 0,
+        #ccc 12px,
+        transparent 12px,
+        transparent 24px
+      )
+      10;
   }
 }
