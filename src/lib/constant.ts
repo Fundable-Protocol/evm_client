@@ -59,6 +59,8 @@ export const transactionCardTypes = [
 
 export const supportedTokenSymbol = ["STRK", "USDT", "USDC", "ETH"] as const;
 
+export const supportedChainName = ["Starknet", "Ethereum"] as const;
+
 export const featureCardImgTypes = ["airdrop", "stream"] as const;
 
 export const apiSecretKey = process.env.API_SECRET_KEY || "";

@@ -36,6 +36,7 @@ import { createDistributionAction } from "@/app/actions/distributionActions";
 import DistributionConfirmationModal from "@/components/modules/distribution/DistributionConfirmationModal";
 import { getBalance, waitForCallsStatus } from "@wagmi/core";
 import { config } from "@/config";
+import { fetchProtocolFee } from "@/lib/api";
 
 const DistributePage = () => {
   const { address, chain } = useAccount();
@@ -164,7 +165,13 @@ const DistributePage = () => {
       //   throw new Error(protocolFeeMessage);
       // }
 
-      const protocolFeePercentage = 2500;
+      const {
+        // message: protocolFeeMessage,
+        // success: protocolFeeSuccess,
+        data: protocolFeePercentage,
+      } = await fetchProtocolFee(isMainNet ? "mainnet" : "testnet", "Starknet");
+
+      // const protocolFeePercentage = 2500;
 
       const { totalAmountString, amounts, protocolFee, totalAmount } =
         calculateTotalDistributionAmount(
