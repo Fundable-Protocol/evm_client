@@ -50,6 +50,7 @@ const DistributePage = () => {
   const router = useRouter();
   // const { chain } = useNetwork();
   const isMainNet = chain?.name === "Ethereum";
+  console.log("Chain name", chain?.name);
   console.log("isMainNet", isMainNet);
 
   // const isMainNet = chain.network === "mainnet";
