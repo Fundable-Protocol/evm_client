@@ -49,7 +49,8 @@ const DistributePage = () => {
 
   const router = useRouter();
   // const { chain } = useNetwork();
-  const isMainNet = chain?.name === "base-mainnet";
+  const isMainNet = chain?.name === "Ethereum";
+  console.log("isMainNet", isMainNet);
 
   // const isMainNet = chain.network === "mainnet";
 
@@ -170,6 +171,8 @@ const DistributePage = () => {
         // success: protocolFeeSuccess,
         data: protocolFeePercentage,
       } = await fetchProtocolFee(isMainNet ? "mainnet" : "testnet", "Starknet");
+
+      console.log("protocolFeePercentage", protocolFeePercentage);
 
       // const protocolFeePercentage = 2500;
 
@@ -377,6 +380,7 @@ const DistributePage = () => {
         toast.error(error.message);
       } else {
         toast.error("Distribution failed, please try again.");
+        toast.dismiss();
       }
     } finally {
       setDistributionState((prev) => ({
