@@ -34,7 +34,7 @@ import { ErrorWithCode } from "@/types";
 // import { useStarkNameResolver } from "@/hooks/useStarkNameResolver";
 import { createDistributionAction } from "@/app/actions/distributionActions";
 import DistributionConfirmationModal from "@/components/modules/distribution/DistributionConfirmationModal";
-import { waitForCallsStatus } from "@wagmi/core";
+import { getBalance, waitForCallsStatus } from "@wagmi/core";
 import { config } from "@/config";
 
 const DistributePage = () => {
@@ -226,6 +226,17 @@ const DistributePage = () => {
 
       const totalAmountWithFee = totalAmount! + protocolFee!;
 
+      const userDetails = await getBalance(config, {
+        address: address!,
+        token: selectedToken.address as `0x${string}`,
+      });
+
+      const userBalance = userDetails.value;
+
+      if (userBalance < totalAmountWithFee) {
+        throw new Error("Insufficient balance");
+      }
+
       const approveCall = {
         to: selectedToken.address as `0x${string}`,
         data: encodeFunctionData({
@@ -278,6 +289,12 @@ const DistributePage = () => {
       id: result?.id,
       pollingInterval: 1000,
      });
+
+     const transactionHash = receipts?.[0]?.transactionHash;
+
+     if (!transactionHash) {
+      throw new Error("Transaction failed, check Onchain History for more details");
+     }
     //  console.log("callReceipts", callReceipts);
 
       // Wait for transaction to be mined and successful
@@ -297,11 +314,9 @@ const DistributePage = () => {
         }, 0)
         .toString();
 
-      console.log("baseAmount", baseAmount);
-
       const distribution = {
         status: "COMPLETED",
-        transaction_hash: receipts?.[0]?.transactionHash,
+        transaction_hash: transactionHash,
         user_address: address!,
         total_amount: baseAmount,
         token_symbol: selectedToken.symbol,
@@ -350,8 +365,12 @@ const DistributePage = () => {
       );
 
       router.push(`/history`);
-    } catch {
-      toast.error("Distribution failed, please try again.");
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Distribution failed, please try again.");
+      }
     } finally {
       setDistributionState((prev) => ({
         ...prev,
