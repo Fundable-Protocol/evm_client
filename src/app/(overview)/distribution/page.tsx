@@ -46,12 +46,13 @@ const DistributePage = () => {
   //   pollingInterval: 1000,
   // });
   // console.log("callReceipts", callReceipts);
+  const chainNames = ["base", "ethereum"];
 
   const router = useRouter();
   // const { chain } = useNetwork();
-  const isMainNet = chain?.name === "Ethereum";
-  console.log("Chain name", chain?.name);
-  console.log("isMainNet", isMainNet);
+  const isMainNet = chainNames.includes(chain?.name?.toLowerCase() || "");
+  // console.log("Chain name", chain?.name);
+  // console.log("isMainNet", isMainNet);
 
   // const isMainNet = chain.network === "mainnet";
 
