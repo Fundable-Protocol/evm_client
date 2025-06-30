@@ -1,19 +1,22 @@
 "use client";
 
 import { cairo } from "starknet";
+import currency from "currency.js";
 import toast from "react-hot-toast";
 import type { Call } from "starknet";
-import React, { useState } from "react";
+import { useEntity } from "simpler-state";
 import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
 import { useAccount, useNetwork } from "@starknet-react/core";
+import { resendDistributionPayload } from "@/store/distributionEntity";
 
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import DistributionFileUpload from "@/components/modules/distribution/DistributionFileUpload";
 import DistributionTable from "@/components/modules/distribution/DistributionTable";
 import {
+  IDistributionInfo,
   IDistributionData,
   IDistributionState,
-  IDistributionInfo,
 } from "@/types/distribution";
 import DistributionSelector from "@/components/modules/distribution/DistributionSelector";
 
@@ -22,6 +25,7 @@ import {
   createEmptyRow,
   getContractAddress,
   getSupportedTokens,
+  generateRandomUUID,
   calculateTotalDistributionAmount,
 } from "@/lib/utills";
 
@@ -31,13 +35,13 @@ import {
   checkDistributionDataValidity,
   validateIndividualDistributions,
 } from "@/validations/distribution";
+
 import { ErrorWithCode } from "@/types";
 import { fetchProtocolFee } from "@/lib/api";
 import { fetchTokenPrices } from "@/services/apiServices";
 import { useStarkNameResolver } from "@/hooks/useStarkNameResolver";
 import { createDistributionAction } from "@/app/actions/distributionActions";
 import DistributionConfirmationModal from "@/components/modules/distribution/DistributionConfirmationModal";
-import currency from "currency.js";
 
 const DistributePage = () => {
   const { account, address } = useAccount();
@@ -80,6 +84,34 @@ const DistributePage = () => {
 
   // Derive current contract address and supported tokens based on network
   const CONTRACT_ADDRESS = getContractAddress(isMainNet);
+
+  // Pre-fill logic for resend
+  const resendPayload = useEntity(resendDistributionPayload);
+
+  useEffect(() => {
+    if (resendPayload) {
+      // Map payload to distributionInfo and distributionData
+      setDistributionInfo((prev) => ({
+        ...prev,
+        type: resendPayload.distribution_type?.toLowerCase() as typeof distributionInfo.type,
+        selectedToken: resendPayload.token_symbol,
+        amount: Number(resendPayload.total_amount || 0),
+        showLabel: !!resendPayload.recipients?.[0]?.label,
+      }));
+
+      setDistributionData(
+        resendPayload.recipients?.map((r) => ({
+          id: generateRandomUUID(),
+          address: r.address,
+          amount: r.amount,
+          label: r?.label || "",
+        })) || []
+      );
+      // Clear payload after use
+      resendDistributionPayload.set(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resendPayload]);
 
   const handleDistribution = async () => {
     try {

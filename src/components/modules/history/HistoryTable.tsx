@@ -79,7 +79,6 @@ function HistoryTable<TData, TValue>({
         pageIndex: page - 1,
         pageSize: limit,
       },
-      // pagination,
     },
     onPaginationChange: handlePaginationChange,
     manualPagination: true,
