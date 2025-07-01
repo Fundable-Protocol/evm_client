@@ -118,6 +118,10 @@ export function generateUUID() {
   return crypto.randomUUID();
 }
 
+export function generateRandomUUID() {
+  return Math.random().toString(36).slice(2);
+}
+
 export const generateKey = crypto.randomBytes(32).toString("hex");
 
 export const formatThousandNumber = (number: number) => {

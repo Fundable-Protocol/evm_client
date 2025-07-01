@@ -23,10 +23,10 @@ const TransactionCards = () => {
 
   const {
     totalAmount,
-    totalAmountPercentageChange,
     totalDistributions,
-    totalDistributionsPercentageChange,
     totalFundedAddresses,
+    totalAmountPercentageChange,
+    totalDistributionsPercentageChange,
     totalFundedAddressesPercentageChange,
   } = totalDistributionAmount ?? {};
 
