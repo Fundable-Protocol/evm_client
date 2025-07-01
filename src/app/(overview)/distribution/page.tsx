@@ -374,6 +374,8 @@ const DistributePage = () => {
         createDistributionAction(distribution)
       );
 
+      toast.dismiss();
+
       if (!success) {
         toast.error(error?.message || "Something went wrong");
         return;
@@ -388,8 +390,6 @@ const DistributePage = () => {
         }));
       }
 
-      toast.dismiss();
-
       toast.success(
         `Successfully distributed tokens to ${recipients.length} addresses`,
         { duration: 800 }
@@ -397,6 +397,7 @@ const DistributePage = () => {
 
       router.push(`/history`);
     } catch {
+      toast.dismiss();
       toast.error("Distribution failed, please try again.");
     } finally {
       setDistributionState((prev) => ({
