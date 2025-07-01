@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { MoreHorizontal, FileDown, Eye, ExternalLink } from "lucide-react";
+import {
+  MoreHorizontal,
+  FileDown,
+  Eye,
+  ExternalLink,
+  Send,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import {
   getExplorerUrl,
@@ -17,45 +24,62 @@ import {
 import { Button } from "@/components/ui/button";
 import { ActionsCellProps, IAction } from "@/types/history";
 import DistributionDetailsModal from "./DistributionDetailsModal";
-
-const actions: IAction[] = [
-  {
-    label: "View Details",
-    icon: Eye,
-    onClick: () => {},
-  },
-  {
-    label: "Export as PDF",
-    icon: FileDown,
-    onClick: (distribution: ActionsCellProps["distribution"]) =>
-      generateDistributionPDF(distribution),
-  },
-  {
-    label: "Export as CSV",
-    icon: FileDown,
-    onClick: (distribution: ActionsCellProps["distribution"]) =>
-      generateDistributionCSV(distribution),
-  },
-  {
-    label: "View on Explorer",
-    icon: ExternalLink,
-    onClick: (distribution: ActionsCellProps["distribution"]) => {
-      const url = getExplorerUrl(distribution);
-      if (url) window.open(url, "_blank");
-    },
-  },
-];
+import { resendDistributionPayload } from "@/store/distributionEntity";
 
 const ActionsCell = ({ distribution }: ActionsCellProps) => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const router = useRouter();
 
   const handleViewDetails = () => {
     setIsDetailsModalOpen((prev) => !prev);
   };
 
+  const handleResendDistribution = () => {
+    resendDistributionPayload.set(distribution);
+    router.push("/distribution");
+  };
+
+  const actions: IAction[] = [
+    {
+      label: "View Details",
+      icon: Eye,
+      onClick: () => {},
+    },
+    {
+      label: "Export as PDF",
+      icon: FileDown,
+      onClick: (distribution: ActionsCellProps["distribution"]) =>
+        generateDistributionPDF(distribution),
+    },
+    {
+      label: "Export as CSV",
+      icon: FileDown,
+      onClick: (distribution: ActionsCellProps["distribution"]) =>
+        generateDistributionCSV(distribution),
+    },
+    {
+      label: "View on Explorer",
+      icon: ExternalLink,
+      onClick: (distribution: ActionsCellProps["distribution"]) => {
+        const url = getExplorerUrl(distribution);
+        if (url) window.open(url, "_blank");
+      },
+    },
+    {
+      label: "Resend Distribution",
+      icon: Send,
+      onClick: handleResendDistribution,
+    },
+  ];
+
   const handleActionClick = (action: IAction) => {
-    if (action.label === "View Details") handleViewDetails();
-    else action.onClick(distribution);
+    if (action.label === "View Details") {
+      handleViewDetails();
+    } else if (action.label === "Resend Distribution") {
+      handleResendDistribution();
+    } else {
+      action.onClick(distribution);
+    }
   };
 
   return (
