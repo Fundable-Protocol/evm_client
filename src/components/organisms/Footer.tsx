@@ -4,10 +4,10 @@ import Image from "next/image";
 import FundableLogo from "../../../public/svgs/fundable_logo.svg";
 import { FaqGradientButton } from "../modules/landing-page/FaqAccordionSection";
 
-const links = [
-  { name: "For Developers", href: "#" },
-  { name: "Blog", href: "#" },
-];
+// const links = [
+//   { name: "For Developers", href: "#" },
+//   { name: "Blog", href: "#" },
+// ];
 
 const socialLinks = [
   { name: "X", href: "https://x.com/FundableHQ" },
@@ -28,7 +28,7 @@ const Footer = () => {
           />
 
           <div className="flex flex-col gap-y-14">
-            <div className="flex flex-col font-medium">
+            {/* <div className="flex flex-col font-medium">
               {links.map((link) => (
                 <Link
                   key={`footer-index-${link.name}`}
@@ -38,15 +38,12 @@ const Footer = () => {
                   {link.name}
                 </Link>
               ))}
-            </div>
+            </div> */}
             <div className="flex flex-col">
               <h4 className="mb-2 text-gray-400 font-semibold text-sm">
                 CONTACT US
               </h4>
-              <span className="text-sm font-medium mb-0.5">
-                +23470-18771795
-              </span>
-              <span className="text-sm font-medium">info@fundable.finance</span>
+              <span className="text-sm font-medium">admin@fundable.finance</span>
             </div>
           </div>
         </div>
@@ -65,7 +62,7 @@ const Footer = () => {
             ))}
           </div>
 
-          <h4 className="text-gray-400 font-semibold text-sm">
+          <h4 className="text-gray-400 font-semibold text-sm mt-4">
             © {new Date().getFullYear()} — Copyright
           </h4>
         </div>
@@ -81,7 +78,7 @@ const Footer = () => {
             className="w-28 md:w-24"
             priority
           />
-          <div className="flex gap-x-4">
+          {/* <div className="flex gap-x-4">
             {links.map((link) => (
               <Link
                 key={`footer-index-${link.name}`}
@@ -91,7 +88,7 @@ const Footer = () => {
                 {link.name}
               </Link>
             ))}
-          </div>
+          </div> */}
         </div>
 
         <h4 className="text-gray-400 text-right mt-4">

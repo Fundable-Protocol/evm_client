@@ -1,8 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { MoreHorizontal, FileDown, Eye, ExternalLink } from "lucide-react";
-import { useAccount } from "wagmi";
+import {
+  MoreHorizontal,
+  FileDown,
+  Eye,
+  ExternalLink,
+  Send,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import {
   getExplorerUrl,
@@ -18,15 +24,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { ActionsCellProps, IAction } from "@/types/history";
 import DistributionDetailsModal from "./DistributionDetailsModal";
+import { resendDistributionPayload } from "@/store/distributionEntity";
 
 const ActionsCell = ({ distribution }: ActionsCellProps) => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const { chain } = useAccount();
+  const router = useRouter();
 
-  // Safely get the explorer URL from the chain object
-  const explorerUrl = chain?.blockExplorers?.default?.url
-    ? chain.blockExplorers.default.url
-    : undefined;
+  const handleViewDetails = () => {
+    setIsDetailsModalOpen((prev) => !prev);
+  };
+
+  const handleResendDistribution = () => {
+    resendDistributionPayload.set(distribution);
+    router.push("/distribution");
+  };
 
   const actions: IAction[] = [
     {
@@ -50,20 +61,25 @@ const ActionsCell = ({ distribution }: ActionsCellProps) => {
       label: "View on Explorer",
       icon: ExternalLink,
       onClick: (distribution: ActionsCellProps["distribution"]) => {
-        if (!explorerUrl) return;
-        const url = getExplorerUrl(distribution, explorerUrl);
+        const url = getExplorerUrl(distribution);
         if (url) window.open(url, "_blank");
       },
     },
+    {
+      label: "Resend Distribution",
+      icon: Send,
+      onClick: handleResendDistribution,
+    },
   ];
 
-  const handleViewDetails = () => {
-    setIsDetailsModalOpen((prev) => !prev);
-  };
-
   const handleActionClick = (action: IAction) => {
-    if (action.label === "View Details") handleViewDetails();
-    else action.onClick(distribution);
+    if (action.label === "View Details") {
+      handleViewDetails();
+    } else if (action.label === "Resend Distribution") {
+      handleResendDistribution();
+    } else {
+      action.onClick(distribution);
+    }
   };
 
   return (

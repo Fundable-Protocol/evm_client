@@ -67,7 +67,7 @@ export const apiService = {
 let priceCache: PriceCache | null = null;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
 
-export const fetchTokenPrices = async (tokenIds: string[]) => {
+export const fetchTokenPrices = async (tokenIds = ["starknet", "ethereum"]) => {
   // In-memory cache for token prices
 
   const now = Date.now();

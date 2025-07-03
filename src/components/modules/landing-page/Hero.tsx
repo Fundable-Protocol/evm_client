@@ -21,7 +21,7 @@ const Hero = () => {
       <div className="mt-4 md:flex md:items-center md:justify-center md:gap-x-2">
         <p className="font-inter md:text-xl tracking-wide mb-2 md:mb-0">
           Your one stop web3 <br className="md:hidden" />
-          automated payment solution for
+          distribution solution for
         </p>
         {/* <br className="inline md:hidden" /> */}
         <ContainerTextFlip words={words} />

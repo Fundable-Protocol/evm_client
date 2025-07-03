@@ -4,16 +4,7 @@
 CREATE TYPE "public"."DistributionStatus" AS ENUM('COMPLETED', 'FAILED', 'PENDING');--> statement-breakpoint
 CREATE TYPE "public"."DistributionType" AS ENUM('EQUAL', 'WEIGHTED');--> statement-breakpoint
 CREATE TYPE "public"."Network" AS ENUM('MAINNET', 'TESTNET');--> statement-breakpoint
-CREATE TABLE "_prisma_migrations" (
-	"id" varchar(36) PRIMARY KEY NOT NULL,
-	"checksum" varchar(64) NOT NULL,
-	"finished_at" timestamp with time zone,
-	"migration_name" varchar(255) NOT NULL,
-	"logs" text,
-	"rolled_back_at" timestamp with time zone,
-	"started_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"applied_steps_count" integer DEFAULT 0 NOT NULL
-);
+
 --> statement-breakpoint
 CREATE TABLE "Wallet" (
 	"id" serial PRIMARY KEY NOT NULL,

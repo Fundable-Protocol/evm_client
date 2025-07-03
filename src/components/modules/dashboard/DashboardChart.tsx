@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/chart";
 import { LineChart, Line, XAxis, YAxis } from "recharts";
 import { useQuery } from "@tanstack/react-query";
-import { useAccount } from "wagmi";
+import { useAccount } from "@starknet-react/core";
 import { ITransactionDataPoint } from "@/types/dashboard";
 import { getChartDataAction } from "@/app/actions/distributionActions";
 import DashboardChartSkeleton from "./DashboardChartSkeleton";
@@ -35,17 +35,16 @@ const chartConfig = {
 function DashboardChart() {
   const { address } = useAccount();
 
-  const { data: transactionData = [], isPending } = useQuery<
+  const { data: transactionData = [], isFetching } = useQuery<
     ITransactionDataPoint[]
   >({
     queryKey: ["transactionChartData", address],
     queryFn: () => getChartDataAction(address!),
     enabled: !!address,
-    refetchInterval: 1000,
     refetchOnWindowFocus: true,
   });
 
-  if (isPending) return <DashboardChartSkeleton />;
+  if (isFetching) return <DashboardChartSkeleton />;
 
   // Calculate min and max values for Y axis
   const allValues = transactionData.flatMap((point: ITransactionDataPoint) => [
