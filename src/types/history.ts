@@ -23,6 +23,9 @@ export interface DataTableProps<TData, TValue> {
   >;
   statusFilter: DistributionAttributes["status"] | "all";
   typeFilter: DistributionAttributes["distribution_type"] | "all";
+  totalCount?: number;
+  page: number;
+  limit: number;
 }
 
 export interface IHistoryQueryParams {

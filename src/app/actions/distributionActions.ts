@@ -133,10 +133,8 @@ export async function getDistributionsAction(params: IHistoryQueryParams) {
     DistributionService.getAllDistributions(params)
   );
 
-  // console.log(data, error, success);
-
   return {
-    data: error ? [] : data?.distributions,
+    data: error ? { distributions: [], total: 0 } : data,
     error: error ? error.message : null,
   };
 }

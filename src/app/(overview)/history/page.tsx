@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useAccount } from "@starknet-react/core";
+import { useAccount } from "wagmi";
 
 import {
   distributionFilterType,

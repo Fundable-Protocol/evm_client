@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/chart";
 import { LineChart, Line, XAxis, YAxis } from "recharts";
 import { useQuery } from "@tanstack/react-query";
-import { useAccount } from "@starknet-react/core";
+import { useAccount } from "wagmi";
 import { ITransactionDataPoint } from "@/types/dashboard";
 import { getChartDataAction } from "@/app/actions/distributionActions";
 import DashboardChartSkeleton from "./DashboardChartSkeleton";

@@ -25,10 +25,17 @@ import { Button } from "@/components/ui/button";
 import { ActionsCellProps, IAction } from "@/types/history";
 import DistributionDetailsModal from "./DistributionDetailsModal";
 import { resendDistributionPayload } from "@/store/distributionEntity";
+import { useAccount } from "wagmi";
 
 const ActionsCell = ({ distribution }: ActionsCellProps) => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const { chain } = useAccount();
   const router = useRouter();
+
+  // Safely get the explorer URL from the chain object
+  const explorerUrl = chain?.blockExplorers?.default?.url
+  ? chain.blockExplorers.default.url
+  : undefined;
 
   const handleViewDetails = () => {
     setIsDetailsModalOpen((prev) => !prev);
@@ -61,7 +68,7 @@ const ActionsCell = ({ distribution }: ActionsCellProps) => {
       label: "View on Explorer",
       icon: ExternalLink,
       onClick: (distribution: ActionsCellProps["distribution"]) => {
-        const url = getExplorerUrl(distribution);
+        const url = getExplorerUrl(distribution, explorerUrl!);
         if (url) window.open(url, "_blank");
       },
     },
