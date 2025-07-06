@@ -19,28 +19,45 @@ export const equalDistributionType = [
   { label: "Calculate Lump Sum", value: "lump_sum" },
 ] as const;
 
-export const MAINNET_SUPPORTED_TOKENS = Object.freeze({
-  USDC: {
-    symbol: "USDC",
-    address:
-      "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-    decimals: 6,
-  }
-}) as Readonly<Record<string, Readonly<TokenOption>>>;
+export const SUPPORTED_TOKENS: Record<
+  string, // network: "mainnet" | "testnet"
+  Record<
+    string, // chain: "ethereum" | "base" | "arbitrum" | etc.
+    Record<string, TokenOption> // token symbol: "USDC", "ETH", etc.
+  >
+> = {
+  mainnet: {
+    ethereum: {
+      USDC: { symbol: "USDC", address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", decimals: 6 },
+      ETH: { symbol: "ETH", address: "0x0000000000000000000000000000000000000000", decimals: 18 },
+    },
+    base: {
+      USDC: { symbol: "USDC", address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", decimals: 6 },
+    },
+    arbitrum: {
+      USDC: { symbol: "USDC", address: "0x0000000000000000000000000000000000000002", decimals: 6 },
+    },
+    "bnb smart chain": {
+      USDC: { symbol: "USDC", address: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d", decimals: 18 },
+    },
+    // ...add more chains as needed
+  },
+  testnet: {
+    ethereum: {
+      USDC: { symbol: "USDC", address: "0x036CbD53842c5426634e7929541eC2318f3dCF7e", decimals: 6 },
+    },
+    base: {
+      USDC: { symbol: "USDC", address: "0x0000000000000000000000000000000000000003", decimals: 6 },
+    },
+    arbitrum: {
+      USDC: { symbol: "USDC", address: "0x0000000000000000000000000000000000000004", decimals: 6 },
+    },
+    // ...add more chains as needed
+  },
+  // ...add more networks as needed
+};
 
-export const TESTNET_SUPPORTED_TOKENS = Object.freeze({
-  USDC: {
-    symbol: "USDC",
-    address:
-      "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
-    decimals: 6,
-  }
-}) as Readonly<Record<string, Readonly<TokenOption>>>;
-
-export const TESTNET_CONTRACT_ADDRESS =
-  "0xaa0939b802060785c541553911caa6781c41f5d5";
-
-export const MAINNET_CONTRACT_ADDRESS =
+export const CONTRACT_ADDRESS =
   "0xaa0939b802060785c541553911caa6781c41f5d5";
 
 export const distributionState = [

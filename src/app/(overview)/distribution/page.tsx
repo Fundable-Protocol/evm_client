@@ -48,17 +48,15 @@ const DistributePage = () => {
   //   pollingInterval: 1000,
   // });
   // console.log("callReceipts", callReceipts);
-  const chainNames = ["base", "ethereum"];
+  const chainNames = ["base", "ethereum", "bnb smart chain", "arbitrum"];
+  const chainName = chain?.name?.toLowerCase() || "";
+  console.log("chainName", chainName);
 
   const router = useRouter();
-  // const { chain } = useNetwork();
-  const isMainNet = chainNames.includes(chain?.name?.toLowerCase() || "");
-  // console.log("Chain name", chain?.name);
-  // console.log("isMainNet", isMainNet);
-
-  // const isMainNet = chain.network === "mainnet";
-
-  const SUPPORTED_TOKENS = getSupportedTokens(isMainNet);
+  const isMainNet = chainNames.includes(chainName);
+  const network = isMainNet ? "mainnet" : "testnet";
+  const SUPPORTED_TOKENS = getSupportedTokens(network, chainName);
+  console.log("SUPPORTED_TOKENS", SUPPORTED_TOKENS);
 
   const supportedTokens = Object.values(SUPPORTED_TOKENS).map((token) => ({
     label: token.symbol,
@@ -91,7 +89,7 @@ const DistributePage = () => {
   const selectedToken = SUPPORTED_TOKENS[distributionInfo.selectedToken];
 
   // Derive current contract address and supported tokens based on network
-  const CONTRACT_ADDRESS = getContractAddress(isMainNet);
+  const CONTRACT_ADDRESS = getContractAddress();
 
   const handleDistribution = async () => {
     try {
@@ -405,10 +403,11 @@ const DistributePage = () => {
       router.push(`/history`);
     } catch (error) {
       if (error instanceof Error) {
+        toast.dismiss();
         toast.error(error.message);
       } else {
-        toast.error("Distribution failed, please try again.");
         toast.dismiss();
+        toast.error("Distribution failed, please try again.");
       }
     } finally {
       setDistributionState((prev) => ({

@@ -5,10 +5,8 @@ import { twMerge } from "tailwind-merge";
 import { clsx, type ClassValue } from "clsx";
 
 import {
-  MAINNET_CONTRACT_ADDRESS,
-  MAINNET_SUPPORTED_TOKENS,
-  TESTNET_CONTRACT_ADDRESS,
-  TESTNET_SUPPORTED_TOKENS,
+  CONTRACT_ADDRESS,
+  SUPPORTED_TOKENS,
 } from "../constant";
 import { IDistributionData } from "@/types/distribution";
 import { isValidAmount } from "@/validations";
@@ -60,11 +58,10 @@ export const createEmptyRow = (data?: IDistributionData): IDistributionData => {
   };
 };
 
-export const getContractAddress = (isMainnet: boolean) =>
-  isMainnet ? MAINNET_CONTRACT_ADDRESS : TESTNET_CONTRACT_ADDRESS;
+export const getContractAddress = () => CONTRACT_ADDRESS;
 
-export const getSupportedTokens = (isMainnet: boolean) =>
-  isMainnet ? MAINNET_SUPPORTED_TOKENS : TESTNET_SUPPORTED_TOKENS;
+export const getSupportedTokens = (network: string, chain: string) =>
+  SUPPORTED_TOKENS[network]?.[chain] || {};
 
 export const validateDistribution = (
   address: string,
