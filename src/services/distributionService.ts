@@ -150,6 +150,7 @@ export class DistributionService {
         status: distributionModel.status,
         created_at: distributionModel.created_at,
         network: distributionModel.network,
+        chain_name: distributionModel.chain_name,
         metadata: sql`${distributionModel.metadata}->>'recipients'`,
         user_address: distributionModel.user_address,
         token_symbol: distributionModel.token_symbol,

@@ -34,6 +34,7 @@ export const generateDistributionPDF = (
     ["Distribution Type", distribution.distribution_type],
     ["Total Recipients", distribution.total_recipients.toString()],
     ["Network", distribution.network],
+    ["Chain", distribution.chain_name],
     [
       "Total Amount",
       `${distribution.total_amount} ${distribution.token_symbol}`,
@@ -122,6 +123,7 @@ export const generateDistributionCSV = async (
     ["Distribution Type", distribution.distribution_type],
     ["Total Recipients", distribution.total_recipients.toString()],
     ["Network", distribution.network],
+    ["Chain", distribution.chain_name],
     [
       "Total Amount",
       `${distribution.total_amount} ${distribution.token_symbol}`,

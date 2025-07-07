@@ -43,6 +43,10 @@ const DistributionDetailsModal = ({
       value: distribution.network,
     },
     {
+      label: "Chain",
+      value: distribution.chain_name,
+    },
+    {
       label: "Total Amount",
       value: `${distribution.total_amount} ${distribution.token_symbol}`,
     },
