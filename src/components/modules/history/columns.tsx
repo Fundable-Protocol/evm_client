@@ -49,7 +49,7 @@ export const columns: ColumnDef<DistributionAttributes>[] = [
     },
   },
   {
-    accessorKey: "network",
+    accessorKey: "chain_name",
     header: "Network",
   },
   {
