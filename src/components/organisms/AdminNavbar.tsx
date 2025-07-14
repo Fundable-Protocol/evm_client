@@ -44,6 +44,9 @@ const AdminNavbar = () => {
           <NotificationIcon />
         </span>
 
+        {/* Chain Switch Button */}
+        {isConnected && <appkit-network-button />}
+
         {isConnected ? (
           <div className="bg-gradient-to-r from-blue-500 via-purple-800 to-pink-500 rounded-sm px-2 md:px-3 py-1 md:py-2 text-sm font-medium flex gap-x-2 font-bricolage">
             <Image

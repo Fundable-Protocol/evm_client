@@ -9,7 +9,7 @@ if (!projectId) {
   throw new Error('Project ID is not defined')
 }
 
-export const networks = [mainnet, arbitrum, base, baseSepolia, sepolia, bsc]
+export const networks = [arbitrum, base, baseSepolia, sepolia, bsc]
 
 // Set up the Wagmi Adapter (Config)
 export const wagmiAdapter = new WagmiAdapter({
