@@ -68,7 +68,7 @@ const DistributePage = () => {
     type: "equal",
     showLabel: false,
     equalAmountType: "amount_per_address",
-    selectedToken: supportedTokens[0].value, // Default to STRK token
+    selectedToken: supportedTokens[0]?.value || "USDC", // Default to USDC or first available token
   });
 
   const [distributionState, setDistributionState] =
@@ -86,7 +86,11 @@ const DistributePage = () => {
   //   useStarkNameResolver(setDistributionData);
 
   // Calculate total amount including protocol fee
-  const selectedToken = SUPPORTED_TOKENS[distributionInfo.selectedToken];
+  const selectedToken = SUPPORTED_TOKENS[distributionInfo.selectedToken] || {
+    symbol: "USDC",
+    address: "0x0000000000000000000000000000000000000000",
+    decimals: 6,
+  };
 
   // Derive current contract address and supported tokens based on network
   const CONTRACT_ADDRESS = getContractAddress();
@@ -307,18 +311,6 @@ const DistributePage = () => {
      if (!transactionHash) {
       throw new Error("Transaction failed, check Onchain History for more details");
      }
-    //  console.log("callReceipts", callReceipts);
-
-      // Wait for transaction to be mined and successful
-      // if (isError) {
-      //   throw new Error("Transaction failed");
-      // }
-
-      // console.log("callReceipts", callReceipts);
-
-      // if (!isSuccess || !callReceipts?.receipts?.[0]?.transactionHash) {
-      //   throw new Error("Transaction not confirmed");
-      // }
 
       const baseAmount = distributionData
         .reduce((sum, dist) => {

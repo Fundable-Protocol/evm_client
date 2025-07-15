@@ -40,11 +40,11 @@ const DistributionDetailsModal = ({
     },
     {
       label: "Network",
-      value: distribution.network,
+      value: distribution.chain_name || "Unknown",
     },
     {
       label: "Chain",
-      value: distribution.chain_name,
+      value: distribution.chain_name || "Unknown",
     },
     {
       label: "Total Amount",
