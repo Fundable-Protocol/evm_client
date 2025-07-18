@@ -39,6 +39,7 @@ export const SUPPORTED_TOKENS: Record<
     },
     "bnb smart chain": {
       USDC: { symbol: "USDC", address: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d", decimals: 18 },
+      LUR: { symbol: "LUR", address: "0xc66B6f38aE5053A109cfd8639E0Ee17EC69cf788", decimals: 18 },
     },
     // ...add more chains as needed
   },
