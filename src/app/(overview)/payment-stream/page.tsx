@@ -1,12 +1,16 @@
+"use client";
+
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-import React from "react";
+import CreatePaymentStream from "@/components/modules/payment-stream/CreatePaymentStream";
 
 const PaymentStream = () => {
   return (
     <DashboardLayout
-      title="Payment Stream"
+      title="Create Stream"
       className="flex flex-col gap-y-6 h-full"
-    ></DashboardLayout>
+    >
+      <CreatePaymentStream />
+    </DashboardLayout>
   );
 };
 
