@@ -12,13 +12,18 @@ const AppSelect = ({
   title,
   options,
   setValue,
-  placeholder,
   className,
+  placeholder,
+  titleclassname,
 }: AppSelectProps) => {
   return (
     <Select onValueChange={setValue}>
       <div className="flex flex-col min-w-max">
-        {!!title && <h3 className="font-semibold mb-3 text-nowrap">{title}</h3>}
+        {!!title && (
+          <h3 className={cn("font-semibold mb-3 text-nowrap", titleclassname)}>
+            {title}
+          </h3>
+        )}
         <SelectTrigger
           className={cn(
             "w-full border-none bg-fundable-mid-grey text-white",
@@ -31,8 +36,8 @@ const AppSelect = ({
           {options?.map((option) => {
             return (
               <SelectItem
-                key={option.value}
-                value={option.value}
+                key={option.value as unknown as string}
+                value={option.value as unknown as string}
                 className="text-white bg-[#252939] hover:bg-[#252939] hover:text-white"
               >
                 {option.label}
