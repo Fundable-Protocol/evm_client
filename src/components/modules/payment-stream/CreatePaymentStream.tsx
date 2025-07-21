@@ -45,10 +45,10 @@ const CreatePaymentStream = () => {
   };
 
   return (
-    <main className="grid grid-cols-12 gap-x-6 h-dvh w-full">
-      <div className="col-span-8 h-full flex flex-col">
+    <main className="flex gap-x-6 h-dvh w-full justify-between">
+      <div className="w-full xl:w-[70%] h-full flex flex-col">
         <div>
-          <div className="grid grid-cols-2 gap-x-6 my-6">
+          <div className="grid lg:grid-cols-2 gap-6 my-6">
             <InputWithLabel
               title="Name"
               name="name"
@@ -62,11 +62,11 @@ const CreatePaymentStream = () => {
               setValue={(value) => handleStreamDataChange("token", value)}
               options={tokenOptions}
               title="Token"
-              placeholder="Choose a token..."
+              placeholder={streamData.token}
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-x-6 my-6">
+          <div className="grid lg:grid-cols-2 gap-6 my-6">
             <AppSelect
               className="h-14 placeholder:text-fundable-placeholder"
               titleclassname="text-fundable-light-grey"
@@ -90,7 +90,7 @@ const CreatePaymentStream = () => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-x-6 my-6 ">
+          <div className="grid lg:grid-cols-2 gap-6 my-6 ">
             <InputWithLabel
               title="Recipient"
               name="recipient"
@@ -104,7 +104,7 @@ const CreatePaymentStream = () => {
               <h3 className="font-semibold text-fundable-white mb-3 text-nowrap">
                 Streaming Duration
               </h3>
-              <div className="grid grid-cols-[0.5fr_1.5fr] items-end gap-x-6">
+              <div className="w-full grid grid-cols-[0.5fr_1.5fr] items-end gap-x-6">
                 <Input
                   className="border-none bg-fundable-mid-grey rounded h-14 placeholder:text-fundable-placeholder"
                   placeholder="Value eg. 1"

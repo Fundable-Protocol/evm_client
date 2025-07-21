@@ -1,4 +1,4 @@
-import { capitalizeWord } from "@/lib/utills";
+import { capitalizeWord, sliceAddress } from "@/lib/utills";
 import { StreamData } from "@/types/payment-stream";
 
 const PaymentStreamSummary = ({ streamData }: { streamData: StreamData }) => {
@@ -9,7 +9,9 @@ const PaymentStreamSummary = ({ streamData }: { streamData: StreamData }) => {
         : {
             label: capitalizeWord(key) + ":",
             value:
-              key === "duration"
+              key === "recipient"
+                ? sliceAddress(streamData.recipient)
+                : key === "duration"
                 ? `${streamData.durationValue} ${capitalizeWord(
                     streamData.duration
                   )}${+streamData.durationValue > 1 ? "s" : ""}`
@@ -23,11 +25,11 @@ const PaymentStreamSummary = ({ streamData }: { streamData: StreamData }) => {
     .filter(Boolean);
 
   return (
-    <div className="col-span-3 flex flex-col gap-y-4 p-6 rounded-[0.75rem] bg-fundable-mid-grey/50 h-max">
+    <div className="hidden xl:flex flex-col gap-y-4 p-6 rounded-[0.75rem] bg-fundable-mid-grey/50 h-max w-[30%] lg:w-[25%]">
       <h2 className="font-semibold text-fundable-white mb-3 text-nowrap pb-4 border-b border-fundable-light-grey">
         Summary
       </h2>
-      <div className="flex flex-col gap-y-6">
+      <div className="flex flex-col gap-y-5">
         {streamSummary.map((item) => (
           <div className="flex justify-between" key={item?.label}>
             <span className="text-fundable-light-grey font-semibold font-urbanist">
