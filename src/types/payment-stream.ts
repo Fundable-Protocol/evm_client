@@ -19,4 +19,5 @@ export interface StreamData {
   duration: string;
   durationValue: string;
   cancellability: boolean;
+  transferability: boolean;
 }
