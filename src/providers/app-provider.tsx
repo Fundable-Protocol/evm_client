@@ -7,6 +7,7 @@ import { base, AppKitNetwork } from '@reown/appkit/networks'
 import React, { type ReactNode } from 'react'
 import { cookieToInitialState, WagmiProvider, type Config } from 'wagmi'
 import { Toaster } from "react-hot-toast"
+import { MiniKitContextProvider } from './minikit-provider'
 
 // Set up queryClient
 const queryClient = new QueryClient()
@@ -41,10 +42,12 @@ function AppProvider({ children, cookies }: { children: ReactNode; cookies: stri
   return (
     <WagmiProvider config={wagmiAdapter.wagmiConfig as Config} initialState={initialState}>
       <QueryClientProvider client={queryClient}>
-        <main>
-          {children}
-          <Toaster position="bottom-right" />
-        </main>
+        <MiniKitContextProvider>
+          <main>
+            {children}
+            <Toaster position="bottom-right" />
+          </main>
+        </MiniKitContextProvider>
       </QueryClientProvider>
     </WagmiProvider>
   )

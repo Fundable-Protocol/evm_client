@@ -15,13 +15,32 @@ const bricolageGrotesque = Bricolage_Grotesque({
   variable: "--font-bricolage-grotesque",
 });
 
-export const metadata: Metadata = {
-  title: "Fundable",
-  description: "A decentralized funding application.",
-  icons: {
-    icon: "/favicon_io/favicon.ico",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const URL = process.env.NEXT_PUBLIC_URL;
+  return {
+    title: process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME || "Fundable",
+    description: process.env.NEXT_PUBLIC_APP_DESCRIPTION || "A decentralized funding application.",
+    icons: {
+      icon: "/favicon_io/favicon.ico",
+    },
+    other: {
+      "fc:frame": JSON.stringify({
+        version: "next",
+        imageUrl: process.env.NEXT_PUBLIC_APP_HERO_IMAGE,
+        button: {
+          title: `Launch ${process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME || "Fundable"}`,
+          action: {
+            type: "launch_frame",
+            name: process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME || "Fundable",
+            url: URL,
+            splashImageUrl: process.env.NEXT_PUBLIC_APP_SPLASH_IMAGE,
+            splashBackgroundColor: process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR,
+          },
+        },
+      }),
+    },
+  };
+}
 
 export default async function RootLayout({
   children,
