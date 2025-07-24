@@ -12,7 +12,7 @@ function withValidProperties(
 }
 
 export async function GET() {
-  const URL = process.env.NEXT_PUBLIC_URL;
+  const URL = process.env.NEXT_PUBLIC_URL || "https://evm.fundable.finance";
 
   return Response.json({
     accountAssociation: {
