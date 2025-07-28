@@ -13,6 +13,7 @@ import {
 import { IDistributionData } from "@/types/distribution";
 import { isValidAmount, isValidStarknetAddress } from "@/validations";
 import { ErrorWithCode, PromiseResult, TokenOption } from "@/types";
+import { Chain } from "@starknet-react/chains";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -65,6 +66,21 @@ export const getContractAddress = (isMainnet: boolean) =>
 
 export const getSupportedTokens = (isMainnet: boolean) =>
   isMainnet ? MAINNET_SUPPORTED_TOKENS : TESTNET_SUPPORTED_TOKENS;
+
+export const getTokenOptions = (chain: Chain) => {
+  const isMainNet = chain.network === "mainnet";
+
+  const SUPPORTED_TOKENS = getSupportedTokens(isMainNet);
+
+  const tokenOptions = Object.values(getSupportedTokens(isMainNet)).map(
+    (token) => ({
+      label: token.symbol,
+      value: token.symbol,
+    })
+  );
+
+  return { isMainNet, SUPPORTED_TOKENS, tokenOptions };
+};
 
 export const validateDistribution = (
   address: string,
