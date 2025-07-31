@@ -12,10 +12,14 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@cartridge/connector": "0.7.13",
+    "@cartridge/controller": "0.7.13",
     "@neondatabase/serverless": "^1.0.0",
     "@radix-ui/react-accordion": "^1.2.3",
     "@radix-ui/react-dialog": "^1.1.13",
     "@radix-ui/react-dropdown-menu": "^2.1.15",
+    "@metamask/sdk": "^0.32.1",
+    "@solana/web3.js": "^1.98.0",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-select": "^2.2.4",
     "@radix-ui/react-separator": "^1.1.2",

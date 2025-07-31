@@ -91,11 +91,9 @@ export function useConnectWallet() {
     modalTheme: "system",
   });
 
-  // Use useCallback to memoize functions
   const connectWallet = useCallback(async () => {
     try {
       const { connector } = await starknetkitConnectModal();
-
       if (!connector) {
         setWallet({
           isConnected: false,
@@ -104,6 +102,7 @@ export function useConnectWallet() {
 
         return;
       }
+
 
       await connectAsync({ connector: connector as Connector });
 
