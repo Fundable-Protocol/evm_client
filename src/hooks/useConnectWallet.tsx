@@ -96,6 +96,8 @@ export function useConnectWallet() {
     try {
       const { connector } = await starknetkitConnectModal();
 
+      console.log("connector", connector);
+
       if (!connector) {
         setWallet({
           isConnected: false,
@@ -104,6 +106,7 @@ export function useConnectWallet() {
 
         return;
       }
+
 
       await connectAsync({ connector: connector as Connector });
 

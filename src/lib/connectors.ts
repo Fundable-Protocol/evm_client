@@ -13,8 +13,9 @@ import { WebWalletConnector } from "starknetkit/webwallet";
 import { constants } from "starknet";
 import { StarknetkitConnector } from "starknetkit";
 import { projectId } from "./constant";
+import { Connector } from "@starknet-react/core";
 
-export const getAvailableConnectors = () => {
+export const getAvailableConnectors = async () => {
   const argentMobile = ArgentMobileConnector.init({
     options: {
       dappName: "Fundable",
@@ -27,6 +28,21 @@ export const getAvailableConnectors = () => {
       description: "Your web3 automated payment processor",
     },
   }) as StarknetkitConnector;
+
+  // Load Cartridge controller asynchronously
+  let cartridgeController = null;
+  try {
+    const instance = await import("@/lib/utills/controller").then((mod) =>
+      mod.getCartridgeInstance()
+    );
+    cartridgeController = instance;
+    console.log(
+      "Cartridge controller loaded successfully",
+      cartridgeController
+    );
+  } catch (error) {
+    console.error("Failed to load Cartridge controller:", error);
+  }
 
   const connectorOptions = [
     { id: "braavos", name: "Braavos" },
@@ -45,10 +61,17 @@ export const getAvailableConnectors = () => {
       return [BraavosMobileConnector.init({}), argentMobile];
 
     default:
-      return [
+      const baseConnectors = [
         ...connectorOptions,
         new WebWalletConnector({ url: "https://web.argent.xyz" }),
         argentMobile,
       ];
+
+      // Add Cartridge controller if loaded successfully
+      if (cartridgeController) {
+        return [...baseConnectors, cartridgeController];
+      }
+
+      return baseConnectors;
   }
 };
