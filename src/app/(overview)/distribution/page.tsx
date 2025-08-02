@@ -1,9 +1,10 @@
 "use client";
 
-import { cairo } from "starknet";
+import { cairo, RpcProvider } from "starknet";
 import currency from "currency.js";
 import toast from "react-hot-toast";
 import type { Call } from "starknet";
+
 import { useEntity } from "simpler-state";
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
@@ -27,6 +28,7 @@ import {
   getSupportedTokens,
   generateRandomUUID,
   calculateTotalDistributionAmount,
+  getRPCUrl,
 } from "@/lib/utills";
 
 import {
@@ -51,6 +53,13 @@ const DistributePage = () => {
   const isMainNet = chain.network === "mainnet";
 
   const SUPPORTED_TOKENS = getSupportedTokens(isMainNet);
+
+  const RPC_URL = getRPCUrl(isMainNet);
+  
+  // Initiate provider
+  const provider = new RpcProvider({
+    nodeUrl: RPC_URL,
+  });
 
   const supportedTokens = Object.values(SUPPORTED_TOKENS).map((token) => ({
     label: token.symbol,
@@ -255,6 +264,11 @@ const DistributePage = () => {
         transaction_hash: string;
       };
 
+      // Generate a unique distribution ID using UUID v4 to guarantee uniqueness
+      const distributionId = cairo.felt(generateRandomUUID());
+      const unique_ref = distributionId;
+      console.log("unique_ref", unique_ref);
+
       let calls: Call[];
 
       if (distributionInfo.type === "equal") {
@@ -275,6 +289,7 @@ const DistributePage = () => {
               recipients.length.toString(),
               ...recipients,
               selectedToken.address,
+              unique_ref,
             ],
           },
         ];
@@ -297,6 +312,7 @@ const DistributePage = () => {
               recipients.length.toString(),
               ...recipients,
               selectedToken.address,
+              unique_ref,
             ],
           },
         ];
@@ -306,7 +322,7 @@ const DistributePage = () => {
       const tx = result.transaction_hash;
 
       // // Wait for receipt
-      const receiptStatus = await account!.waitForTransaction(tx);
+      const receiptStatus = await provider.waitForTransaction(tx);
 
       // Create distribution record
 

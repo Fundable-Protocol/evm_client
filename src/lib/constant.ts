@@ -73,6 +73,10 @@ export const TESTNET_CONTRACT_ADDRESS =
 export const MAINNET_CONTRACT_ADDRESS =
   "0x67a27274b63fa3b070cabf7adf59e7b1c1e5b768b18f84b50f6cb85f59c42e5";
 
+export const MAINNET_RPC_URL = process.env.STARKNET_RPC_MAINNET ?? "";
+
+export const TESTNET_RPC_URL = process.env.STARKNET_RPC_TESTNET ?? "";
+
 export const distributionState = [
   "process-started",
   "initiate-distribution",
