@@ -25,10 +25,9 @@ import {
   tryCatch,
   createEmptyRow,
   getContractAddress,
-  getSupportedTokens,
   generateRandomUUID,
   calculateTotalDistributionAmount,
-  getRPCUrl,
+  getTokenOptions,
 } from "@/lib/utills";
 
 import {
@@ -50,28 +49,14 @@ const DistributePage = () => {
   const router = useRouter();
   const { chain } = useNetwork();
 
-  const isMainNet = chain.network === "mainnet";
-
-  const SUPPORTED_TOKENS = getSupportedTokens(isMainNet);
-
-  const RPC_URL = getRPCUrl(isMainNet);
-  
-  // Initiate provider
-  const provider = new RpcProvider({
-    nodeUrl: RPC_URL,
-  });
-
-  const supportedTokens = Object.values(SUPPORTED_TOKENS).map((token) => ({
-    label: token.symbol,
-    value: token.symbol,
-  }));
+  const { isMainNet, SUPPORTED_TOKENS, tokenOptions } = getTokenOptions(chain);
 
   const [distributionInfo, setDistributionInfo] = useState<IDistributionInfo>({
     amount: 0,
     type: "equal",
     showLabel: false,
     equalAmountType: "amount_per_address",
-    selectedToken: supportedTokens[0].value, // Default to STRK token
+    selectedToken: tokenOptions[0].value, // Default to STRK token
   });
 
   const [distributionState, setDistributionState] =
@@ -442,7 +427,7 @@ const DistributePage = () => {
       className="flex flex-col gap-y-6 h-full"
     >
       <DistributionSelector
-        supportedTokens={supportedTokens}
+        supportedTokens={tokenOptions}
         distributionType={distributionInfo}
         distributionData={distributionData}
         setDistributionType={setDistributionInfo}

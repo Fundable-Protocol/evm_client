@@ -15,6 +15,7 @@ import {
 import { IDistributionData } from "@/types/distribution";
 import { isValidAmount, isValidStarknetAddress } from "@/validations";
 import { ErrorWithCode, PromiseResult, TokenOption } from "@/types";
+import { Chain } from "@starknet-react/chains";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -70,6 +71,21 @@ export const getSupportedTokens = (isMainnet: boolean) =>
 
 export const getRPCUrl = (isMainnet: boolean) =>
   isMainnet ? MAINNET_RPC_URL : TESTNET_RPC_URL;
+
+export const getTokenOptions = (chain: Chain) => {
+  const isMainNet = chain.network === "mainnet";
+
+  const SUPPORTED_TOKENS = getSupportedTokens(isMainNet);
+
+  const tokenOptions = Object.values(getSupportedTokens(isMainNet)).map(
+    (token) => ({
+      label: token.symbol,
+      value: token.symbol,
+    })
+  );
+
+  return { isMainNet, SUPPORTED_TOKENS, tokenOptions };
+};
 
 export const validateDistribution = (
   address: string,
