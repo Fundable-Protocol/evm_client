@@ -16,7 +16,9 @@
   --color-fundable-dark: var(--fundable-dark);
   --color-fundable-mid-dark: var(--fundable-mid-dark);
   --color-fundable-grey: var(--fundable-grey);
+  --color-fundable-light-grey: var(--fundable-light-grey);
   --color-fundable-mid-grey: var(--fundable-mid-grey);
+  --color-fundable-placeholder: var(--fundable-placeholder);
   --color-fundable-violet: var(--fundable-violet);
   --color-fundable-purple: var(--fundable-purple);
   --color-fundable-purple-2: var(--fundable-purple-2);
@@ -102,7 +104,9 @@
   --fundable-dark: #0d0019;
   --fundable-mid-dark: #151617;
   --fundable-grey: #4a4949;
+  --fundable-light-grey: #8792ab;
   --fundable-mid-grey: #252939;
+  --fundable-placeholder: #4e5679;
   --fundable-purple: #b102cd;
   --fundable-purple-2: #8256ff;
   --fundable-violet: #5b21b6;
