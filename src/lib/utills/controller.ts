@@ -1,14 +1,14 @@
 "use client";
 
+import { Connector } from "starknetkit";
+
 export async function getCartridgeInstance() {
-  const [{ default: ControllerConnector }, { Connector }, { constants }] =
+  const [{ default: ControllerConnector }, {}, { constants }] =
     await Promise.all([
       import("@cartridge/connector/controller"),
       import("@starknet-react/core"),
       import("starknet"),
     ]);
-
-  const isProduction = process.env.NEXT_PUBLIC_ENV === "production";
 
   const instance = new ControllerConnector({
     chains: [

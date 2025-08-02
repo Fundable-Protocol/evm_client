@@ -103,7 +103,6 @@ export function useConnectWallet() {
         return;
       }
 
-
       await connectAsync({ connector: connector as Connector });
 
       setWallet({
