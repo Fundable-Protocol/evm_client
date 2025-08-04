@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useAccount } from "@starknet-react/core";
 
 import { User2 } from "lucide-react";
-import { Sidebar } from "@/components/ui/sidebar";
+import { Sidebar, useSidebar } from "@/components/ui/sidebar";
 import Logo from "../../../public/svgs/fundable_logo.svg";
 
 import { useConnectWallet } from "@/hooks/useConnectWallet";
@@ -60,8 +60,13 @@ const items = [
 export function AppSidebar() {
   const pathname = usePathname();
   const { disConnectWallet } = useConnectWallet();
+  const { setOpenMobile } = useSidebar();
 
   const { address } = useAccount();
+
+  const handleLinkClick = () => {
+    setOpenMobile(false);
+  };
 
   return (
     <Sidebar
@@ -85,6 +90,7 @@ export function AppSidebar() {
                 <li key={link.title}>
                   <Link
                     href={link.url}
+                    onClick={handleLinkClick}
                     className={`flex items-center gap-x-2 rounded p-2  transition-colors focus:outline-none focus:ring-1 focus:ring-fundable-purple-2 focus:ring-offset-2 focus:ring-offset-black 
                     ${
                       isActive
@@ -117,7 +123,10 @@ export function AppSidebar() {
         {address ? (
           <div
             className="text-white flex items-center gap-x-4 cursor-pointer hover:bg-fundable-purple-2 p-2 rounded hover:text-black transition-all active:bg-fundable-purple-2"
-            onClick={disConnectWallet}
+            onClick={() => {
+              disConnectWallet();
+              setOpenMobile(false);
+            }}
           >
             <span className="size-9 grid place-content-center rounded-full bg-black">
               <LogoutIcon />
