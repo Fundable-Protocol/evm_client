@@ -25,8 +25,9 @@ import {
   createEmptyRow,
   getContractAddress,
   generateRandomUUID,
-  calculateTotalDistributionAmount,
   getTokenOptions,
+  getDistributionUniqueRef,
+  calculateTotalDistributionAmount,
 } from "@/lib/utills";
 
 import {
@@ -250,6 +251,8 @@ const DistributePage = () => {
 
       let calls: Call[];
 
+      const uniqueRef = !isMainNet ? [getDistributionUniqueRef()] : [];
+
       if (distributionInfo.type === "equal") {
         const amountPerRecipient = cairo.uint256(amounts![0]);
 
@@ -268,6 +271,7 @@ const DistributePage = () => {
               recipients.length.toString(),
               ...recipients,
               selectedToken.address,
+              ...uniqueRef,
             ],
           },
         ];
@@ -290,6 +294,7 @@ const DistributePage = () => {
               recipients.length.toString(),
               ...recipients,
               selectedToken.address,
+              ...uniqueRef,
             ],
           },
         ];
