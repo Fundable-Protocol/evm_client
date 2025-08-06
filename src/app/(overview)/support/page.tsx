@@ -10,6 +10,7 @@ import TelegramIcon from "@/components/svgs/TelegramIcon";
 import DiscordIcon from "@/components/svgs/DiscordIcon";
 import FarcasterIcon from "@/components/svgs/FarcasterIcon";
 import WarningIcon from "@/components/svgs/WarningIcon";
+import { SendIcon } from "lucide-react";
 
 const HelpPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -37,7 +38,7 @@ const HelpPage = () => {
 
     {
       id: "telegram",
-      icon: <TelegramIcon className="w-6 h-6" />,
+      icon: <SendIcon className="w-6 h-6" />,
       title: "Telegram Support",
       description:
         "Chat us on our telegram and we will get back to you as soon as possible",

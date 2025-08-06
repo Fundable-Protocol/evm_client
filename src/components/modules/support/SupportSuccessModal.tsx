@@ -37,7 +37,7 @@ export function SupportSuccessModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
         showCloseButton={false}
-        className=" w-full sm:max-w-4xl   bg-white rounded-lg md:rounded-xl lg:rounded-2xl  mx-4 md:mx-0 p-4 md:p-6 lg:p-8"
+        className=" w-full sm:max-w-4xl   bg-white rounded-lg md:rounded-xl lg:rounded-2xl p-4 md:p-6 lg:p-8"
       >
         <DialogTitle className="sr-only">
           {" "}

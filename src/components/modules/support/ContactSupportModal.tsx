@@ -186,7 +186,7 @@ export function ContactSupportModal({
     >
       <DialogContent
         showCloseButton={false}
-        className=" sm:max-w-4xl  overflow-y-hidden  rounded-lg md:rounded-xl shadow-lg mx-4 md:mx-0 p-4 md:p-6 lg:p-8 "
+        className=" sm:max-w-4xl  overflow-y-hidden  rounded-lg md:rounded-xl shadow-lg  p-4 md:p-6 lg:p-8 "
         onPointerDownOutside={(e) => {
           // Prevent outside clicks from closing the modal
           e.preventDefault();
