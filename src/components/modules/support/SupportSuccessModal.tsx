@@ -86,39 +86,19 @@ export function SupportSuccessModal({
           <h3 className="text-base  font-medium text-fundable-mid-grey mb-1">
             What happens next?
           </h3>
-          <ul className="space-y-1 ">
-            <li className="flex items-start">
-              <span className="text-gray-600 mr-2 md:mr-3 mt-1 text-sm md:text-base">
-                •
-              </span>
-              <span className="text-sm md:text-base  text-fundable-mid-dark leading-relaxed ">
+          <ul className=" list-disc list-inside marker:text-[8px] pl-2  ">
+              <li className="text-sm md:text-base text-fundable-mid-dark leading-relaxed">
                 Our support team will review your request
-              </span>
-            </li>
-            <li className="flex items-start">
-              <span className="text-gray-600 mr-2 md:mr-3 mt-1 text-sm md:text-base">
-                •
-              </span>
-              <span className="text-sm md:text-base  text-fundable-mid-dark leading-relaxed">
+              </li>
+              <li className="text-sm md:text-base text-fundable-mid-dark leading-relaxed">
                 You'll receive an email confirmation shortly
-              </span>
-            </li>
-            <li className="flex items-start">
-              <span className="text-gray-600 mr-2 md:mr-3 mt-1 text-sm md:text-base">
-                •
-              </span>
-              <span className="text-sm md:text-base  text-fundable-mid-dark leading-relaxed">
+              </li>
+              <li className="text-sm md:text-base text-fundable-mid-dark leading-relaxed">
                 Expected response time: 24 hours
-              </span>
-            </li>
-            <li className="flex items-start">
-              <span className="text-gray-600 mr-2 md:mr-3 mt-1 text-sm md:text-base">
-                •
-              </span>
-              <span className="text-sm md:text-base  text-fundable-mid-dark leading-relaxed">
+              </li>
+              <li className="text-sm md:text-base text-fundable-mid-dark leading-relaxed">
                 Updates will be sent to your email address
-              </span>
-            </li>
+              </li>
           </ul>
         </div>
       </DialogContent>
