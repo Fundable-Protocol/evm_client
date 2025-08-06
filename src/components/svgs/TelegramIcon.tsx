@@ -1,32 +1,17 @@
 import * as React from "react";
 import { SVGProps } from "react";
+
 const TelegramIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    xmlnsXlink="http://www.w3.org/1999/xlink"
     width={24}
     height={24}
-    fill="none"
+    viewBox="0 0 24 24"
+    fill="currentColor"
     {...props}
   >
-    <path fill="url(#a)" d="M0 0h24v24H0z" transform="matrix(-1 0 0 1 24 0)" />
-    <defs>
-      <pattern
-        id="a"
-        width={1}
-        height={1}
-        patternContentUnits="objectBoundingBox"
-      >
-        <use xlinkHref="#b" transform="scale(.01111)" />
-      </pattern>
-      <image
-        xlinkHref="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAABaCAYAAAA4qEECAAAACXBIWXMAAAsTAAALEwEAmpwYAAACpklEQVR4nO3boW8UQRTH8YMSQtJAIEGQYBAYDAqDQoECQXHgkEgMAv6AChIMhpQEEiQKHAoMBgwGg0EgEKRNSAoBUvolk2xNQ3fm5mbevLn7fVST63ZvftmdffN2OpmIiIiIiIiIiIiIiIhIQcBR4C0S8x44PmvYy8Cr6KkW12vgcKkr+yDwvPWIHHoJHMoJdN/IZ0vAk9Yjc+QpcCAny/Dhs9jBwP3WI3TgIbA/clE+Hgs66XYA7rC4VlOn2VjQSRM8cAv4y+LYBm5PUzikBJ1UsgA3gD/Mvy3gZiSLY7tL4dSgg4/AycgJLgM/mV+/gWuRDE4AH3YfOE3QwWfgdOREF4DvzJ9N4FJk7KeAT/87eNqgg6/A2cgJzwHfmB8bwPnImM8AX/b6AzlBFzlxR4pcWLlB79xKF3NvpU4UmypnCTr4lftw6EDKw/9K6sN/1qCzyx3nipezJYLOKuAdq7JAKxX01EtSp6q1HEoHndxkwZ+qTbQaQVf/0hVUvzhqBd1T52/VYrqrGbT3zt+25QO8dtDBO4edvy3rktQi6OLFf6sOXA9Be+n8bc7Sgesl6Nadv42WjTDroFsNuHlrt0XQ1p0/D1NWs6CtOn9uXr+1DLp2mZXSgbtuVVa2DrrWwsHdQslD0KWXwi6X/p6CDh4k7PlbY29rCc2scA4WPWiGzZNLkStyBXgD/BgqmDBVXI0c03RjpseggxdZW2Adv3DwGnSxTd1eXqF5Djqp89fLv4N4D5phdTi6fB5ZxocFiws9BM3w0LubMpUAR4B73jZb9hL0jnXgUagwQv9imH+Xh59Xhs/C77jTW9DdUtBGFLQRBW1EQRtR0EYUtBEFbURBG1HQRhS0EQVtREEbUdBGFLSRWB9dREREREREREREREREJiP+AdaLJhJfih3lAAAAAElFTkSuQmCC"
-        id="b"
-        width={90}
-        height={90}
-        preserveAspectRatio="none"
-      />
-    </defs>
+    <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
   </svg>
 );
+
 export default TelegramIcon;
