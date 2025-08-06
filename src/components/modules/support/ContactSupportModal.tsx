@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { X } from "lucide-react";
+import { DialogTitle } from "@radix-ui/react-dialog";
 
 interface ContactSupportModalProps {
   isOpen: boolean;
@@ -195,6 +196,7 @@ export function ContactSupportModal({
           e.preventDefault();
         }}
       >
+        <DialogTitle className="sr-only">  Customer Support</DialogTitle>
         <div className="flex justify-between items-start mb-4 md:mb-6">
           <div className="flex-1 pr-4">
             <h2 className="text-xl md:text-2xl lg:text-4xl font-bold text-black font-syne mb-1 md:mb-2 leading-tight">

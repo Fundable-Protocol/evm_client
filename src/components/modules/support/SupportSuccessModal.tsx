@@ -1,6 +1,11 @@
 "use client";
 
-import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Check, Copy } from "lucide-react";
 import { useState } from "react";
@@ -34,6 +39,11 @@ export function SupportSuccessModal({
         showCloseButton={false}
         className=" w-full sm:max-w-4xl   bg-white rounded-lg md:rounded-xl lg:rounded-2xl  mx-4 md:mx-0 p-4 md:p-6 lg:p-8"
       >
+        <DialogTitle className="sr-only">
+          {" "}
+          Message sent successfully!!!{" "}
+        </DialogTitle>
+
         <DialogHeader>
           <div className="flex items-center gap-x-4 mb-3 sm:mb-6 ">
             <div className="w-11 h-11 bg-fundable-purple-2 rounded-full flex items-center justify-center flex-shrink-0">
