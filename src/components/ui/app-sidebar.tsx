@@ -52,7 +52,7 @@ const items = [
   },
   {
     title: "Help",
-    url: "/help",
+    url: "/customer-support",
     icon: <WalletIcon aria-hidden="true" />,
   },
 ];

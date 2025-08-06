@@ -24,7 +24,7 @@
   --color-fundable-purple-2: var(--fundable-purple-2);
   --color-fundable-deep-purple: var(--fundable-deep-purple);
   --color-fundable-white: #c9ccd2;
-
+  --color-fundable-faint-white: var(--fundable-faint-white);
   --color-fundable-deep-purple-light: color-mix(
     in oklab,
     var(--fundable-deep-purple),
@@ -111,6 +111,7 @@
   --fundable-purple-2: #8256ff;
   --fundable-violet: #5b21b6;
   --fundable-deep-purple: #440495;
+  --fundable-faint-white: #E1E1E1;
 
   /* Existing Styles */
   --radius: 0.625rem;
