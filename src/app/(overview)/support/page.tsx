@@ -6,10 +6,7 @@ import SupportCard from "@/components/modules/support/SupportCard";
 import { ContactSupportModal } from "@/components/modules/support/ContactSupportModal";
 import { SupportSuccessModal } from "@/components/modules/support/SupportSuccessModal";
 import MailIcon from "@/components/svgs/MailIcon";
-import TelegramIcon from "@/components/svgs/TelegramIcon";
-import DiscordIcon from "@/components/svgs/DiscordIcon";
 import FarcasterIcon from "@/components/svgs/FarcasterIcon";
-import WarningIcon from "@/components/svgs/WarningIcon";
 import { SendIcon } from "lucide-react";
 
 const HelpPage = () => {
@@ -45,21 +42,21 @@ const HelpPage = () => {
       buttonText: "Send a Message",
       contactInfo: "FundableHq",
       action: () => {
-        window.open("https://t.me/FundableHq", "_blank");
+        window.open(" https://t.me/fundable_finance", "_blank");
       },
     },
-    {
-      id: "discord",
-      icon: <DiscordIcon className="w-6 h-6" />,
-      title: "Discord Support",
-      description:
-        "Chat us on discord and we will get back to you as soon as possible",
-      buttonText: "Join Discord",
-      contactInfo: "Fundable Discord",
-      action: () => {
-        window.open("https://discord.gg/fundable", "_blank");
-      },
-    },
+    // {
+    //   id: "discord",
+    //   icon: <DiscordIcon className="w-6 h-6" />,
+    //   title: "Discord Support",
+    //   description:
+    //     "Chat us on discord and we will get back to you as soon as possible",
+    //   buttonText: "Join Discord",
+    //   contactInfo: "Fundable Discord",
+    //   action: () => {
+    //     window.open("https://discord.gg/fundable", "_blank");
+    //   },
+    // },
     {
       id: "farcaster",
       icon: <FarcasterIcon className="w-6 h-6" />,
@@ -69,24 +66,24 @@ const HelpPage = () => {
       buttonText: "Send a Message",
       contactInfo: "Fundable Farcaster",
       action: () => {
-        window.open("https://warpcast.com/fundable", "_blank");
+        window.open("https://farcaster.xyz/fundable", "_blank");
       },
     },
-    {
-      id: "whatsapp",
-      icon: <WarningIcon className="w-6 h-6" />,
-      title: "Emergency???",
-      description:
-        "For critical issues affecting your  dashboard, please call our emergency hotline VIA WHATSAPP @ +234-001-234-6789",
-      buttonText: "Send a Message",
-      contactInfo: "+234-001-234-6789",
-      action: () => {
-        const message = encodeURIComponent(
-          "Hello Fundable Support Team, I need emergency assistance with my dashboard."
-        );
-        window.open(`https://wa.me/2340012346789?text=${message}`, "_blank");
-      },
-    },
+    // {
+    //   id: "whatsapp",
+    //   icon: <WarningIcon className="w-6 h-6" />,
+    //   title: "Emergency???",
+    //   description:
+    //     "For critical issues affecting your  dashboard, please call our emergency hotline VIA WHATSAPP @ +234-001-234-6789",
+    //   buttonText: "Send a Message",
+    //   contactInfo: "+234-001-234-6789",
+    //   action: () => {
+    //     const message = encodeURIComponent(
+    //       "Hello Fundable Support Team, I need emergency assistance with my dashboard."
+    //     );
+    //     window.open(`https://wa.me/2340012346789?text=${message}`, "_blank");
+    //   },
+    // },
   ];
 
   return (
