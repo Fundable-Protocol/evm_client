@@ -6,7 +6,9 @@ import SupportCard from "@/components/modules/support/SupportCard";
 import { ContactSupportModal } from "@/components/modules/support/ContactSupportModal";
 import { SupportSuccessModal } from "@/components/modules/support/SupportSuccessModal";
 import MailIcon from "@/components/svgs/MailIcon";
+import DiscordIcon from "@/components/svgs/DiscordIcon";
 import FarcasterIcon from "@/components/svgs/FarcasterIcon";
+// import WarningIcon from "@/components/svgs/WarningIcon";
 import { SendIcon } from "lucide-react";
 
 const HelpPage = () => {
@@ -89,8 +91,8 @@ const HelpPage = () => {
   return (
     <DashboardLayout title="" className="h-screen overflow-hidden">
       <div className="h-full flex flex-col">
-        <div className="mb-8 md:mb-11 flex-shrink-0">
-          <p className="text-[#E1E1E1] text-sm sm:text-2xl max-w-4xl mx-auto text-center">
+        <div className="mb-6 flex-shrink-0">
+          <p className="text-[#E1E1E1] text-sm sm:text-xl max-w-4xl mx-auto text-center">
             Need help with your dashboard? Our support team is here to assist
             you. Choose the method that works best for you.
           </p>
