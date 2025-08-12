@@ -4,8 +4,8 @@ import { motion } from "motion/react";
 
 import Image from "next/image";
 
-import IconOkk from "../../../public/imgs/marqueLogos/okxLogo.png";
-import IconArgent from "../../../public/imgs/marqueLogos/argentX.png";
+import IconArbitrum from "../../../public/imgs/marqueLogos/arbitrumLogo.jpeg";
+import IconBaseApp from "../../../public/imgs/marqueLogos/Baseapp.jpg";
 import IconBravaas from "../../../public/imgs/marqueLogos/bravoos.png";
 import IconStarknet from "../../../public/imgs/marqueLogos/starknet.png";
 import IconMetamask from "../../../public/imgs/marqueLogos/metamask.png";
@@ -13,8 +13,8 @@ import IconMetamask from "../../../public/imgs/marqueLogos/metamask.png";
 const Marquee = () => {
   const logos = [
     {
-      image: IconArgent,
-      alt: "argent-logo",
+      image: IconBaseApp,
+      alt: "base-app-logo",
     },
     {
       image: IconStarknet,
@@ -29,8 +29,8 @@ const Marquee = () => {
       alt: "bravaas-logo",
     },
     {
-      image: IconOkk,
-      alt: "okk-logo",
+      image: IconArbitrum,
+      alt: "arbitrum-logo",
     },
   ];
 

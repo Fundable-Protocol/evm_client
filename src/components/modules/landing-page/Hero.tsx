@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import Marquee from "@/components/molecules/Marquee";
+// import Marquee from "@/components/molecules/Marquee";
 
 import FundableHero from "../../../../public/svgs/fundableHero.svg";
 import { TextHoverEffect } from "@/components/ui/text-hover-effect";
@@ -53,7 +53,7 @@ const Hero = () => {
         <div className="absolute  bg-black dark:bg-black hidden md:block h:8 md:h-32 w-full bottom-0" />
       </div>
 
-      <Marquee />
+      {/* <Marquee /> */}
     </header>
   );
 };
