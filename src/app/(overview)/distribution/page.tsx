@@ -4,10 +4,11 @@ import { cairo } from "starknet";
 import currency from "currency.js";
 import toast from "react-hot-toast";
 import type { Call } from "starknet";
+
 import { useEntity } from "simpler-state";
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
-import { useAccount, useNetwork } from "@starknet-react/core";
+import { useAccount, useNetwork, useProvider } from "@starknet-react/core";
 import { resendDistributionPayload } from "@/store/distributionEntity";
 
 import DashboardLayout from "@/components/layouts/DashboardLayout";
@@ -48,7 +49,7 @@ const DistributePage = () => {
   const { account, address } = useAccount();
   const router = useRouter();
   const { chain } = useNetwork();
-
+  const { provider } = useProvider();
   const { isMainNet, SUPPORTED_TOKENS, tokenOptions } = getTokenOptions(chain);
 
   const [distributionInfo, setDistributionInfo] = useState<IDistributionInfo>({
@@ -249,6 +250,11 @@ const DistributePage = () => {
         transaction_hash: string;
       };
 
+      // Generate a unique distribution ID using UUID v4 to guarantee uniqueness
+      const distributionId = cairo.felt(generateRandomUUID());
+      const unique_ref = distributionId;
+      console.log("unique_ref", unique_ref);
+
       let calls: Call[];
 
       const uniqueRef = !isMainNet ? [getDistributionUniqueRef()] : [];
@@ -304,7 +310,7 @@ const DistributePage = () => {
       const tx = result.transaction_hash;
 
       // // Wait for receipt
-      const receiptStatus = await account!.waitForTransaction(tx);
+      const receiptStatus = await provider.waitForTransaction(tx); 
 
       // Create distribution record
 

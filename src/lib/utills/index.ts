@@ -8,8 +8,10 @@ import { shortString } from "starknet";
 
 import {
   MAINNET_CONTRACT_ADDRESS,
+  MAINNET_RPC_URL,
   MAINNET_SUPPORTED_TOKENS,
   TESTNET_CONTRACT_ADDRESS,
+  TESTNET_RPC_URL,
   TESTNET_SUPPORTED_TOKENS,
 } from "../constant";
 import { IDistributionData } from "@/types/distribution";
@@ -68,6 +70,9 @@ export const getContractAddress = (isMainnet: boolean) =>
 
 export const getSupportedTokens = (isMainnet: boolean) =>
   isMainnet ? MAINNET_SUPPORTED_TOKENS : TESTNET_SUPPORTED_TOKENS;
+
+export const getRPCUrl = (isMainnet: boolean) =>
+  isMainnet ? MAINNET_RPC_URL : TESTNET_RPC_URL;
 
 export const getTokenOptions = (chain: Chain) => {
   const isMainNet = chain.network === "mainnet";
