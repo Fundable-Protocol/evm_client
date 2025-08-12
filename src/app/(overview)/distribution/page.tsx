@@ -1,6 +1,6 @@
 "use client";
 
-import { cairo, RpcProvider } from "starknet";
+import { cairo } from "starknet";
 import currency from "currency.js";
 import toast from "react-hot-toast";
 import type { Call } from "starknet";
