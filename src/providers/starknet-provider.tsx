@@ -1,12 +1,12 @@
 "use client";
 
 import {
-  StarknetConfig,
-  jsonRpcProvider,
   voyager,
   Connector,
+  StarknetConfig,
+  jsonRpcProvider,
 } from "@starknet-react/core";
-import { sepolia, mainnet } from "@starknet-react/chains";
+import { sepolia, mainnet, Chain } from "@starknet-react/chains";
 import { getAvailableConnectors } from "@/lib/connectors";
 import { useCallback, useEffect, useState } from "react";
 
@@ -24,7 +24,11 @@ export function StarknetProvider({ children }: { children: React.ReactNode }) {
     loadConnectors();
   }, []);
 
-  const rpc = useCallback(() => {
+  const rpc = useCallback((chain: Chain) => {
+    if (["mainnet", "mainnet-alpha"].includes(chain.network?.toLowerCase())) {
+      return { nodeUrl: "https://starknet-mainnet.public.blastapi.io" };
+    }
+
     return { nodeUrl: "https://starknet-sepolia.public.blastapi.io" };
   }, []);
 

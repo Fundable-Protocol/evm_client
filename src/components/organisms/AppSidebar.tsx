@@ -17,6 +17,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import Image from "next/image";
 import Link from "next/link";
@@ -68,6 +69,12 @@ const items = [
 ];
 
 export function AppSidebar() {
+  const { setOpenMobile } = useSidebar();
+
+  const handleLinkClick = () => {
+    setOpenMobile(false);
+  };
+
   return (
     <Sidebar>
       <SidebarContent className="bg-[#151617] px-6">
@@ -87,6 +94,7 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     asChild
                     className="py-6 hover:bg-fundable-violet"
+                    onClick={handleLinkClick}
                   >
                     <Link
                       href={item.url}
