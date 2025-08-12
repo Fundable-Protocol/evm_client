@@ -5,7 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 
 import { User2 } from "lucide-react";
-import { Sidebar } from "@/components/ui/sidebar";
+import { Sidebar, useSidebar } from "@/components/ui/sidebar";
 import Logo from "../../../public/svgs/fundable_logo.svg";
 
 import { useEVM } from "@/hooks/useEVM";
@@ -59,7 +59,7 @@ const items = [
 export function AppSidebar() {
   const pathname = usePathname();
   const { disconnect, isConnected } = useEVM();
-
+  const { setOpenMobile } = useSidebar();
   return (
     <Sidebar
       className="pt-7 bg-fundable-mid-grey/10"
@@ -90,6 +90,7 @@ export function AppSidebar() {
                     }`}
                     data-slot="sidebar-menu"
                     aria-current={isActive ? "page" : undefined}
+                    onClick={() => setOpenMobile(false)}
                   >
                     <span
                       data-slot="sidebar-icon"
@@ -114,7 +115,10 @@ export function AppSidebar() {
         {isConnected ? (
           <div
             className="text-white flex items-center gap-x-4 cursor-pointer hover:bg-fundable-purple-2 p-2 rounded hover:text-black transition-all active:bg-fundable-purple-2"
-            onClick={disconnect}
+            onClick={() => {
+              disconnect();
+              setOpenMobile(false);
+            }}
           >
             <span className="size-9 grid place-content-center rounded-full bg-black">
               <LogoutIcon />
