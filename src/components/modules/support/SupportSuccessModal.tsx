@@ -9,12 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Check, Copy } from "lucide-react";
 import { useState } from "react";
-
-interface SupportSuccessModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  ticketNumber?: string;
-}
+import { SupportSuccessModalProps } from "@/types/support";
 
 export function SupportSuccessModal({
   isOpen,
@@ -91,7 +86,7 @@ export function SupportSuccessModal({
                 Our support team will review your request
               </li>
               <li className="text-sm md:text-base text-fundable-mid-dark leading-relaxed">
-                You'll receive an email confirmation shortly
+                You&apos;ll receive an email confirmation shortly
               </li>
               <li className="text-sm md:text-base text-fundable-mid-dark leading-relaxed">
                 Expected response time: 24 hours

@@ -3,15 +3,7 @@
 import React from "react";
 import { cn } from "@/lib/utills";
 import { Button } from "@/components/ui/button";
-
-interface SupportCardProps {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  buttonText: string;
-  contactInfo?: string;
-  handleOnClick?: () => void;
-}
+import { SupportCardProps } from "@/types/support";
 
 const SupportCard: React.FC<SupportCardProps> = ({
   icon,

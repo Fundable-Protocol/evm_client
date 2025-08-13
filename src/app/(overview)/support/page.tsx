@@ -6,9 +6,7 @@ import SupportCard from "@/components/modules/support/SupportCard";
 import { ContactSupportModal } from "@/components/modules/support/ContactSupportModal";
 import { SupportSuccessModal } from "@/components/modules/support/SupportSuccessModal";
 import MailIcon from "@/components/svgs/MailIcon";
-import DiscordIcon from "@/components/svgs/DiscordIcon";
 import FarcasterIcon from "@/components/svgs/FarcasterIcon";
-// import WarningIcon from "@/components/svgs/WarningIcon";
 import { SendIcon } from "lucide-react";
 
 const HelpPage = () => {
