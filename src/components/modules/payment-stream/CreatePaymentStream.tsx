@@ -85,6 +85,25 @@ const CreatePaymentStream = () => {
     }
   };
 
+  // Check if user is on mainnet
+  if (chain?.network === "mainnet") {
+    return (
+      <main className="flex items-center justify-center h-dvh w-full">
+        <div className="max-w-2xl p-6 text-center">
+          <h2 className="text-2xl font-bold mb-2">Feature Not Available on Mainnet</h2>
+          <p className="text-gray-600 dark:text-gray-300 mb-4">
+            Payment streams are currently only available on testnet.
+          </p>
+          <div className="p-2">
+            <p className="text-sm text-yellow-800 dark:text-yellow-200">
+              To continue, please switch your network to testnet in your wallet.
+            </p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="flex gap-x-6 h-dvh w-full justify-between">
       <PaymentStreamForm

@@ -35,6 +35,6 @@ export interface StreamRecord {
   amount: string;
   duration: number;
   chainName: string;
-  streamId?: string;
+  streamId: string;
   createdAt: string;
 }
