@@ -2,7 +2,7 @@ import type { Call, AccountInterface } from "starknet";
 import { cairo } from "starknet";
 import { Chain } from "@starknet-react/chains";
 
-import { getStreamContractAddress, durationToSeconds, recordStreamTx } from "@/lib/utills/stream";
+import { getStreamContractAddress, durationToSeconds, recordStreamTx, type DurationUnit } from "@/lib/utills/stream";
 import { getSupportedTokens } from "@/lib/utills";
 
 export interface CreateStreamParams {
@@ -11,7 +11,7 @@ export interface CreateStreamParams {
   tokenSymbol: string;
   totalAmount: string; 
   durationValue: number;
-  durationUnit: "hour" | "day" | "week" | "month";
+  durationUnit: DurationUnit;
   cancellable: boolean;
   transferable: boolean;
 }
@@ -79,6 +79,12 @@ export class PaymentStreamService {
         tokenSymbol: params.tokenSymbol,
         txHash: tx,
         network: chain?.network || "sepolia",
+        creator: account.address,
+        isCancellable: params.cancellable,
+        isTransferable: params.transferable,
+        amount: params.totalAmount,
+        duration: durationSeconds,
+        chainName: chain?.name || "sepolia",
       },
       typeof window !== "undefined" ? window.localStorage : null
     );

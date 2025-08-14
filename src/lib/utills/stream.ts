@@ -2,7 +2,7 @@ import { Chain } from "@starknet-react/chains";
 
 import { MAINNET_STREAM_CONTRACT_ADDRESS, TESTNET_STREAM_CONTRACT_ADDRESS } from "../constant";
 
-export type DurationUnit = "hour" | "day" | "week" | "month";
+export type DurationUnit = "hour" | "day" | "week" | "month" | "year";
 
 export function getStreamContractAddress(chain?: Chain): string {
   const isMainnet = chain?.network === "mainnet";
@@ -22,6 +22,8 @@ export function durationToSeconds(value: number, unit: DurationUnit): number {
     case "month":
       // Use month as 30 days
       return value * 30 * 24 * 60 * 60;
+    case "year":
+      return value * 365 * 24 * 60 * 60;
     default:
       return value;
   }
@@ -34,6 +36,13 @@ export function recordStreamTx(
     tokenSymbol: string;
     txHash: string;
     network: string;
+    creator: string;
+    isCancellable: boolean;
+    isTransferable: boolean;
+    amount: string;
+    duration: number;
+    chainName: string;
+    streamId?: string;
   },
   storage: Pick<Storage, "getItem" | "setItem"> | null =
     typeof window !== "undefined" ? window.localStorage : null

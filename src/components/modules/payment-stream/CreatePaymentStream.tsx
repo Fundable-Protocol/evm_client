@@ -15,7 +15,7 @@ const CreatePaymentStream = () => {
   const { account, address } = useAccount();
   const { tokenOptions } = getTokenOptions(chain);
 
-  const durationOptions = ["hour", "day", "week", "month"].map((option) => ({
+  const durationOptions = ["hour", "day", "week", "month", "year"].map((option) => ({
     label: capitalizeWord(option),
     value: option,
   }));

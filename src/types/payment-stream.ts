@@ -29,5 +29,12 @@ export interface StreamRecord {
   tokenSymbol: string;
   txHash: string;
   network: string;
+  creator: string;
+  isCancellable: boolean;
+  isTransferable: boolean;
+  amount: string;
+  duration: number;
+  chainName: string;
+  streamId?: string;
   createdAt: string;
 }
