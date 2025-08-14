@@ -8,6 +8,7 @@ import { SupportSuccessModal } from "@/components/modules/support/SupportSuccess
 import MailIcon from "@/components/svgs/MailIcon";
 import FarcasterIcon from "@/components/svgs/FarcasterIcon";
 import { SendIcon } from "lucide-react";
+import XIcon from "@/components/svgs/X";
 
 const HelpPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -20,16 +21,29 @@ const HelpPage = () => {
   };
 
   const supportCards = [
+    // {
+    //   id: "email",
+    //   icon: <MailIcon className="w-6 h-6" />,
+    //   title: "Email Support",
+    //   description:
+    //     "Send us a detailed message and we'll get back to you within 24 hours.",
+    //   buttonText: "Send Email",
+    //   contactInfo: "support@fundable.finance",
+    //   action: () => {
+    //     setIsContactModalOpen(true);
+    //   },
+    // },
+
     {
-      id: "email",
-      icon: <MailIcon className="w-6 h-6" />,
-      title: "Email Support",
+      id: "x",
+      icon: <XIcon className="w-6 h-6 text-white" />,
+      title: "X",
       description:
-        "Send us a detailed message and we'll get back to you within 24 hours.",
-      buttonText: "Send Email",
-      contactInfo: "support@fundable.finance",
+        "Chat us on our X and we will get back to you as soon as possible",
+      buttonText: "Send a Message",
+      contactInfo: "@FundableHQ",
       action: () => {
-        setIsContactModalOpen(true);
+        window.open("https://x.com/FundableHQ", "_blank");
       },
     },
 
@@ -45,6 +59,7 @@ const HelpPage = () => {
         window.open(" https://t.me/fundable_finance", "_blank");
       },
     },
+
     // {
     //   id: "discord",
     //   icon: <DiscordIcon className="w-6 h-6" />,

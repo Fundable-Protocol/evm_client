@@ -23,10 +23,10 @@ import DistributionSelector from "@/components/modules/distribution/Distribution
 import {
   tryCatch,
   createEmptyRow,
+  getTokenOptions,
   getContractAddress,
   generateRandomUUID,
   calculateTotalDistributionAmount,
-  getTokenOptions,
 } from "@/lib/utills";
 
 import {
