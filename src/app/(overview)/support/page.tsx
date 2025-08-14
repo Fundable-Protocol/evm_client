@@ -5,7 +5,6 @@ import DashboardLayout from "@/components/layouts/DashboardLayout";
 import SupportCard from "@/components/modules/support/SupportCard";
 import { ContactSupportModal } from "@/components/modules/support/ContactSupportModal";
 import { SupportSuccessModal } from "@/components/modules/support/SupportSuccessModal";
-import MailIcon from "@/components/svgs/MailIcon";
 import FarcasterIcon from "@/components/svgs/FarcasterIcon";
 import { SendIcon } from "lucide-react";
 import XIcon from "@/components/svgs/X";
