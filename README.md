@@ -1,6 +1,6 @@
 # Fundable Frontend
 
-Fundable is a decentralized payment platform built on StarkNet that enables seamless Web3 payments and subscriptions. This repository contains the main frontend application for the Fundable Protocol.
+Fundable is a decentralized payment platform built on Starknet that enables seamless Web3 payments and subscriptions. This repository contains the main frontend application for the Fundable Protocol.
 
 ## Features
 
