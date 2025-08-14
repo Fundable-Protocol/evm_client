@@ -310,7 +310,7 @@ const DistributePage = () => {
       const tx = result.transaction_hash;
 
       // // Wait for receipt
-      const receiptStatus = await provider.waitForTransaction(tx); 
+      const receiptStatus = await provider.waitForTransaction(tx);
 
       // Create distribution record
 
