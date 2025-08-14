@@ -4,10 +4,14 @@ import { v4 as uuidv4 } from "uuid";
 import { twMerge } from "tailwind-merge";
 import { clsx, type ClassValue } from "clsx";
 
+import { shortString } from "starknet";
+
 import {
   MAINNET_CONTRACT_ADDRESS,
+  MAINNET_RPC_URL,
   MAINNET_SUPPORTED_TOKENS,
   TESTNET_CONTRACT_ADDRESS,
+  TESTNET_RPC_URL,
   TESTNET_SUPPORTED_TOKENS,
 } from "../constant";
 import { IDistributionData } from "@/types/distribution";
@@ -66,6 +70,9 @@ export const getContractAddress = (isMainnet: boolean) =>
 
 export const getSupportedTokens = (isMainnet: boolean) =>
   isMainnet ? MAINNET_SUPPORTED_TOKENS : TESTNET_SUPPORTED_TOKENS;
+
+export const getRPCUrl = (isMainnet: boolean) =>
+  isMainnet ? MAINNET_RPC_URL : TESTNET_RPC_URL;
 
 export const getTokenOptions = (chain: Chain) => {
   const isMainNet = chain.network === "mainnet";
@@ -134,6 +141,9 @@ export function generateUUID() {
   return crypto.randomUUID();
 }
 
+export const getDistributionUniqueRef = () => {
+  return shortString.encodeShortString(uuidv4().replace(/-/g, "").slice(0, 31));
+};
 export function generateRandomUUID() {
   return Math.random().toString(36).slice(2);
 }
