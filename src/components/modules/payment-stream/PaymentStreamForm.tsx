@@ -12,11 +12,15 @@ const PaymentStreamForm = ({
   tokenOptions,
   setStreamData,
   durationOptions,
+  onSubmit,
+  isSubmitting,
 }: {
   streamData: StreamData;
   tokenOptions: AppSelectProps["options"];
   durationOptions: AppSelectProps["options"];
   setStreamData: Dispatch<SetStateAction<StreamData>>;
+  onSubmit: () => void;
+  isSubmitting?: boolean;
 }) => {
   const transferabilityOptions = [true, false].map((option) => ({
     label: option ? "Yes" : "No",
@@ -39,6 +43,16 @@ const PaymentStreamForm = ({
             name="name"
             placeholder="Fill in the name of the stream"
             onChange={(e) => handleStreamDataChange("name", e.target.value)}
+          />
+
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-6 my-6">
+          <InputWithLabel
+            title="Total Amount"
+            name="amount"
+            placeholder="Enter total amount to stream"
+            onChange={(e) => handleStreamDataChange("amount", e.target.value)}
           />
 
           <AppSelect
@@ -115,11 +129,14 @@ const PaymentStreamForm = ({
         variant="gradient"
         className="self-end w-fit"
         disabled={
-          !streamData.name || !streamData.durationValue || !streamData.recipient
+          isSubmitting ||
+          !streamData.name ||
+          !streamData.durationValue ||
+          !streamData.recipient
         }
-        // onClick={handleStreamDataSubmit}
+        onClick={onSubmit}
       >
-        <span>Continue</span>
+        <span>{isSubmitting ? "Processing..." : "Continue"}</span>
         <Lock className="w-[0.7rem] h-[0.91rem] font-bold" />
       </Button>
     </div>

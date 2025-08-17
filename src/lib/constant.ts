@@ -77,6 +77,11 @@ export const MAINNET_RPC_URL = process.env.STARKNET_RPC_MAINNET ?? "";
 
 export const TESTNET_RPC_URL = process.env.STARKNET_RPC_TESTNET ?? "";
 
+export const TESTNET_STREAM_CONTRACT_ADDRESS =
+  "0x0150f8e99d665ab76dca2f5816930cf14987d947a6ea7e0934c6ac2b4243b735";
+
+export const MAINNET_STREAM_CONTRACT_ADDRESS = "";
+
 export const distributionState = [
   "process-started",
   "initiate-distribution",
