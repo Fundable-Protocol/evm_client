@@ -5,6 +5,7 @@ const AdminPage = () => {
     <DashboardLayout
       title="Create Campaign"
       className="flex flex-col gap-y-6 h-full"
+      availableNetwork={[""]}
     ></DashboardLayout>
   );
 };

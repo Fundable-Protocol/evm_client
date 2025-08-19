@@ -44,17 +44,15 @@ const PaymentStreamForm = ({
             placeholder="Fill in the name of the stream"
             onChange={(e) => handleStreamDataChange("name", e.target.value)}
           />
-
-        </div>
-
-        <div className="grid lg:grid-cols-2 gap-6 my-6">
           <InputWithLabel
             title="Total Amount"
             name="amount"
             placeholder="Enter total amount to stream"
             onChange={(e) => handleStreamDataChange("amount", e.target.value)}
           />
+        </div>
 
+        <div className="grid lg:grid-cols-2 gap-6 my-6">
           <AppSelect
             className="h-14 placeholder:text-fundable-placeholder"
             titleclassname="text-fundable-light-grey"
@@ -63,9 +61,6 @@ const PaymentStreamForm = ({
             title="Token"
             placeholder={streamData.token}
           />
-        </div>
-
-        <div className="grid lg:grid-cols-2 gap-6 my-6">
           <AppSelect
             className="h-14 placeholder:text-fundable-placeholder"
             titleclassname="text-fundable-light-grey"
@@ -76,7 +71,9 @@ const PaymentStreamForm = ({
             title="Make the stream transferable?"
             placeholder={streamData.transferability ? "Yes" : "No"}
           />
+        </div>
 
+        <div className="grid lg:grid-cols-2 gap-6 my-6">
           <AppSelect
             className="h-14 placeholder:text-fundable-placeholder"
             titleclassname="text-fundable-light-grey"
@@ -87,9 +84,6 @@ const PaymentStreamForm = ({
             title="Make the stream cancellable?"
             placeholder={streamData.cancellability ? "Yes" : "No"}
           />
-        </div>
-
-        <div className="grid lg:grid-cols-2 gap-6 my-6 ">
           <InputWithLabel
             title="Recipient"
             name="recipient"
@@ -98,7 +92,9 @@ const PaymentStreamForm = ({
               handleStreamDataChange("recipient", e.target.value)
             }
           />
+        </div>
 
+        <div className="grid lg:grid-cols-2 gap-6 my-6 ">
           <div className="flex flex-col">
             <h3 className="font-semibold text-fundable-white mb-3 text-nowrap">
               Streaming Duration
