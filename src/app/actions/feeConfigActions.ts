@@ -47,7 +47,10 @@ export async function getProtocolFee(
 ) {
   try {
     const andQuery = and(
-      eq(feeConfigModel.network, network),
+      eq(
+        feeConfigModel.network,
+        network?.toUpperCase() as "mainnet" | "testnet"
+      ),
       ilike(feeConfigModel.chainName, chainName)
     );
 
