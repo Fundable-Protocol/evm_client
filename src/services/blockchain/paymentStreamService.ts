@@ -1,8 +1,8 @@
 import type { Call, AccountInterface } from "starknet";
-import { cairo } from "starknet";
+import { cairo, num } from "starknet";
 import { Chain } from "@starknet-react/chains";
 
-import { getStreamContractAddress, durationToSeconds, recordStreamTx } from "@/lib/utills/stream";
+import { getStreamContractAddress, durationToSeconds, recordStreamTx, normalizeAddress } from "@/lib/utills/stream";
 import { getSupportedTokens } from "@/lib/utills";
 import type { CreateStreamParams, CreateStreamResponse } from "@/types/payment-stream";
 
@@ -59,9 +59,34 @@ export class PaymentStreamService {
 
       const result = await account.execute(calls);
       const tx = result.transaction_hash;
+      const waited = await account.waitForTransaction(tx);
 
-      await account.waitForTransaction(tx);
+      // extract stream id from the transaction receipt events
+      let streamId: string | undefined = undefined;
+      type MinimalEvent = { from_address: string; keys?: string[]; data?: string[] };
+      type MinimalReceipt = { events?: MinimalEvent[] };
+      const receipt = (waited as unknown) as MinimalReceipt;
+      const events = receipt?.events ?? [];
+      const streamEvents = events.filter(
+        (e) => typeof e?.from_address === "string" && normalizeAddress(e.from_address) === normalizeAddress(contractAddress)
+      );
 
+      // try matching by StreamCreated selector
+      const streamCreatedSelector = "0x289bd09ddaa7c41a0543ffe671c3d622964f675a5af7f14f27e1d3b46bd8194".toLowerCase();
+      const candidate = streamEvents.find((e) => e?.keys?.[0]?.toLowerCase() === streamCreatedSelector);
+
+
+      if (candidate?.keys && candidate.keys.length > 1) {
+        const id = candidate.keys[1];
+        try {
+          // validate it is numeric
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const _ = num.toBigInt(id);
+          streamId = id;
+        } catch {
+          streamId = undefined;
+        }
+      }
       recordStreamTx(
         {
           name: params.name,
@@ -75,6 +100,7 @@ export class PaymentStreamService {
           amount: params.totalAmount,
           duration: durationSeconds,
           chainName: chain?.name || "sepolia",
+          streamId: Number(streamId),
         },
         typeof window !== "undefined" ? window.localStorage : null
       );

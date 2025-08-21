@@ -11,6 +11,15 @@ export function getStreamContractAddress(chain?: Chain): string {
     : TESTNET_STREAM_CONTRACT_ADDRESS;
 }
 
+
+export function normalizeAddress(address?: string): string {
+  if (!address) return "";
+  const lower = address.toLowerCase();
+  const noPrefix = lower.startsWith("0x") ? lower.slice(2) : lower;
+  const trimmed = noPrefix.replace(/^0+/, "");
+  return `0x${trimmed}`;
+}
+
 export function durationToSeconds(value: number, unit: DurationUnit): number {
   switch (unit) {
     case "hour":
@@ -42,7 +51,7 @@ export function recordStreamTx(
     amount: string;
     duration: number;
     chainName: string;
-    streamId?: string;
+    streamId?: number;
   },
   storage: Pick<Storage, "getItem" | "setItem"> | null =
     typeof window !== "undefined" ? window.localStorage : null
