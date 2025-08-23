@@ -8,6 +8,7 @@ const PaymentStream = () => {
     <DashboardLayout
       title="Create Stream"
       className="flex flex-col gap-y-6 h-full"
+      availableNetwork={["testnet"]}
     >
       <CreatePaymentStream />
     </DashboardLayout>

@@ -7,7 +7,6 @@ export async function recordStreamOnServer(data: {
   txHash: string;
   network: string;
 }) {
-  // no-op for now (client localStorage is used). 
-  return { ok: true };
+  // no-op for now (client localStorage is used).
+  return { ok: !!data };
 }
-

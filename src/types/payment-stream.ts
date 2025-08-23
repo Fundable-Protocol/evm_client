@@ -1,16 +1,4 @@
-// TODO: Add types for payment stream
-
-/*
-
-    name: "",
-    recipient: "",
-    token: tokenOptions[0].value,
-    duration: durationOptions[0].value,
-    durationValue: "",
-    cancellability: false,
-    transferability: false,
-
-*/
+import type { DurationUnit } from "@/lib/utills/stream";
 
 export interface StreamData {
   name: string;
@@ -38,3 +26,24 @@ export interface StreamRecord {
   streamId: string;
   createdAt: string;
 }
+
+export interface CreateStreamParams {
+  name: string;
+  recipient: string;
+  tokenSymbol: string;
+  totalAmount: string;
+  durationValue: number;
+  durationUnit: DurationUnit;
+  cancellable: boolean;
+  transferable: boolean;
+}
+
+export interface CreateStreamResult {
+  transactionHash: string;
+}
+
+export type CreateStreamResponse = {
+  success: boolean;
+  data?: CreateStreamResult;
+  message?: string;
+};

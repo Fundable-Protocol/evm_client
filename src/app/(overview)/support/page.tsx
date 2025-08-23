@@ -101,7 +101,11 @@ const HelpPage = () => {
   ];
 
   return (
-    <DashboardLayout title="" className="h-screen overflow-hidden">
+    <DashboardLayout
+      title=""
+      className="h-screen overflow-hidden"
+      availableNetwork={["testnet", "mainnet"]}
+    >
       <div className="h-full flex flex-col">
         <div className="mb-6 flex-shrink-0">
           <p className="text-[#E1E1E1] text-sm sm:text-xl max-w-4xl mx-auto text-center">
