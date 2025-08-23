@@ -17,10 +17,12 @@ const CreatePaymentStream = () => {
   const { account, address } = useAccount();
   const { tokenOptions } = getTokenOptions(chain);
 
-  const durationOptions = ["hour", "day", "week", "month", "year"].map((option) => ({
-    label: capitalizeWord(option),
-    value: option,
-  }));
+  const durationOptions = ["hour", "day", "week", "month", "year"].map(
+    (option) => ({
+      label: capitalizeWord(option),
+      value: option,
+    })
+  );
 
   const [streamData, setStreamData] = useState({
     name: "",
@@ -38,7 +40,10 @@ const CreatePaymentStream = () => {
   const selectedTokenDecimals = useMemo(() => {
     const option = tokenOptions.find((o) => o.value === streamData.token);
     const { SUPPORTED_TOKENS } = getTokenOptions(chain);
-    const token = SUPPORTED_TOKENS[(option?.value || "STRK") as keyof typeof SUPPORTED_TOKENS];
+    const token =
+      SUPPORTED_TOKENS[
+        (option?.value || "STRK") as keyof typeof SUPPORTED_TOKENS
+      ];
     return token.decimals;
   }, [tokenOptions, streamData.token, chain]);
 
@@ -52,27 +57,32 @@ const CreatePaymentStream = () => {
       const schema = createPaymentStreamSchema(tokenOptions, durationOptions);
       const parsed = schema.safeParse(streamData);
       if (!parsed.success) {
-        const firstErr = parsed.error.issues[0]?.message || "Invalid form input";
+        const firstErr =
+          parsed.error.issues[0]?.message || "Invalid form input";
         toast.error(firstErr);
         setIsSubmitting(false);
         return;
       }
-      const totalAmountScaled = parseUnits(streamData.amount, selectedTokenDecimals).toString();
+      const totalAmountScaled = parseUnits(
+        streamData.amount,
+        selectedTokenDecimals
+      ).toString();
 
-      const result: CreateStreamResponse = await PaymentStreamService.createStream(
-        account as AccountInterface,
-        chain,
-        {
-          name: streamData.name,
-          recipient: streamData.recipient,
-          tokenSymbol: streamData.token,
-          totalAmount: totalAmountScaled,
-          durationValue: Number(streamData.durationValue),
-          durationUnit: streamData.duration as DurationUnit,
-          cancellable: Boolean(streamData.cancellability),
-          transferable: Boolean(streamData.transferability),
-        }
-      );
+      const result: CreateStreamResponse =
+        await PaymentStreamService.createStream(
+          account as AccountInterface,
+          chain,
+          {
+            name: streamData.name,
+            recipient: streamData.recipient,
+            tokenSymbol: streamData.token,
+            totalAmount: totalAmountScaled,
+            durationValue: Number(streamData.durationValue),
+            durationUnit: streamData.duration as DurationUnit,
+            cancellable: Boolean(streamData.cancellability),
+            transferable: Boolean(streamData.transferability),
+          }
+        );
 
       if (!result.success || !result.data) {
         const msg = result.message || "Failed to create stream";
@@ -81,7 +91,10 @@ const CreatePaymentStream = () => {
       }
 
       const { transactionHash } = result.data;
-      toast.success(`Stream created successfully!: ${transactionHash.slice(0, 10)}...`);
+
+      toast.success(
+        `Stream created successfully!: ${transactionHash.slice(0, 10)}...`
+      );
       // Reset form to initial state
       setStreamData({
         name: "",
@@ -95,7 +108,8 @@ const CreatePaymentStream = () => {
       });
       setFormKey((k) => k + 1);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to create stream";
+      const message =
+        error instanceof Error ? error.message : "Failed to create stream";
       toast.error(message);
     } finally {
       setIsSubmitting(false);
