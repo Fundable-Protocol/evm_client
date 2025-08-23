@@ -1,5 +1,4 @@
 import type { DurationUnit } from "@/lib/utills/stream";
-import type { ErrorWithCode } from ".";
 
 export interface StreamData {
   name: string;
@@ -32,7 +31,7 @@ export interface CreateStreamParams {
   name: string;
   recipient: string;
   tokenSymbol: string;
-  totalAmount: string; 
+  totalAmount: string;
   durationValue: number;
   durationUnit: DurationUnit;
   cancellable: boolean;
