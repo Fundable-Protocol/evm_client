@@ -5,6 +5,7 @@ import "./globals.css";
 import { headers } from 'next/headers'
 import AppProvider from "../providers/app-provider";
 import { geistMono, geistSans, syneSans, urbanistFont } from "@/assets/fonts";
+import { Analytics } from "@vercel/analytics/react";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -55,6 +56,7 @@ export default async function RootLayout({
         className={`${bricolageGrotesque.variable} ${geistSans.variable} ${geistMono.variable} ${inter.className} ${syneSans.variable} ${urbanistFont.variable} antialiased bg-black overflow-hidden`}
       >
         <AppProvider cookies={cookies}>{children}</AppProvider>
+        <Analytics />
       </body>
     </html>
   );

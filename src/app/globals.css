@@ -22,6 +22,7 @@
   --color-fundable-purple-2: var(--fundable-purple-2);
   --color-fundable-deep-purple: var(--fundable-deep-purple);
   --color-fundable-white: #c9ccd2;
+  --color-fundable-faint-white: var(--fundable-faint-white);
 
   --color-fundable-deep-purple-light: color-mix(
     in oklab,
@@ -107,6 +108,7 @@
   --fundable-purple-2: #8256ff;
   --fundable-violet: #5b21b6;
   --fundable-deep-purple: #440495;
+  --fundable-faint-white: #E1E1E1;
 
   /* Existing Styles */
   --radius: 0.625rem;
@@ -279,5 +281,16 @@
         transparent 24px
       )
       10;
+  }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
   }
 }
