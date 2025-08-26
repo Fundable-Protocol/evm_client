@@ -38,30 +38,65 @@ export function durationToSeconds(value: number, unit: DurationUnit): number {
   }
 }
 
-export function recordStreamTx(
-  data: {
-    name: string;
-    recipient: string;
-    tokenSymbol: string;
-    txHash: string;
+export async function recordStreamTransaction(
+  streamData: {
+    usdRate?: string;
+    transactionStatus?: string;
     network: string;
-    creator: string;
-    isCancellable: boolean;
-    isTransferable: boolean;
-    amount: string;
     duration: number;
+    tokenDecimals: number;
+    tokenSymbol: string;
+    isCancellable: boolean;
     chainName: string;
-    streamId?: number;
-  },
-  storage: Pick<Storage, "getItem" | "setItem"> | null =
-    typeof window !== "undefined" ? window.localStorage : null
-): void {
-  if (!storage) return;
-  const key = "fundable:lastStreamTx";
-  const existing = storage.getItem(key);
-  const list = existing ? (JSON.parse(existing) as unknown[]) : [];
-  list.unshift({ ...data, createdAt: new Date().toISOString() });
-  storage.setItem(key, JSON.stringify(list.slice(0, 25)));
+    streamId: string;
+    creator: string;
+    recipient: string;
+    amount: string;
+    tokenAddress: string;
+    isTransferable: boolean;
+    transactionHash: string;
+    totalUsdAmount?: string;
+  }
+): Promise<void> {
+  try {
+    const payload = {
+      usd_rate: streamData.usdRate || "0.00",
+      status: streamData.transactionStatus || "COMPLETED",
+      network: streamData.network.toUpperCase(),
+      duration: streamData.duration,
+      token_decimals: streamData.tokenDecimals,
+      token_symbol: streamData.tokenSymbol,
+      is_cancellable: streamData.isCancellable,
+      chain_name: streamData.chainName,
+      created_at: Math.floor(Date.now() / 1000),
+      is_transferable: streamData.isTransferable,
+      total_usd_amount: streamData.totalUsdAmount || "0.00",
+      stream_id: streamData.streamId,
+      amount: streamData.amount,
+      creator: streamData.creator,
+      recipient: streamData.recipient,
+      token_address: streamData.tokenAddress,
+      transaction_hash: streamData.transactionHash,
+    };
+
+    const response = await fetch(
+      "https://backend-main-no3f.onrender.com/api/payment-streams",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-wallet-id": streamData.creator,
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    if (!response.ok) {
+
+    }
+  } catch {
+
+  }
 }
 
 

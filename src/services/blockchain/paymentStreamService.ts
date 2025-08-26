@@ -5,10 +5,11 @@ import { Chain } from "@starknet-react/chains";
 import {
   getStreamContractAddress,
   durationToSeconds,
-  recordStreamTx,
   normalizeAddress,
+  recordStreamTransaction,
 } from "@/lib/utills/stream";
 import { getSupportedTokens } from "@/lib/utills";
+import { fetchTokenPrices } from "@/services/apiServices";
 import type {
   CreateStreamParams,
   CreateStreamResponse,
@@ -103,23 +104,40 @@ export class PaymentStreamService {
         }
       }
 
-      recordStreamTx(
-        {
-          name: params.name,
-          recipient: params.recipient,
-          tokenSymbol: params.tokenSymbol,
-          txHash: tx,
-          network: chain?.network || "sepolia",
+      // record stream transaction to backend
+      const tokenInfo = SUPPORTED_TOKENS[params.tokenSymbol as keyof typeof SUPPORTED_TOKENS];
+      if (tokenInfo) {
+        // Get USD rate for the token
+        const tokenPrices = await fetchTokenPrices(["starknet", "ethereum"]);
+        let usdRate = 1;
+        
+        if (params.tokenSymbol === "STRK") {
+          usdRate = tokenPrices?.["starknet"]?.usd ?? 1;
+        } else if (params.tokenSymbol === "ETH") {
+          usdRate = tokenPrices?.["ethereum"]?.usd ?? 1;
+        }
+        
+        // Calculate total USD amount
+        const totalUsdAmount = (Number(params.totalAmount) / Math.pow(10, tokenInfo.decimals)) * usdRate;
+        
+        await recordStreamTransaction({
+          streamId: streamId ? BigInt(streamId).toString() : "UNKNOWN",
           creator: account.address,
+          recipient: params.recipient,
+          amount: params.totalAmount,
+          tokenSymbol: params.tokenSymbol,
+          tokenAddress: tokenInfo.address,
+          tokenDecimals: tokenInfo.decimals,
+          duration: durationSeconds,
           isCancellable: params.cancellable,
           isTransferable: params.transferable,
-          amount: params.totalAmount,
-          duration: durationSeconds,
+          network: chain?.network || "sepolia",
           chainName: chain?.name || "sepolia",
-          ...(streamId && { streamId: parseInt(streamId, 16) }),
-        },
-        typeof window !== "undefined" ? window.localStorage : null
-      );
+          transactionHash: tx,
+          usdRate: usdRate.toString(),
+          totalUsdAmount: totalUsdAmount.toFixed(2),
+        });
+      }
 
       return { success: true, data: { transactionHash: tx } };
     } catch (error) {
