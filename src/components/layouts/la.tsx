@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 
 import AdminNavbar from "@/components/organisms/AdminNavbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/ui/app-sidebar";
+import { AppSidebar } from "@/components/ui/app-sidebar";x
 
 const layout = ({ children }: { children: ReactNode }) => {
   return (
