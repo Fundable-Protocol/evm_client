@@ -12,11 +12,15 @@ const PaymentStreamForm = ({
   tokenOptions,
   setStreamData,
   durationOptions,
+  onSubmit,
+  isSubmitting,
 }: {
   streamData: StreamData;
   tokenOptions: AppSelectProps["options"];
   durationOptions: AppSelectProps["options"];
   setStreamData: Dispatch<SetStateAction<StreamData>>;
+  onSubmit: () => void;
+  isSubmitting?: boolean;
 }) => {
   const transferabilityOptions = [true, false].map((option) => ({
     label: option ? "Yes" : "No",
@@ -40,7 +44,15 @@ const PaymentStreamForm = ({
             placeholder="Fill in the name of the stream"
             onChange={(e) => handleStreamDataChange("name", e.target.value)}
           />
+          <InputWithLabel
+            title="Total Amount"
+            name="amount"
+            placeholder="Enter total amount to stream"
+            onChange={(e) => handleStreamDataChange("amount", e.target.value)}
+          />
+        </div>
 
+        <div className="grid lg:grid-cols-2 gap-6 my-6">
           <AppSelect
             className="h-14 placeholder:text-fundable-placeholder"
             titleclassname="text-fundable-light-grey"
@@ -49,9 +61,6 @@ const PaymentStreamForm = ({
             title="Token"
             placeholder={streamData.token}
           />
-        </div>
-
-        <div className="grid lg:grid-cols-2 gap-6 my-6">
           <AppSelect
             className="h-14 placeholder:text-fundable-placeholder"
             titleclassname="text-fundable-light-grey"
@@ -62,7 +71,9 @@ const PaymentStreamForm = ({
             title="Make the stream transferable?"
             placeholder={streamData.transferability ? "Yes" : "No"}
           />
+        </div>
 
+        <div className="grid lg:grid-cols-2 gap-6 my-6">
           <AppSelect
             className="h-14 placeholder:text-fundable-placeholder"
             titleclassname="text-fundable-light-grey"
@@ -73,9 +84,6 @@ const PaymentStreamForm = ({
             title="Make the stream cancellable?"
             placeholder={streamData.cancellability ? "Yes" : "No"}
           />
-        </div>
-
-        <div className="grid lg:grid-cols-2 gap-6 my-6 ">
           <InputWithLabel
             title="Recipient"
             name="recipient"
@@ -84,7 +92,9 @@ const PaymentStreamForm = ({
               handleStreamDataChange("recipient", e.target.value)
             }
           />
+        </div>
 
+        <div className="grid lg:grid-cols-2 gap-6 my-6 ">
           <div className="flex flex-col">
             <h3 className="font-semibold text-fundable-white mb-3 text-nowrap">
               Streaming Duration
@@ -115,11 +125,14 @@ const PaymentStreamForm = ({
         variant="gradient"
         className="self-end w-fit"
         disabled={
-          !streamData.name || !streamData.durationValue || !streamData.recipient
+          isSubmitting ||
+          !streamData.name ||
+          !streamData.durationValue ||
+          !streamData.recipient
         }
-        // onClick={handleStreamDataSubmit}
+        onClick={onSubmit}
       >
-        <span>Continue</span>
+        <span>{isSubmitting ? "Processing..." : "Continue"}</span>
         <Lock className="w-[0.7rem] h-[0.91rem] font-bold" />
       </Button>
     </div>

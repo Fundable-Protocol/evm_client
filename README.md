@@ -4,7 +4,7 @@ Fundable is a decentralized payment platform built on StarkNet that enables seam
 
 ## Features
 
-- 🔒 Secure Web3 payments powered by StarkNet
+- 🔒 Secure Web3 payments powered by Starknet
 - 💳 Recurring subscription management
 - 🌐 Cross-chain payment solutions
 - 👥 User-friendly dashboard for payment management

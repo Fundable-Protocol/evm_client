@@ -2,7 +2,15 @@ import Link from "next/link";
 import Image from "next/image";
 
 import FundableLogo from "../../../public/svgs/fundable_logo.svg";
-import { FaqGradientButton } from "../modules/landing-page/FaqAccordionSection";
+
+export const FaqGradientButton = ({ text }: { text: string }) => {
+  return (
+    <div className="faq-wrapper">
+      <span className="faq-top-grad" />
+      <span className="faq-bottom-grad">{text}</span>
+    </div>
+  );
+};
 
 // const links = [
 //   { name: "For Developers", href: "#" },
@@ -43,7 +51,9 @@ const Footer = () => {
               <h4 className="mb-2 text-gray-400 font-semibold text-sm">
                 CONTACT US
               </h4>
-              <span className="text-sm font-medium">admin@fundable.finance</span>
+              <span className="text-sm font-medium">
+                admin@fundable.finance
+              </span>
             </div>
           </div>
         </div>

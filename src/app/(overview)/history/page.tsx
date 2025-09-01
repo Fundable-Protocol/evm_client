@@ -65,7 +65,10 @@ const HistoryPageContent = () => {
   };
 
   return (
-    <DashboardLayout title="Transaction History">
+    <DashboardLayout
+      title="Transaction History"
+      availableNetwork={["testnet", "mainnet"]}
+    >
       <div className="h-full overflow-y-auto">
         {address && isPending ? (
           <HistoryTableSkeleton />
