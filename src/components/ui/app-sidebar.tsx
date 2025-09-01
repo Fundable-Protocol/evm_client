@@ -22,7 +22,7 @@ import EyeIcon from "../svgs/EyeIcon";
 const items = [
   {
     title: "Dashboard",
-    url: "/dashboard",
+    url: "/",
     icon: <DashboardIcon aria-hidden="true" />,
   },
   {
