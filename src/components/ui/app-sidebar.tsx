@@ -65,7 +65,7 @@ export function AppSidebar() {
       className="pt-7 bg-fundable-mid-grey/10"
       aria-label="Main navigation"
     >
-      <Link href="/">
+      <Link href="https://fundable.finance">
         <Image src={Logo} alt="Fundable Logo" priority className="pl-8 mb-12" />
       </Link>
       <div className="pr-4 pl-5 pb-16 flex-1 flex flex-col justify-between">
