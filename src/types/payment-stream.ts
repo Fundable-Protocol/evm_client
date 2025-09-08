@@ -11,6 +11,17 @@ export interface StreamData {
   transferability: boolean;
 }
 
+export interface Stream {
+  id: number;
+  recipient: string;
+  amountPerSecond: number;
+  startDate: string;
+  endDate: string;
+  token: string;
+  status: string;
+}
+
+
 export interface StreamRecord {
   name: string;
   recipient: string;
