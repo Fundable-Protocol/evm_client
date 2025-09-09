@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import currency from "currency.js";
-import { useAccount, useSendCalls} from "wagmi";
+import { useAccount, useSendCalls, useWriteContract } from "wagmi";
 import { encodeFunctionData } from "viem";
 
 import DashboardLayout from "@/components/layouts/DashboardLayout";
@@ -35,21 +35,24 @@ import { ErrorWithCode } from "@/types";
 // import { useStarkNameResolver } from "@/hooks/useStarkNameResolver";
 import { createDistributionAction } from "@/app/actions/distributionActions";
 import DistributionConfirmationModal from "@/components/modules/distribution/DistributionConfirmationModal";
-import { getBalance, waitForCallsStatus } from "@wagmi/core";
+import { getBalance, waitForCallsStatus, waitForTransactionReceipt } from "@wagmi/core";
 import { config } from "@/config";
 import { fetchProtocolFee } from "@/lib/api";
 import { fetchTokenPrices } from "@/services/apiServices";
+import { EIP_7702_CHAINS } from "@/lib/constant";
 
 const DistributePage = () => {
   const { address, chain } = useAccount();
   const { sendCallsAsync } = useSendCalls();
+  const { writeContractAsync } = useWriteContract();
   // const { data: callReceipts, isSuccess, isError } = useWaitForCallsStatus({
   //   id: bundle?.id,
   //   pollingInterval: 1000,
   // });
   // console.log("callReceipts", callReceipts);
-  const chainNames = ["base", "ethereum", "bnb smart chain", "arbitrum"];
+  const chainNames = ["base", "ethereum", "bnb smart chain", "arbitrum", "lisk"];
   const chainName = chain?.name?.toLowerCase() || "";
+  const isEip7702Chain = EIP_7702_CHAINS.includes(chainName as any);
   console.log("chainName", chainName);
 
   const router = useRouter();
@@ -253,44 +256,48 @@ const DistributePage = () => {
         throw new Error("Insufficient balance");
       }
 
+      const erc20ApproveAbi = [{
+        name: 'approve',
+        type: 'function',
+        stateMutability: 'nonpayable',
+        inputs: [
+          { name: 'spender', type: 'address' },
+          { name: 'amount', type: 'uint256' }
+        ],
+        outputs: [{ name: '', type: 'bool' }]
+      }] as const;
+
       const approveCall = {
         to: selectedToken.address as `0x${string}`,
         data: encodeFunctionData({
-          abi: [{
-            name: 'approve',
-            type: 'function',
-            stateMutability: 'nonpayable',
-            inputs: [
-              { name: 'spender', type: 'address' },
-              { name: 'amount', type: 'uint256' }
-            ],
-            outputs: [{ name: '', type: 'bool' }]
-          }],
+          abi: erc20ApproveAbi as unknown as any,
           functionName: 'approve',
           args: [CONTRACT_ADDRESS as `0x${string}`, totalAmountWithFee]
         })
       };
 
+      const distributionAbi = [{
+        name: distributionInfo.type === 'equal' ? 'distribute' : 'distribute_weighted',
+        type: 'function',
+        stateMutability: 'nonpayable',
+        inputs: distributionInfo.type === 'equal'
+          ? [
+              { name: 'amount', type: 'uint256' },
+              { name: 'recipients', type: 'address[]' },
+              { name: 'token', type: 'address' }
+            ]
+          : [
+              { name: 'amounts', type: 'uint256[]' },
+              { name: 'recipients', type: 'address[]' },
+              { name: 'token', type: 'address' }
+            ],
+        outputs: []
+      }] as const;
+
       const distributeCall = {
         to: CONTRACT_ADDRESS as `0x${string}`,
         data: encodeFunctionData({
-          abi: [{
-            name: distributionInfo.type === 'equal' ? 'distribute' : 'distribute_weighted',
-            type: 'function',
-            stateMutability: 'nonpayable',
-            inputs: distributionInfo.type === 'equal' 
-              ? [
-                  { name: 'amount', type: 'uint256' },
-                  { name: 'recipients', type: 'address[]' },
-                  { name: 'token', type: 'address' }
-                ]
-              : [
-                  { name: 'amounts', type: 'uint256[]' },
-                  { name: 'recipients', type: 'address[]' },
-                  { name: 'token', type: 'address' }
-                ],
-            outputs: []
-          }],
+          abi: distributionAbi as unknown as any,
           functionName: distributionInfo.type === 'equal' ? 'distribute' : 'distribute_weighted',
           args: distributionInfo.type === 'equal'
             ? [amounts![0], recipients, selectedToken.address as `0x${string}`]
@@ -298,15 +305,50 @@ const DistributePage = () => {
         })
       };
 
-     const result = await sendCallsAsync({ calls: [approveCall, distributeCall] });
-     console.log("result", result);
+     let transactionHash: `0x${string}` | undefined;
 
-     const { receipts } = await waitForCallsStatus(config, {
-      id: result?.id,
-      pollingInterval: 1000,
-     });
+     if (isEip7702Chain) {
+       const result = await sendCallsAsync({ calls: [approveCall, distributeCall] });
+       console.log("result", result);
 
-     const transactionHash = receipts?.[0]?.transactionHash;
+       const { receipts } = await waitForCallsStatus(config, {
+        id: result?.id,
+        pollingInterval: 1000,
+       });
+
+       transactionHash = receipts?.[0]?.transactionHash as `0x${string}` | undefined;
+     } else {
+       toast.dismiss();
+       toast.loading("Approving tokens...", {
+         duration: Number.POSITIVE_INFINITY,
+       });
+
+       // Fallback: send sequential transactions
+       const approveHash = await writeContractAsync({
+         address: selectedToken.address as `0x${string}`,
+         abi: erc20ApproveAbi as unknown as any,
+         functionName: 'approve',
+         args: [CONTRACT_ADDRESS as `0x${string}`, totalAmountWithFee]
+       });
+       await waitForTransactionReceipt(config, { hash: approveHash });
+
+       toast.dismiss();
+       toast.loading("Distributing tokens...", {
+         duration: Number.POSITIVE_INFINITY,
+       });
+
+       const distributeHash = await writeContractAsync({
+         address: CONTRACT_ADDRESS as `0x${string}`,
+         abi: distributionAbi as unknown as any,
+         functionName: distributionInfo.type === 'equal' ? 'distribute' : 'distribute_weighted',
+         args: distributionInfo.type === 'equal'
+           ? [amounts![0], recipients, selectedToken.address as `0x${string}`]
+           : [amounts!, recipients, selectedToken.address as `0x${string}`]
+       });
+       const distributeReceipt = await waitForTransactionReceipt(config, { hash: distributeHash });
+       // Prefer the receipt's hash if available
+       transactionHash = (distributeReceipt as any)?.transactionHash ?? distributeHash;
+     }
 
      if (!transactionHash) {
       throw new Error("Transaction failed, check Onchain History for more details");

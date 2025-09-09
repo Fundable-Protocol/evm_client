@@ -41,6 +41,12 @@ export const SUPPORTED_TOKENS: Record<
       USDC: { symbol: "USDC", address: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d", decimals: 18 },
       LUR: { symbol: "LUR", address: "0xc66B6f38aE5053A109cfd8639E0Ee17EC69cf788", decimals: 18 },
     },
+    lisk : {
+      USDC: { symbol: "USDC", address: "0xF242275d3a6527d877f2c927a82D9b057609cc71", decimals: 6 },
+      LSK: { symbol: "LSK", address: "0xac485391EB2d7D88253a7F1eF18C37f4242D1A24", decimals: 18 },
+      USDT: { symbol: "USDT", address: "0x05D032ac25d322df992303dCa074EE7392C117b9", decimals: 6 },
+      ETH: { symbol: "ETH", address: "0x0000000000000000000000000000000000000000", decimals: 18 },
+    }
     // ...add more chains as needed
   },
   testnet: {
@@ -52,6 +58,9 @@ export const SUPPORTED_TOKENS: Record<
     },
     arbitrum: {
       USDC: { symbol: "USDC", address: "0x0000000000000000000000000000000000000004", decimals: 6 },
+    },
+    "lisk sepolia": {
+      USDC: { symbol: "USDC", address: "0x0E82fDDAd51cc3ac12b69761C45bBCB9A2Bf3C83", decimals: 6 },
     },
     // ...add more chains as needed
   },
@@ -84,3 +93,14 @@ export const featureCardImgTypes = ["airdrop", "stream"] as const;
 export const apiSecretKey = process.env.API_SECRET_KEY || "";
 
 export const validPageLimits = [10, 20, 50] as const;
+
+// Chains that support EIP-7702 style bundled calls via sendCallsAsync
+// Values must match chain.name.toLowerCase()
+export const EIP_7702_CHAINS = [
+  "ethereum",
+  "base",
+  "arbitrum",
+  "bnb smart chain",
+  // add/remove chains as support evolves
+  // e.g., "arbitrum", "sepolia", "base sepolia"
+] as const;

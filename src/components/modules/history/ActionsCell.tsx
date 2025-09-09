@@ -32,10 +32,8 @@ const ActionsCell = ({ distribution }: ActionsCellProps) => {
   const { chain } = useAccount();
   const router = useRouter();
 
-  // Safely get the explorer URL from the chain object
-  const explorerUrl = chain?.blockExplorers?.default?.url
-  ? chain.blockExplorers.default.url
-  : undefined;
+  // No longer rely on the connected wallet's chain explorer.
+  // We will derive the explorer from distribution.network/chain_name.
 
   const handleViewDetails = () => {
     setIsDetailsModalOpen((prev) => !prev);
@@ -68,7 +66,7 @@ const ActionsCell = ({ distribution }: ActionsCellProps) => {
       label: "View on Explorer",
       icon: ExternalLink,
       onClick: (distribution: ActionsCellProps["distribution"]) => {
-        const url = getExplorerUrl(distribution, explorerUrl!);
+        const url = getExplorerUrl(distribution);
         if (url) window.open(url, "_blank");
       },
     },
