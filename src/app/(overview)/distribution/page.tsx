@@ -1,11 +1,11 @@
 "use client";
 
 import toast from "react-hot-toast";  
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import currency from "currency.js";
 import { useAccount, useSendCalls, useWriteContract } from "wagmi";
-import { encodeFunctionData } from "viem";
+import { encodeFunctionData, type Abi, type TransactionReceipt } from "viem";
 
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import DistributionFileUpload from "@/components/modules/distribution/DistributionFileUpload";
@@ -40,6 +40,7 @@ import { config } from "@/config";
 import { fetchProtocolFee } from "@/lib/api";
 import { fetchTokenPrices } from "@/services/apiServices";
 import { EIP_7702_CHAINS } from "@/lib/constant";
+import { resendDistributionPayload } from "@/store/distributionEntity";
 
 const DistributePage = () => {
   const { address, chain } = useAccount();
@@ -52,7 +53,7 @@ const DistributePage = () => {
   // console.log("callReceipts", callReceipts);
   const chainNames = ["base", "ethereum", "bnb smart chain", "arbitrum", "lisk"];
   const chainName = chain?.name?.toLowerCase() || "";
-  const isEip7702Chain = EIP_7702_CHAINS.includes(chainName as any);
+  const isEip7702Chain = (EIP_7702_CHAINS as readonly string[]).includes(chainName);
   console.log("chainName", chainName);
 
   const router = useRouter();
@@ -61,10 +62,10 @@ const DistributePage = () => {
   const SUPPORTED_TOKENS = getSupportedTokens(network, chainName);
   console.log("SUPPORTED_TOKENS", SUPPORTED_TOKENS);
 
-  const supportedTokens = Object.values(SUPPORTED_TOKENS).map((token) => ({
+  const supportedTokens = useMemo(() => Object.values(SUPPORTED_TOKENS).map((token) => ({
     label: token.symbol,
     value: token.symbol,
-  }));
+  })), [SUPPORTED_TOKENS]);
 
   const [distributionInfo, setDistributionInfo] = useState<IDistributionInfo>({
     amount: 0,
@@ -84,6 +85,46 @@ const DistributePage = () => {
   const [distributionData, setDistributionData] = useState<IDistributionData[]>(
     [createEmptyRow()]
   );
+
+  // Prefill from resend payload if available
+  useEffect(() => {
+    const payload = resendDistributionPayload.get();
+    if (!payload) return;
+
+    // Map token by symbol if available in current chain/token list
+    const tokenSymbol = payload.token_symbol || supportedTokens[0]?.value || "USDC";
+    const tokenExistsOnChain = supportedTokens.some((t) => t.value.toLowerCase() === tokenSymbol.toLowerCase());
+    const selectedTokenSymbol = tokenExistsOnChain ? tokenSymbol : (supportedTokens[0]?.value || "USDC");
+
+    // Determine type and equalAmountType
+    const type = (payload.distribution_type?.toLowerCase() as IDistributionInfo["type"]) || "equal";
+    const recipients = payload.metadata?.recipients || payload.recipients || [];
+    const hasAnyLabel = recipients.some((r) => !!r.label);
+
+    setDistributionInfo((prev) => ({
+      ...prev,
+      type,
+      showLabel: hasAnyLabel,
+      equalAmountType: type === "equal" ? "amount_per_address" : prev.equalAmountType,
+      selectedToken: selectedTokenSymbol,
+      amount: type === "equal" ? Number(recipients?.[0]?.amount ?? 0) : 0,
+    }));
+
+    // Populate rows
+    const rows: IDistributionData[] = (recipients.length ? recipients : []).map((r) =>
+      createEmptyRow({
+        id: "", // will be replaced by createEmptyRow
+        address: r.address,
+        amount: String(r.amount ?? ""),
+        label: r.label ?? "",
+      })
+    );
+
+    setDistributionData(rows.length ? rows : [createEmptyRow()]);
+
+    // Clear payload after applying
+    resendDistributionPayload.set(null);
+  }, [supportedTokens]);
 
   // const { queueStarkNameResolution } =
   //   useStarkNameResolver(setDistributionData);
@@ -265,12 +306,12 @@ const DistributePage = () => {
           { name: 'amount', type: 'uint256' }
         ],
         outputs: [{ name: '', type: 'bool' }]
-      }] as const;
+      }] as const satisfies Abi;
 
       const approveCall = {
         to: selectedToken.address as `0x${string}`,
         data: encodeFunctionData({
-          abi: erc20ApproveAbi as unknown as any,
+          abi: erc20ApproveAbi,
           functionName: 'approve',
           args: [CONTRACT_ADDRESS as `0x${string}`, totalAmountWithFee]
         })
@@ -292,12 +333,12 @@ const DistributePage = () => {
               { name: 'token', type: 'address' }
             ],
         outputs: []
-      }] as const;
+      }] as const satisfies Abi;
 
       const distributeCall = {
         to: CONTRACT_ADDRESS as `0x${string}`,
         data: encodeFunctionData({
-          abi: distributionAbi as unknown as any,
+          abi: distributionAbi,
           functionName: distributionInfo.type === 'equal' ? 'distribute' : 'distribute_weighted',
           args: distributionInfo.type === 'equal'
             ? [amounts![0], recipients, selectedToken.address as `0x${string}`]
@@ -326,7 +367,7 @@ const DistributePage = () => {
        // Fallback: send sequential transactions
        const approveHash = await writeContractAsync({
          address: selectedToken.address as `0x${string}`,
-         abi: erc20ApproveAbi as unknown as any,
+         abi: erc20ApproveAbi,
          functionName: 'approve',
          args: [CONTRACT_ADDRESS as `0x${string}`, totalAmountWithFee]
        });
@@ -339,15 +380,15 @@ const DistributePage = () => {
 
        const distributeHash = await writeContractAsync({
          address: CONTRACT_ADDRESS as `0x${string}`,
-         abi: distributionAbi as unknown as any,
+         abi: distributionAbi,
          functionName: distributionInfo.type === 'equal' ? 'distribute' : 'distribute_weighted',
          args: distributionInfo.type === 'equal'
            ? [amounts![0], recipients, selectedToken.address as `0x${string}`]
            : [amounts!, recipients, selectedToken.address as `0x${string}`]
        });
-       const distributeReceipt = await waitForTransactionReceipt(config, { hash: distributeHash });
+       const distributeReceipt: TransactionReceipt = await waitForTransactionReceipt(config, { hash: distributeHash });
        // Prefer the receipt's hash if available
-       transactionHash = (distributeReceipt as any)?.transactionHash ?? distributeHash;
+       transactionHash = distributeReceipt.transactionHash ?? distributeHash;
      }
 
      if (!transactionHash) {

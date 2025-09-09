@@ -25,15 +25,10 @@ import { Button } from "@/components/ui/button";
 import { ActionsCellProps, IAction } from "@/types/history";
 import DistributionDetailsModal from "./DistributionDetailsModal";
 import { resendDistributionPayload } from "@/store/distributionEntity";
-import { useAccount } from "wagmi";
 
 const ActionsCell = ({ distribution }: ActionsCellProps) => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const { chain } = useAccount();
   const router = useRouter();
-
-  // No longer rely on the connected wallet's chain explorer.
-  // We will derive the explorer from distribution.network/chain_name.
 
   const handleViewDetails = () => {
     setIsDetailsModalOpen((prev) => !prev);
