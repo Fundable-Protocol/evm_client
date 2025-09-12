@@ -1,6 +1,7 @@
 "use client";
 
 import DashboardLayout from "@/components/layouts/DashboardLayout";
+import CreatePaymentStream from "@/components/modules/payment-stream/CreatePaymentStream";
 import { StreamsHistory } from "@/components/modules/payment-stream/StreamsHistory";
 
 const PaymentStream = () => {
@@ -11,6 +12,7 @@ const PaymentStream = () => {
         className="flex flex-col gap-y-6 h-full bg-transparent"
         availableNetwork={["testnet"]}
       >
+        <CreatePaymentStream />
         <StreamsHistory />
         </DashboardLayout>
     </>  

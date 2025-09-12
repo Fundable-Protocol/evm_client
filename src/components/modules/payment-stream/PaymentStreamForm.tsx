@@ -117,24 +117,24 @@ const PaymentStreamForm = ({
               />
             </div>
           </div>
+                
+          <Button
+            size="lg"
+            variant="gradient"
+            className="self-end h-14 w-fit"
+            disabled={
+              isSubmitting ||
+              !streamData.name ||
+              !streamData.durationValue ||
+              !streamData.recipient
+            }
+            onClick={onSubmit}
+          >
+            <span>{isSubmitting ? "Processing..." : "Continue"}</span>
+            <Lock className="w-[0.7rem] h-[0.91rem] font-bold" />
+          </Button>
         </div>
       </div>
-
-      <Button
-        size="lg"
-        variant="gradient"
-        className="self-end w-fit"
-        disabled={
-          isSubmitting ||
-          !streamData.name ||
-          !streamData.durationValue ||
-          !streamData.recipient
-        }
-        onClick={onSubmit}
-      >
-        <span>{isSubmitting ? "Processing..." : "Continue"}</span>
-        <Lock className="w-[0.7rem] h-[0.91rem] font-bold" />
-      </Button>
     </div>
   );
 };
