@@ -77,7 +77,7 @@ function StreamsTable({
 
   return (
     <div className="h-full flex flex-col space-y-4 overflow-y-auto pb-4">
-      <div className="grid grid-cols-1 gap-x-8 w-full lg:w-1/3">
+      <div className="grid grid-cols-1 px-1 gap-x-8 w-full lg:w-1/3">
         <AppSelect
           title="Filter by Status"
           placeholder={statusOptions.find(opt => opt.value === statusFilter)?.label || statusOptions[0].label}
@@ -111,7 +111,7 @@ function StreamsTable({
             </TableRow>
           ))}
         </TableHeader>
-        <TableBody>
+        <TableBody className="[&_tr:last-child]:border-b [&_tr:last-child]:border-x [&_tr:last-child]:border-gray-700/50">
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow
