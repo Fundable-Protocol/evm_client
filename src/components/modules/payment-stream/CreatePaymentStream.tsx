@@ -1,16 +1,16 @@
-import { useMemo, useState } from "react";
-import { useAccount, useNetwork } from "@starknet-react/core";
-import type { AccountInterface } from "starknet";
 import toast from "react-hot-toast";
+import { parseUnits } from "ethers";
+import { useMemo, useState } from "react";
+import type { AccountInterface } from "starknet";
+import { useAccount, useNetwork } from "@starknet-react/core";
 
 import PaymentStreamForm from "./PaymentStreamForm";
+import type { DurationUnit } from "@/lib/utills/stream";
 import PaymentStreamSummary from "./PaymentStreamSummary";
 import { capitalizeWord, getTokenOptions } from "@/lib/utills";
-import { PaymentStreamService } from "@/services/blockchain/paymentStreamService";
-import type { DurationUnit } from "@/lib/utills/stream";
-import { parseUnits } from "ethers";
-import { createPaymentStreamSchema } from "@/validations/paymentStream";
 import type { CreateStreamResponse } from "@/types/payment-stream";
+import { createPaymentStreamSchema } from "@/validations/paymentStream";
+import { PaymentStreamService } from "@/services/blockchain/paymentStreamService";
 
 const CreatePaymentStream = () => {
   const { chain } = useNetwork();
@@ -34,8 +34,8 @@ const CreatePaymentStream = () => {
     cancellability: false,
     transferability: false,
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formKey, setFormKey] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const selectedTokenDecimals = useMemo(() => {
     const option = tokenOptions.find((o) => o.value === streamData.token);
@@ -56,13 +56,18 @@ const CreatePaymentStream = () => {
       setIsSubmitting(true);
       const schema = createPaymentStreamSchema(tokenOptions, durationOptions);
       const parsed = schema.safeParse(streamData);
+
       if (!parsed.success) {
         const firstErr =
           parsed.error.issues[0]?.message || "Invalid form input";
+
         toast.error(firstErr);
+
         setIsSubmitting(false);
+
         return;
       }
+
       const totalAmountScaled = parseUnits(
         streamData.amount,
         selectedTokenDecimals

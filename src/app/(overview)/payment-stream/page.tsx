@@ -8,14 +8,14 @@ const PaymentStream = () => {
   return (
     <>
       <DashboardLayout
-        title="My Payment Streams"
+        title="Create Payment Streams"
         className="flex flex-col gap-y-6 h-full bg-transparent"
         availableNetwork={["testnet"]}
       >
         <CreatePaymentStream />
         <StreamsHistory />
-        </DashboardLayout>
-    </>  
+      </DashboardLayout>
+    </>
   );
 };
 
