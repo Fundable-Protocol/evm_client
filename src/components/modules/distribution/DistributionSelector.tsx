@@ -89,7 +89,7 @@ const DistributionSelector = ({
           />
 
           <div className="flex flex-col">
-            <h3 className="font-semibold mb-3 text-nowrap">
+            <h3 className="mb-3 text-nowrap">
               {distributionType["equalAmountType"] === "amount_per_address"
                 ? "Amount per address"
                 : "Lump sum to distribute."}

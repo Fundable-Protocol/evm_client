@@ -13,12 +13,12 @@ const InputWithLabel = ({
 }: InputWithLabelProps) => {
   return (
     <div className="flex flex-col w-full">
-      <h3 className="font-semibold text-fundable-light-grey mb-3 text-nowrap">
+      <h3 className="text-base text-fundable-light-grey mb-3 text-nowrap">
         {title}
       </h3>
       <Input
         className={cn(
-          "border-none bg-fundable-mid-grey rounded h-14 placeholder:text-fundable-placeholder",
+          "border-none bg-fundable-mid-grey rounded h-12 placeholder:text-fundable-placeholder",
           className
         )}
         {...props}

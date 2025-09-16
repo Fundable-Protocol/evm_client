@@ -126,51 +126,6 @@ export async function getChartDataAction(user_address: string, date?: number) {
   return chartData;
 }
 
-// async function updateDistributionsUsdRateAction() {
-//   try {
-//     const starknetTestName = "Starknet Sepolia Testnet";
-//     const starknetMainnet = "Starknet";
-
-//     const distributions = await db
-//       .select({
-//         id: distributionModel.id,
-//         usd_rate: distributionModel.usd_rate,
-//         total_amount: distributionModel.total_amount,
-//       })
-//       .from(distributionModel)
-//       .where(eq(distributionModel.network, "mainnet".toUpperCase() as any));
-
-//     // Get all distributions with usd_rate = 0
-//     const distributionsWithZeroRate = await db
-//       .update(distributionModel)
-//       .set({
-//         chain_name: starknetTestName,
-//       })
-//       .where(
-//         eq(
-//           distributionModel.network,
-//           "TESTNET" as unknown as typeof distributionModel.network
-//         )
-//       );
-
-//     return {
-//       success: true,
-//       data: {
-//         distributionsWithZeroRate,
-//       },
-//     };
-//   } catch (error) {
-//     return {
-//       success: false,
-//       message:
-//         error instanceof Error
-//           ? error.message
-//           : "Failed to update distributions with USD rate",
-//       updatedCount: 0,
-//     };
-//   }
-// }
-
 export async function getDistributionsAction(params: IHistoryQueryParams) {
   if (!params?.user_address) throw new Error("User address is required");
 

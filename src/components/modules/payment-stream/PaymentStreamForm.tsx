@@ -54,7 +54,7 @@ const PaymentStreamForm = ({
 
         <div className="grid lg:grid-cols-2 gap-6 my-6">
           <AppSelect
-            className="h-14 placeholder:text-fundable-placeholder"
+            className="h-12 placeholder:text-fundable-placeholder"
             titleclassname="text-fundable-light-grey"
             setValue={(value) => handleStreamDataChange("token", value)}
             options={tokenOptions}
@@ -62,7 +62,7 @@ const PaymentStreamForm = ({
             placeholder={streamData.token}
           />
           <AppSelect
-            className="h-14 placeholder:text-fundable-placeholder"
+            className="h-12 placeholder:text-fundable-placeholder"
             titleclassname="text-fundable-light-grey"
             setValue={(value) =>
               handleStreamDataChange("transferability", value)
@@ -75,7 +75,7 @@ const PaymentStreamForm = ({
 
         <div className="grid lg:grid-cols-2 gap-6 my-6">
           <AppSelect
-            className="h-14 placeholder:text-fundable-placeholder"
+            className="h-12 placeholder:text-fundable-placeholder"
             titleclassname="text-fundable-light-grey"
             setValue={(value) =>
               handleStreamDataChange("cancellability", value)
@@ -94,14 +94,14 @@ const PaymentStreamForm = ({
           />
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-6 my-6 ">
+        <div className="grid lg:grid-cols-2 gap-6 my-6 justify-between">
           <div className="flex flex-col">
-            <h3 className="font-semibold text-fundable-white mb-3 text-nowrap">
+            <h3 className="text-fundable-light-grey mb-3 text-nowrap">
               Streaming Duration
             </h3>
             <div className="w-full grid grid-cols-[0.5fr_1.5fr] items-end gap-x-6">
               <Input
-                className="border-none bg-fundable-mid-grey rounded h-14 placeholder:text-fundable-placeholder"
+                className="border-none bg-fundable-mid-grey rounded h-12 placeholder:text-fundable-placeholder"
                 maxLength={streamData.duration === "hour" ? 1 : 3}
                 placeholder="Value eg. 1"
                 value={streamData.durationValue}
@@ -110,31 +110,31 @@ const PaymentStreamForm = ({
                 }
               />
               <AppSelect
-                className="h-14"
+                className="h-12"
                 setValue={(value) => handleStreamDataChange("duration", value)}
                 options={durationOptions}
                 placeholder="Pick a duration"
               />
             </div>
           </div>
+
+          <Button
+            size="lg"
+            variant="gradient"
+            className="justify-self-end self-end h-12 w-fit"
+            disabled={
+              isSubmitting ||
+              !streamData.name ||
+              !streamData.durationValue ||
+              !streamData.recipient
+            }
+            onClick={onSubmit}
+          >
+            <span>{isSubmitting ? "Processing..." : "Continue"}</span>
+            <Lock className="w-[0.7rem] h-[0.91rem] font-bold" />
+          </Button>
         </div>
       </div>
-
-      <Button
-        size="lg"
-        variant="gradient"
-        className="self-end w-fit"
-        disabled={
-          isSubmitting ||
-          !streamData.name ||
-          !streamData.durationValue ||
-          !streamData.recipient
-        }
-        onClick={onSubmit}
-      >
-        <span>{isSubmitting ? "Processing..." : "Continue"}</span>
-        <Lock className="w-[0.7rem] h-[0.91rem] font-bold" />
-      </Button>
     </div>
   );
 };

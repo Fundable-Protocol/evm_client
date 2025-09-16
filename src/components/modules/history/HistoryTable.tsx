@@ -48,6 +48,8 @@ function HistoryTable<TData, TValue>({
   page,
   limit,
   columns,
+  typeFilter,
+  statusFilter,
   totalCount = 0,
   onTypeFilterChange,
   onStatusFilterChange,
@@ -119,15 +121,13 @@ function HistoryTable<TData, TValue>({
     <div className="h-full flex flex-col space-y-4 overflow-y-auto pb-4">
       <div className="grid grid-cols-2 gap-x-8 w-full lg:w-1/3">
         <AppSelect
-          title="Filter by Status"
-          placeholder={statusOptions[0].label}
+          placeholder={capitalizeWord(statusFilter) || statusOptions[0].label}
           options={statusOptions}
           setValue={handleStatusChange}
         />
 
         <AppSelect
-          title="Filter by Type"
-          placeholder={typeOptions[0].label}
+          placeholder={capitalizeWord(typeFilter) || typeOptions[0].label}
           options={typeOptions}
           setValue={handleTypeChange}
         />
