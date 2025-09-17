@@ -12,11 +12,11 @@ import { DistributionAttributes } from "@/types/distribution";
 import { columns } from "@/components/modules/history/columns";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import HistoryTable from "@/components/modules/history/HistoryTable";
-import { getDistributionsAction } from "@/app/actions/distributionActions";
 import HistoryTableSkeleton from "@/components/modules/history/HistoryTableSkeleton";
 
 import { useSearchParams } from "next/navigation";
 import { validPageLimits } from "@/lib/constant";
+import DistributionApiService from "@/services/api/distributionService";
 
 const HistoryPageContent = () => {
   const { address } = useAccount();
@@ -40,9 +40,21 @@ const HistoryPageContent = () => {
   const { data: distributionsData, isPending } = useQuery({
     queryKey: ["distributions-table", distributionFilter, page, limit],
     queryFn: () =>
-      getDistributionsAction({
-        user_address: address ?? "",
-        page, // Convert to 1-based for API
+      // getDistributionsAction({
+      //   user_address: address ?? "",
+      //   page, // Convert to 1-based for API
+      //   limit,
+      //   status:
+      //     distributionFilter.status !== "all"
+      //       ? distributionFilter.status
+      //       : undefined,
+      //   type:
+      //     distributionFilter.type !== "all"
+      //       ? distributionFilter.type
+      //       : undefined,
+      // }),
+      DistributionApiService.getDistributions(address ?? "", {
+        page,
         limit,
         status:
           distributionFilter.status !== "all"
@@ -61,7 +73,10 @@ const HistoryPageContent = () => {
     filter: distributionFilterType,
     value: distributionFilterValueType
   ) => {
-    setDistributionFilter((prev) => ({ ...prev, [filter]: value }));
+    setDistributionFilter((prev) => ({
+      ...prev,
+      [filter]: value === "all" ? "" : value?.toUpperCase(),
+    }));
   };
 
   return (
@@ -90,7 +105,7 @@ const HistoryPageContent = () => {
                 value as typeof distributionFilter.type
               )
             }
-            totalCount={distributionsData?.data?.total ?? 0}
+            totalCount={distributionsData?.data?.meta?.totalRows ?? 0}
             page={page}
             limit={limit}
           />

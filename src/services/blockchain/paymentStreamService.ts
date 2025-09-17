@@ -7,8 +7,8 @@ import {
   durationToSeconds,
   normalizeAddress,
   recordStreamTransaction,
-} from "@/lib/utills/stream";
-import { getSupportedTokens } from "@/lib/utills";
+} from "@/lib/utils/stream";
+import { getSupportedTokens } from "@/lib/utils";
 import { fetchTokenPrices } from "@/services/apiServices";
 import type {
   CreateStreamParams,
@@ -105,21 +105,24 @@ export class PaymentStreamService {
       }
 
       // record stream transaction to backend
-      const tokenInfo = SUPPORTED_TOKENS[params.tokenSymbol as keyof typeof SUPPORTED_TOKENS];
+      const tokenInfo =
+        SUPPORTED_TOKENS[params.tokenSymbol as keyof typeof SUPPORTED_TOKENS];
       if (tokenInfo) {
         // Get USD rate for the token
         const tokenPrices = await fetchTokenPrices(["starknet", "ethereum"]);
         let usdRate = 1;
-        
+
         if (params.tokenSymbol === "STRK") {
           usdRate = tokenPrices?.["starknet"]?.usd ?? 1;
         } else if (params.tokenSymbol === "ETH") {
           usdRate = tokenPrices?.["ethereum"]?.usd ?? 1;
         }
-        
+
         // Calculate total USD amount
-        const totalUsdAmount = (Number(params.totalAmount) / Math.pow(10, tokenInfo.decimals)) * usdRate;
-        
+        const totalUsdAmount =
+          (Number(params.totalAmount) / Math.pow(10, tokenInfo.decimals)) *
+          usdRate;
+
         await recordStreamTransaction({
           streamId: streamId ? BigInt(streamId).toString() : "UNKNOWN",
           creator: account.address,

@@ -6,7 +6,7 @@ import { TokenOption } from "@/types";
 
 export const databaseUrl = process.env.DATABASE_URL ?? "";
 
-export const backendBaseUrl = process.env.BACKEND_BASE_URL ?? "";
+export const backendBaseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL ?? "";
 
 export const projectId = "4f854415eedab0dd9258793f029e728d";
 

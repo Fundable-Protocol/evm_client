@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/utills";
+import { cn } from "@/lib/utils";
 import { useAccount, useNetwork } from "@starknet-react/core";
 import { ReactNode } from "react";
 

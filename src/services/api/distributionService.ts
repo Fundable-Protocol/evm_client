@@ -1,7 +1,7 @@
 import { baseApiService } from "./baseApiService";
 import { DistributionAttributes } from "@/types/distribution";
 
-class DistributionApiService {
+class _DistributionApiService {
   async getDistributions(walletId: string, params?: unknown) {
     // Build query string from parameters
     const queryParams = new URLSearchParams();
@@ -16,7 +16,7 @@ class DistributionApiService {
 
     const queryString = queryParams.toString();
 
-    const endpoint = `/distributions/users?user_address=${walletId}${queryString}`;
+    const endpoint = `/distributions?${queryString}`;
 
     return baseApiService.makeRequest<{
       success: boolean;
@@ -53,12 +53,13 @@ class DistributionApiService {
   async getDistributionStats(walletId: string) {
     return baseApiService.makeRequest<{
       success: boolean;
-      stats: unknown;
-    }>(
-      `/distributions/stats?user_address=${walletId}`,
-      { method: "GET" },
-      walletId
-    );
+      totalAmount: number;
+      totalDistributions: number;
+      totalFundedAddresses: number;
+      totalAmountPercentageChange: number;
+      totalDistributionsPercentageChange: number;
+      totalFundedAddressesPercentageChange: number;
+    }>(`/distributions/stats`, { method: "GET" }, walletId);
   }
 
   async getDistributionChartData(walletId: string) {
@@ -72,5 +73,7 @@ class DistributionApiService {
     );
   }
 }
+
+const DistributionApiService = new _DistributionApiService();
 
 export default DistributionApiService;

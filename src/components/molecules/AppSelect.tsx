@@ -5,7 +5,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utills";
+import { cn } from "@/lib/utils";
 import { AppSelectProps } from "@/types";
 
 const AppSelect = ({

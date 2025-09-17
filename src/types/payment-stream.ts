@@ -1,4 +1,4 @@
-import type { DurationUnit } from "@/lib/utills/stream";
+import type { DurationUnit } from "@/lib/utils/stream";
 
 export interface StreamData {
   name: string;
@@ -20,7 +20,6 @@ export interface Stream {
   token: string;
   status: string;
 }
-
 
 export interface StreamRecord {
   name: string;

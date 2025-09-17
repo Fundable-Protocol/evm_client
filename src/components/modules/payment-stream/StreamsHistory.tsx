@@ -4,7 +4,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import StreamsTable from "./StreamsTable";
 import StreamsTableSkeleton from "./StreamsTableSkeleton";
 import AppSelect from "@/components/molecules/AppSelect";
-import { capitalizeWord } from "@/lib/utills";
+import { capitalizeWord } from "@/lib/utils";
 
 export const StreamsHistory = () => {
   const [activeTab, setActiveTab] = useState("incoming");

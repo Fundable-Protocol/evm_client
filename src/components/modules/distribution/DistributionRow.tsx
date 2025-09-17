@@ -1,7 +1,7 @@
 import { FC } from "react";
 import { Trash2Icon } from "lucide-react";
 
-import { cn } from "@/lib/utills";
+import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { IDistributionRow } from "@/types/distribution";
 
@@ -42,7 +42,9 @@ const DistributionRow: FC<IDistributionRow> = ({
           className="border-none rounded h-12 md:h-14"
           name="amount"
           placeholder="Amount"
-          value={isEqualDistribution ? equalAmount?.toString() || "0" : row.amount}
+          value={
+            isEqualDistribution ? equalAmount?.toString() || "0" : row.amount
+          }
           onChange={(e) => onChange(row.id, e.target.value, "amount")}
           disabled={isEqualDistribution}
         />

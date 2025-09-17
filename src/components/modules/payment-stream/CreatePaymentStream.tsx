@@ -5,9 +5,9 @@ import type { AccountInterface } from "starknet";
 import { useAccount, useNetwork } from "@starknet-react/core";
 
 import PaymentStreamForm from "./PaymentStreamForm";
-import type { DurationUnit } from "@/lib/utills/stream";
+import type { DurationUnit } from "@/lib/utils/stream";
 import PaymentStreamSummary from "./PaymentStreamSummary";
-import { capitalizeWord, getTokenOptions } from "@/lib/utills";
+import { capitalizeWord, getTokenOptions } from "@/lib/utils";
 import type { CreateStreamResponse } from "@/types/payment-stream";
 import { createPaymentStreamSchema } from "@/validations/paymentStream";
 import { PaymentStreamService } from "@/services/blockchain/paymentStreamService";
