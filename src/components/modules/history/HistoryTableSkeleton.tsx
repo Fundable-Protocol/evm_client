@@ -12,14 +12,14 @@ const HistoryTableSkeleton = () => {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-x-8 w-full lg:w-1/3">
-        <div className="flex flex-col gap-y-4">
-          <Skeleton className="h-6 w-28" />
-          <Skeleton className="h-10 w-full" />
-        </div>
-        <div className="flex flex-col gap-y-4">
-          <Skeleton className="h-6 w-28" />
-          <Skeleton className="h-10 w-full" />
-        </div>
+        {Array.from({ length: 2 }).map((_, i) => (
+          <div
+            className="flex flex-col gap-y-4"
+            key={`history-table-skeleton-${i}`}
+          >
+            <Skeleton className="h-8 w-full" />
+          </div>
+        ))}
       </div>
 
       <Table className="bg-transparent">

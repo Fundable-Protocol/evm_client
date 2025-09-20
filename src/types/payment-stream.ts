@@ -1,4 +1,6 @@
 import type { DurationUnit } from "@/lib/utils/stream";
+import { Dispatch, SetStateAction } from "react";
+import { AppSelectProps } from ".";
 
 export interface StreamData {
   name: string;
@@ -22,22 +24,27 @@ export interface Stream {
 }
 
 export interface StreamRecord {
-  name: string;
-  recipient: string;
-  tokenSymbol: string;
-  txHash: string;
-  network: string;
+  sn?: number;
+  id: string;
   creator: string;
-  isCancellable: boolean;
-  isTransferable: boolean;
+  recipient: string;
+  is_cancellable: boolean;
+  is_transferable: boolean;
   amount: string;
   duration: number;
-  chainName: string;
-  streamId: string;
-  createdAt: string;
+  status: string;
+  chain_name: string;
+  network: string;
+  stream_id: string;
+  transaction_hash: string;
+  token_symbol: string;
+  total_usd_amount: number;
+  created_at: string | number;
+  updated_at: string;
 }
 
 export interface CreateStreamParams {
+  creator: string;
   name: string;
   recipient: string;
   tokenSymbol: string;
@@ -57,3 +64,28 @@ export type CreateStreamResponse = {
   data?: CreateStreamResult;
   message?: string;
 };
+
+export interface StreamsTableProps {
+  data: StreamRecord[];
+  page?: number;
+  limit?: number;
+  totalCount?: number;
+}
+
+// New confirmation modal props
+export interface PaymentStreamConfirmationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  streamData: StreamData;
+  isLoading?: boolean;
+}
+
+export interface StreamFormProps {
+  streamData: StreamData;
+  tokenOptions: AppSelectProps["options"];
+  durationOptions: AppSelectProps["options"];
+  setStreamData: Dispatch<SetStateAction<StreamData>>;
+  onSubmit: () => void;
+  isSubmitting?: boolean;
+}

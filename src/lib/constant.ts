@@ -16,6 +16,14 @@ export const supportedNetwork = ["mainnet", "testnet"] as const;
 
 export const distributionStatus = ["completed", "failed", "pending"] as const;
 
+export const paymentStreamStatus = [
+  "active",
+  "paused",
+  "canceled",
+  "completed",
+  "transfered",
+] as const;
+
 export const equalDistributionType = [
   { label: "Equal amount per address", value: "amount_per_address" },
   { label: "Calculate Lump Sum", value: "lump_sum" },
@@ -82,7 +90,8 @@ export const TESTNET_RPC_URL = process.env.STARKNET_RPC_TESTNET ?? "";
 export const TESTNET_STREAM_CONTRACT_ADDRESS =
   "0x0150f8e99d665ab76dca2f5816930cf14987d947a6ea7e0934c6ac2b4243b735";
 
-export const MAINNET_STREAM_CONTRACT_ADDRESS = "";
+export const MAINNET_STREAM_CONTRACT_ADDRESS =
+  "0x07097d3e5851088ce1d8bf9280c3f9b52f59db92bf5af2226338f15c837f13bd";
 
 export const distributionState = [
   "process-started",

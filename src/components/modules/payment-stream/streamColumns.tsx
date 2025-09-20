@@ -1,91 +1,124 @@
 "use client";
 
+import { sliceAddress } from "@/lib/utils";
+import { format, parseISO } from "date-fns";
 import { ColumnDef } from "@tanstack/react-table";
-import { Stream } from "@/types/payment-stream";
-import Image from "next/image";
+import { StreamRecord } from "@/types/payment-stream";
 
 const getStatusColor = (status: string) => {
-  switch (status.toLowerCase()) {
+  switch (status?.toLowerCase()) {
     case "active":
       return "bg-green-500";
+    case "canceled":
+      return "bg-red-500";
+    case "transfered":
+      return "bg-blue-500";
     case "paused":
       return "bg-orange-500";
     case "completed":
-      return "bg-green-500";
+      return "bg-gray-500";
     default:
       return "bg-gray-500";
   }
 };
 
-const getTokenIcon = (token: string) => {
-  switch (token) {
-    case "XLM":
-      return "stellar_xlm";
-    case "TON":
-      return "ton";
-    case "STRK":
-      return "starknet";
-    default:
-      return "starknet";
-  }
-};
-
-export const streamColumns: ColumnDef<Stream>[] = [
+export const streamColumns: ColumnDef<StreamRecord>[] = [
   {
-    accessorKey: "id",
-    header: "Stream ID",
-  },
-  {
-    accessorKey: "recipient",
-    header: "Recipient Address",
+    accessorKey: "sn",
+    header: () => <div className="text-center">S/N</div>,
     cell: ({ row }) => (
-      <span className="text-white font-mono">
-        {row.getValue("recipient")}
-      </span>
+      <div className="text-white font-mono text-center">
+        {row.getValue("sn")}
+      </div>
     ),
   },
   {
-    accessorKey: "amountPerSecond",
-    header: "Amount Per Second",
+    accessorKey: "creator",
+    header: () => <div className="text-center">Sender</div>,
+    cell: ({ row }) => (
+      <div className="text-white font-mono text-center">
+        {sliceAddress(row.getValue("creator"))}
+      </div>
+    ),
   },
   {
-    accessorKey: "startDate",
-    header: "Start Date",
+    accessorKey: "recipient",
+    header: () => <div className="text-center">Receiver</div>,
+    cell: ({ row }) => (
+      <div className="text-white font-mono text-center">
+        {sliceAddress(row.getValue("recipient"))}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "total_usd_amount",
+    header: () => <div className="text-center">Amount (USD)</div>,
+    cell: ({ row }) => (
+      <div className="text-center">
+        <span className="text-white font-mono">
+          {row.getValue("total_usd_amount")}
+        </span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "created_at",
+    header: () => <div className="text-center">Start Date</div>,
+    cell: ({ row }) => {
+      const createdAt = row.getValue("created_at") as string;
+      const formattedDate = format(
+        parseISO(createdAt),
+        "MMM dd, yyyy  hh:mm a"
+      );
+      return (
+        <div className="text-white font-mono text-center">{formattedDate}</div>
+      );
+    },
   },
   {
     accessorKey: "endDate",
-    header: "End Date",
-  },
-  {
-    accessorKey: "token",
-    header: "Token",
+    header: () => <div className="text-center">End Date</div>,
     cell: ({ row }) => {
-      const token = row.getValue("token") as string;
+      const duration = (row?.original?.duration as number) * 1000;
+      const createdAt = new Date(row?.original?.created_at)?.getTime();
+      const endDate = new Date(createdAt + duration);
+
+      const formattedEndDate = format(endDate, "MMM dd, yyyy  hh:mm a");
+
       return (
-        <div className="flex items-center gap-2">
-          <Image
-            src={`/svgs/${getTokenIcon(token)}.svg`}
-            alt={token}
-            width={24}
-            height={24}
-            className="w-6 h-6"
-          />
-          <span className="text-white">{token}</span>
+        <div className="text-white font-mono text-center">
+          {formattedEndDate}
         </div>
       );
     },
   },
   {
+    accessorKey: "chain_name",
+    header: () => <div className="text-center">Chain</div>,
+    cell: ({ row }) => {
+      const chain = row.getValue("chain_name") as string;
+      return <div className="text-white text-center">{chain}</div>;
+    },
+  },
+  {
+    accessorKey: "token_symbol",
+    header: () => <div className="text-center">Token</div>,
+    cell: ({ row }) => {
+      const token = row.getValue("token_symbol") as string;
+      return <div className="text-white text-center">{token}</div>;
+    },
+  },
+  {
     accessorKey: "status",
-    header: "Status",
+    header: () => <div className="text-center">Status</div>,
     cell: ({ row }) => {
       const status = row.getValue("status") as string;
       return (
-        <div className="flex items-center">
+        <div className="flex justify-center items-center">
           <span
             className={`size-2 rounded-full ${getStatusColor(status)} mr-2`}
           />
-          <span className="text-white capitalize">{status}</span>
+          <div className="text-white capitalize">{status}</div>
         </div>
       );
     },

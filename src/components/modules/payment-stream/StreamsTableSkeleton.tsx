@@ -11,17 +11,10 @@ import {
 const StreamsTableSkeleton = () => {
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 gap-x-8 w-full lg:w-1/3">
-        <div className="flex flex-col gap-y-4">
-          <Skeleton className="h-6 w-36" />
-          <Skeleton className="h-10 w-full" />
-        </div>
-      </div>
-
       <Table className="bg-transparent">
         <TableHeader>
           <TableRow className="bg-fundable-violet border-none">
-            {Array.from({ length: 5 }).map((_, i) => (
+            {Array.from({ length: 7 }).map((_, i) => (
               <TableHead
                 key={`streams-table-skeleton-head-${i}`}
                 className="text-white font-bold p-4"
@@ -32,12 +25,12 @@ const StreamsTableSkeleton = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {Array.from({ length: 5 }).map((_, row) => (
+          {Array.from({ length: 7 }).map((_, row) => (
             <TableRow
               key={row}
               className="border-b border-gray-700/50 py-3 px-4"
             >
-              {Array.from({ length: 5 }).map((_, cell) => (
+              {Array.from({ length: 7 }).map((_, cell) => (
                 <TableCell key={cell} className="py-3 px-4">
                   <Skeleton className="h-4 w-24" />
                 </TableCell>
@@ -51,5 +44,3 @@ const StreamsTableSkeleton = () => {
 };
 
 export default StreamsTableSkeleton;
-
-

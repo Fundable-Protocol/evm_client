@@ -1,96 +1,81 @@
-import { useEffect, useState } from "react";
-import { Stream } from "@/types/payment-stream";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
+import { useAccount } from "@starknet-react/core";
+
 import StreamsTable from "./StreamsTable";
-import StreamsTableSkeleton from "./StreamsTableSkeleton";
-import AppSelect from "@/components/molecules/AppSelect";
 import { capitalizeWord } from "@/lib/utils";
+import { paymentStreamStatus, validPageLimits } from "@/lib/constant";
+import AppSelect from "@/components/molecules/AppSelect";
+import StreamsTableSkeleton from "./StreamsTableSkeleton";
+import PaymentStreamApiService from "@/services/api/paymentStreamService";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export const StreamsHistory = () => {
-  const [activeTab, setActiveTab] = useState("incoming");
+  const { address } = useAccount();
+  const queryClient = useQueryClient();
+
+  const searchParams = useSearchParams();
+
+  const page = parseInt(searchParams.get("page") || "1");
+  const limit = validPageLimits.includes(
+    parseInt(
+      searchParams.get("limit") || "10"
+    ) as (typeof validPageLimits)[number]
+  )
+    ? parseInt(searchParams.get("limit") || "10")
+    : validPageLimits[0];
+
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const incomingStreams: Stream[] = [
-    {
-      id: 1,
-      recipient: "0x0780.....93C",
-      amountPerSecond: 10,
-      startDate: "12th Feb 2025",
-      endDate: "12th Mar 2025",
-      token: "XLM",
-      status: "Active",
-    },
-    {
-      id: 2,
-      recipient: "0x0780.....93C",
-      amountPerSecond: 20,
-      startDate: "12th Feb 2025",
-      endDate: "12th Mar 2025",
-      token: "TON",
-      status: "Paused",
-    },
-    {
-      id: 3,
-      recipient: "0x0780.....93C",
-      amountPerSecond: 30,
-      startDate: "12th Feb 2025",
-      endDate: "12th Mar 2025",
-      token: "STRK",
-      status: "Completed",
-    },
-  ];
+  // Check for the switch signal
+  const shouldSwitchToOutgoing = queryClient.getQueryData([
+    "stream-created-switch-tab",
+  ]);
 
-  const outgoingStreams: Stream[] = [
-    {
-      id: 1,
-      recipient: "0x0780.....93C",
-      amountPerSecond: 10,
-      startDate: "12th Feb 2025",
-      endDate: "12th Mar 2025",
-      token: "XLM",
-      status: "Active",
-    },
-    {
-      id: 2,
-      recipient: "0x0780.....93C",
-      amountPerSecond: 20,
-      startDate: "12th Feb 2025",
-      endDate: "12th Mar 2025",
-      token: "TON",
-      status: "Paused",
-    },
-    {
-      id: 3,
-      recipient: "0x0780.....93C",
-      amountPerSecond: 30,
-      startDate: "12th Feb 2025",
-      endDate: "12th Mar 2025",
-      token: "STRK",
-      status: "Completed",
-    },
-  ];
-
-  const [isPending, setIsPending] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsPending(false);
-    }, 2000); // Simulate api call
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  const statusOptions = ["all", "active", "paused", "completed"].map(
-    (status) => ({
-      label: capitalizeWord(status),
-      value: status,
-    })
+  // Use state for manual tab control, but initialize based on switch signal
+  const [activeTab, setActiveTab] = useState(() =>
+    shouldSwitchToOutgoing ? "outgoing" : "incoming"
   );
+
+  // Update activeTab when switch signal appears
+  if (shouldSwitchToOutgoing && activeTab !== "outgoing") {
+    setActiveTab("outgoing");
+    // Clear the signal after using it
+    queryClient.removeQueries({
+      queryKey: ["stream-created-switch-tab"],
+    });
+  }
 
   const tabTriggerValues = ["incoming", "outgoing"];
 
+  const { data: streamsData, isPending } = useQuery({
+    queryKey: ["payment-streams-table", statusFilter, page, limit, activeTab],
+    queryFn: () =>
+      PaymentStreamApiService.getStreams(address ?? "", {
+        page,
+        limit,
+        type: activeTab,
+        status: statusFilter !== "all" ? statusFilter : undefined,
+      }),
+    enabled: !!address,
+  });
+
+  const statusOptions = ["all", ...paymentStreamStatus].map((status) => ({
+    label: capitalizeWord(status),
+    value: status,
+  }));
+
   const handleStatusChange = (value: string) => {
     setStatusFilter(value);
+  };
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    // Clear any existing switch signal when manually changing tabs
+    queryClient.removeQueries({
+      queryKey: ["stream-created-switch-tab"],
+    });
   };
 
   return (
@@ -103,7 +88,7 @@ export const StreamsHistory = () => {
         value={activeTab}
         defaultValue="incoming"
         className="w-full"
-        onValueChange={setActiveTab}
+        onValueChange={handleTabChange}
       >
         <div className="flex mb-2 items-center w-full gap-x-6">
           <TabsList className="bg-[#242838] p-1 rounded-xs h-auto">
@@ -113,7 +98,7 @@ export const StreamsHistory = () => {
                 value={value}
                 className="data-[state=active]:bg-[#2A2E41] hover:cursor-pointer data-[state=active]:text-[#E1E4EA] text-text-fundable-mid-grey rounded-xs"
               >
-                {value === "incoming" ? "Incoming Streams" : "Outgoing Streams"}
+                {capitalizeWord(value)}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -129,39 +114,29 @@ export const StreamsHistory = () => {
           />
         </div>
 
-        <TabsContent value="incoming">
-          {isPending ? (
-            <StreamsTableSkeleton />
-          ) : (
-            <StreamsTable
-              data={incomingStreams.filter(
-                (stream) =>
-                  statusFilter === "all" ||
-                  stream.status.toLowerCase() === statusFilter
-              )}
-              page={1}
-              limit={10}
-              totalCount={incomingStreams.length}
-            />
-          )}
-        </TabsContent>
+        {address && isPending ? (
+          <StreamsTableSkeleton />
+        ) : (
+          <>
+            <TabsContent value="incoming">
+              <StreamsTable
+                data={streamsData?.data?.paymentStreams ?? []}
+                page={streamsData?.data?.meta.currentPage}
+                limit={streamsData?.data?.meta.perPage}
+                totalCount={streamsData?.data?.meta.totalRows}
+              />
+            </TabsContent>
 
-        <TabsContent value="outgoing">
-          {isPending ? (
-            <StreamsTableSkeleton />
-          ) : (
-            <StreamsTable
-              data={outgoingStreams.filter(
-                (stream) =>
-                  statusFilter === "all" ||
-                  stream.status.toLowerCase() === statusFilter
-              )}
-              page={1}
-              limit={10}
-              totalCount={outgoingStreams.length}
-            />
-          )}
-        </TabsContent>
+            <TabsContent value="outgoing">
+              <StreamsTable
+                data={streamsData?.data?.paymentStreams ?? []}
+                page={streamsData?.data?.meta.currentPage}
+                limit={streamsData?.data?.meta.perPage}
+                totalCount={streamsData?.data?.meta.totalRows}
+              />
+            </TabsContent>
+          </>
+        )}
       </Tabs>
     </div>
   );

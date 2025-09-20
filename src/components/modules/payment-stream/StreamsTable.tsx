@@ -7,6 +7,7 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
 } from "@tanstack/react-table";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import {
   Table,
@@ -27,14 +28,9 @@ import {
 } from "@/components/ui/pagination";
 
 import { streamColumns } from "./streamColumns";
-import { Stream } from "@/types/payment-stream";
-
-interface StreamsTableProps {
-  data: Stream[];
-  page?: number;
-  limit?: number;
-  totalCount?: number;
-}
+import { StreamsTableProps } from "@/types/payment-stream";
+import { validPageLimits } from "@/lib/constant";
+import AppSelect from "@/components/molecules/AppSelect";
 
 function StreamsTable({
   data,
@@ -42,6 +38,8 @@ function StreamsTable({
   limit = 10,
   totalCount = 0,
 }: StreamsTableProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const pageCount = Math.ceil(totalCount / limit);
 
   const table = useReactTable({
@@ -59,6 +57,27 @@ function StreamsTable({
     manualPagination: true,
     pageCount,
   });
+
+  const updatePage = (newPage: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", newPage.toString());
+    router.push(`?${params.toString()}`);
+  };
+
+  const canPreviousPage = page > 1;
+  const canNextPage = page < pageCount;
+
+  const pageSize = validPageLimits.map((limit) => ({
+    label: `${limit} per page`,
+    value: limit.toString(),
+  }));
+
+  const handlePageSizeChange = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", "1");
+    params.set("limit", value);
+    router.push(`?${params.toString()}`);
+  };
 
   return (
     <div className="h-full flex flex-col space-y-4 overflow-y-auto pb-4">
@@ -119,26 +138,37 @@ function StreamsTable({
       {/* Pagination */}
       {totalCount > 0 && (
         <Pagination>
+          <PaginationContent className="hidden lg:flex items-center space-x-4">
+            <p className="text-sm font-medium text-gray-300">Showing</p>
+            <AppSelect
+              options={pageSize}
+              placeholder={
+                limit
+                  ? pageSize.find((size) => size.value === String(limit))?.label
+                  : pageSize[0].label
+              }
+              setValue={handlePageSizeChange}
+            />
+          </PaginationContent>
+
           <PaginationContent className="hidden lg:flex flex-col sm:flex-row sm:space-y-0 sm:space-x-6 lg:space-x-8">
             <div className="flex w-[100px] items-center justify-center text-sm font-medium text-gray-300">
-              Page {table.getState().pagination.pageIndex + 1} of {pageCount}
+              Page {page} of {pageCount}
             </div>
           </PaginationContent>
 
           <PaginationContent className="gap-2">
             <PaginationPrevious
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
+              onClick={() => updatePage(page - 1)}
+              disabled={!canPreviousPage}
             />
             {Array.from(
               { length: pageCount > 3 ? 3 : pageCount },
               (_, index) => (
                 <PaginationLink
                   key={`streams-pagination-${index}`}
-                  onClick={() => table.setPageIndex(index)}
-                  isActive={
-                    table.getState().pagination.pageIndex + 1 === index + 1
-                  }
+                  onClick={() => updatePage(index + 1)}
+                  isActive={page === index + 1}
                 >
                   {index + 1}
                 </PaginationLink>
@@ -149,10 +179,8 @@ function StreamsTable({
               <PaginationContent className="flex items-center space-x-4">
                 <PaginationEllipsis />
                 <PaginationLink
-                  onClick={() => table.setPageIndex(pageCount - 1)}
-                  isActive={
-                    table.getState().pagination.pageIndex + 1 === pageCount
-                  }
+                  onClick={() => updatePage(pageCount)}
+                  isActive={page === pageCount}
                 >
                   {pageCount}
                 </PaginationLink>
@@ -160,8 +188,8 @@ function StreamsTable({
             ) : null}
 
             <PaginationNext
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
+              onClick={() => updatePage(page + 1)}
+              disabled={!canNextPage}
             />
           </PaginationContent>
         </Pagination>

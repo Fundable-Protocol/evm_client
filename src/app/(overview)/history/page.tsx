@@ -40,19 +40,6 @@ const HistoryPageContent = () => {
   const { data: distributionsData, isPending } = useQuery({
     queryKey: ["distributions-table", distributionFilter, page, limit],
     queryFn: () =>
-      // getDistributionsAction({
-      //   user_address: address ?? "",
-      //   page, // Convert to 1-based for API
-      //   limit,
-      //   status:
-      //     distributionFilter.status !== "all"
-      //       ? distributionFilter.status
-      //       : undefined,
-      //   type:
-      //     distributionFilter.type !== "all"
-      //       ? distributionFilter.type
-      //       : undefined,
-      // }),
       DistributionApiService.getDistributions(address ?? "", {
         page,
         limit,
