@@ -2,10 +2,8 @@ import AppSelect from "@/components/molecules/AppSelect";
 import InputWithLabel from "@/components/molecules/InputWithLabel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { AppSelectProps } from "@/types";
-import { StreamData } from "@/types/payment-stream";
-import { Lock } from "lucide-react";
-import { Dispatch, SetStateAction } from "react";
+import { StreamFormProps } from "@/types/payment-stream";
+import { Loader2, Lock } from "lucide-react";
 
 const PaymentStreamForm = ({
   streamData,
@@ -14,14 +12,7 @@ const PaymentStreamForm = ({
   durationOptions,
   onSubmit,
   isSubmitting,
-}: {
-  streamData: StreamData;
-  tokenOptions: AppSelectProps["options"];
-  durationOptions: AppSelectProps["options"];
-  setStreamData: Dispatch<SetStateAction<StreamData>>;
-  onSubmit: () => void;
-  isSubmitting?: boolean;
-}) => {
+}: StreamFormProps) => {
   const transferabilityOptions = [true, false].map((option) => ({
     label: option ? "Yes" : "No",
     value: option,
@@ -130,8 +121,17 @@ const PaymentStreamForm = ({
             }
             onClick={onSubmit}
           >
-            <span>{isSubmitting ? "Processing..." : "Continue"}</span>
-            <Lock className="w-[0.7rem] h-[0.91rem] font-bold" />
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Processing...</span>
+              </>
+            ) : (
+              <>
+                <span>Proceed</span>
+                <Lock className="w-[0.7rem] h-[0.91rem] font-bold" />
+              </>
+            )}
           </Button>
         </div>
       </div>

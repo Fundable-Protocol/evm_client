@@ -8,14 +8,8 @@ import { Label } from "@/components/ui/label";
 import { X } from "lucide-react";
 import { DialogTitle } from "@radix-ui/react-dialog";
 
-import {
-  ContactSupportModalProps,
-  ContactFormData,
-} from "@/types/support";
-import {
-  validateField,
-  createEmptyFormState,
-} from "@/lib/utils/support";
+import { ContactSupportModalProps, ContactFormData } from "@/types/support";
+import { validateField, createEmptyFormState } from "@/lib/utils/support";
 
 export function ContactSupportModal({
   isOpen,
@@ -25,9 +19,7 @@ export function ContactSupportModal({
   const [formData, setFormData] = useState<ContactFormData>(
     createEmptyFormState()
   );
-  const [errors, setErrors] = useState<ContactFormData>(
-    createEmptyFormState()
-  );
+  const [errors, setErrors] = useState<ContactFormData>(createEmptyFormState());
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isFormValid =

@@ -27,6 +27,7 @@ export class DistributionService {
       .values({
         ...data,
         status: data.status as DistributionAttributes["status"],
+        created_at: new Date(data.created_at),
         distribution_type:
           data.distribution_type as DistributionAttributes["distribution_type"],
         network: data.network as DistributionAttributes["network"],

@@ -32,14 +32,14 @@ export const getAvailableConnectors = async (): Promise<Connector[]> => {
       },
     }) as Connector;
     connectors.push(argentMobile);
-  } catch  {}
+  } catch {}
 
   // Load Cartridge controller asynchronously
   try {
-    const cartridgeController = await import("@/lib/utills/controller").then((mod) =>
-      mod.getCartridgeInstance()
+    const cartridgeController = await import("@/lib/utils/controller").then(
+      (mod) => mod.getCartridgeInstance()
     );
-    
+
     if (cartridgeController) {
       connectors.push(cartridgeController as Connector);
     }
@@ -57,14 +57,18 @@ export const getAvailableConnectors = async (): Promise<Connector[]> => {
 
   connectorOptions.forEach((connector) => {
     try {
-      const injectedConnector = new InjectedConnector({ options: connector }) as Connector;
+      const injectedConnector = new InjectedConnector({
+        options: connector,
+      }) as Connector;
       connectors.push(injectedConnector);
     } catch {}
   });
 
   // Initialize Web Wallet with error handling
   try {
-    const webWallet = new WebWalletConnector({ url: "https://web.argent.xyz" }) as Connector;
+    const webWallet = new WebWalletConnector({
+      url: "https://web.argent.xyz",
+    }) as Connector;
     connectors.push(webWallet);
   } catch {}
 
@@ -72,25 +76,27 @@ export const getAvailableConnectors = async (): Promise<Connector[]> => {
   switch (true) {
     case isInArgentMobileAppBrowser():
       // Return only Argent Mobile if in Argent app browser
-      return connectors.filter(connector => 
-        (connector as Connector).id === "argentMobile" || 
-        connector.constructor.name === "ArgentMobileConnector"
+      return connectors.filter(
+        (connector) =>
+          (connector as Connector).id === "argentMobile" ||
+          connector.constructor.name === "ArgentMobileConnector"
       );
 
     case isInBraavosMobileAppBrowser():
       try {
         const braavosMobile = BraavosMobileConnector.init({}) as Connector;
         const relevantConnectors = [braavosMobile];
-        
+
         // Add Argent Mobile if it was successfully initialized
-        const argentConnector = connectors.find(connector => 
-          (connector as Connector).id === "argentMobile" || 
-          connector.constructor.name === "ArgentMobileConnector"
+        const argentConnector = connectors.find(
+          (connector) =>
+            (connector as Connector).id === "argentMobile" ||
+            connector.constructor.name === "ArgentMobileConnector"
         );
         if (argentConnector) {
           relevantConnectors.push(argentConnector);
         }
-        
+
         return relevantConnectors;
       } catch {}
 

@@ -8,7 +8,7 @@ import type { Call } from "starknet";
 import { useEntity } from "simpler-state";
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
-import { useAccount, useNetwork, useProvider } from "@starknet-react/core";
+import { useAccount, useNetwork } from "@starknet-react/core";
 import { resendDistributionPayload } from "@/store/distributionEntity";
 
 import DashboardLayout from "@/components/layouts/DashboardLayout";
@@ -18,6 +18,7 @@ import {
   IDistributionInfo,
   IDistributionData,
   IDistributionState,
+  DistributionAttributes,
 } from "@/types/distribution";
 import DistributionSelector from "@/components/modules/distribution/DistributionSelector";
 
@@ -29,7 +30,7 @@ import {
   getTokenOptions,
   getDistributionUniqueRef,
   calculateTotalDistributionAmount,
-} from "@/lib/utills";
+} from "@/lib/utils";
 
 import {
   snsAddressValidation,
@@ -42,14 +43,13 @@ import { ErrorWithCode } from "@/types";
 import { fetchProtocolFee } from "@/lib/api";
 import { fetchTokenPrices } from "@/services/apiServices";
 import { useStarkNameResolver } from "@/hooks/useStarkNameResolver";
-import { createDistributionAction } from "@/app/actions/distributionActions";
 import DistributionConfirmationModal from "@/components/modules/distribution/DistributionConfirmationModal";
+import DistributionApiService from "@/services/api/distributionService";
 
 const DistributePage = () => {
   const { account, address } = useAccount();
   const router = useRouter();
   const { chain } = useNetwork();
-  const { provider } = useProvider();
   const { isMainNet, SUPPORTED_TOKENS, tokenOptions } = getTokenOptions(chain);
 
   const [distributionInfo, setDistributionInfo] = useState<IDistributionInfo>({
@@ -251,9 +251,8 @@ const DistributePage = () => {
       };
 
       // Generate a unique distribution ID using UUID v4 to guarantee uniqueness
-      const distributionId = cairo.felt(generateRandomUUID());
-      const unique_ref = distributionId;
-      console.log("unique_ref", unique_ref);
+      // const distributionId = cairo.felt(generateRandomUUID());
+      // const unique_ref = distributionId;
 
       let calls: Call[];
 
@@ -310,13 +309,13 @@ const DistributePage = () => {
       const tx = result.transaction_hash;
 
       // // Wait for receipt
-      const receiptStatus = await provider.waitForTransaction(tx);
+      // const receiptStatus = await provider.waitForTransaction(tx);
 
       // Create distribution record
 
-      if (receiptStatus.statusReceipt !== "success") {
-        throw new Error("Distribution failed, please try again.");
-      }
+      // if (receiptStatus.statusReceipt !== "success") {
+      //   throw new Error("Distribution failed, please try again.");
+      // }
 
       const baseAmount = distributionData
         .reduce((sum, dist) => {
@@ -346,18 +345,19 @@ const DistributePage = () => {
       const totalUsdAmount = totalBaseAmount.multiply(usdRate).toString();
 
       const distribution = {
-        status: "COMPLETED",
+        status: "PENDING",
         transaction_hash: tx,
         user_address: address!,
+        chain_name: chain.name,
         total_amount: baseAmount,
+        usd_rate: usdRate?.toString(),
         total_usd_amount: totalUsdAmount,
         token_symbol: selectedToken.symbol,
+        created_at: new Date().toISOString(),
         token_address: selectedToken.address,
         token_decimals: selectedToken.decimals,
         total_recipients: distributionData.length,
-        chain_name: chain.name,
         network: isMainNet ? "MAINNET" : "TESTNET",
-        usd_rate: usdRate?.toString(),
         distribution_type: distributionInfo.type.toUpperCase(),
         fee_amount: (
           Number(distributionState.protocolFee || BigInt(0)) /
@@ -374,13 +374,16 @@ const DistributePage = () => {
         },
       };
 
-      const { error, success } = await tryCatch(
-        createDistributionAction(distribution)
+      const { data, error } = await tryCatch(
+        DistributionApiService.createDistribution(
+          address!,
+          distribution as unknown as DistributionAttributes
+        )
       );
 
       toast.dismiss();
 
-      if (!success) {
+      if (!data?.success) {
         toast.error(error?.message || "Something went wrong");
         return;
       }

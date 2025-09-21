@@ -39,7 +39,7 @@ import {
   distributionType,
   validPageLimits,
 } from "@/lib/constant";
-import { capitalizeWord } from "@/lib/utills";
+import { capitalizeWord } from "@/lib/utils";
 
 import { useRouter } from "next/navigation";
 

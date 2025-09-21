@@ -1,6 +1,11 @@
 import { Chain } from "@starknet-react/chains";
 
-import { MAINNET_STREAM_CONTRACT_ADDRESS, TESTNET_STREAM_CONTRACT_ADDRESS } from "../constant";
+import {
+  MAINNET_STREAM_CONTRACT_ADDRESS,
+  TESTNET_STREAM_CONTRACT_ADDRESS,
+} from "../constant";
+import { tryCatch } from ".";
+import PaymentStreamApiService from "@/services/api/paymentStreamService";
 
 export type DurationUnit = "hour" | "day" | "week" | "month" | "year";
 
@@ -10,7 +15,6 @@ export function getStreamContractAddress(chain?: Chain): string {
     ? MAINNET_STREAM_CONTRACT_ADDRESS
     : TESTNET_STREAM_CONTRACT_ADDRESS;
 }
-
 
 export function normalizeAddress(address?: string): string {
   if (!address) return "";
@@ -38,40 +42,39 @@ export function durationToSeconds(value: number, unit: DurationUnit): number {
   }
 }
 
-export async function recordStreamTransaction(
-  streamData: {
-    usdRate?: string;
-    transactionStatus?: string;
-    network: string;
-    duration: number;
-    tokenDecimals: number;
-    tokenSymbol: string;
-    isCancellable: boolean;
-    chainName: string;
-    streamId: string;
-    creator: string;
-    recipient: string;
-    amount: string;
-    tokenAddress: string;
-    isTransferable: boolean;
-    transactionHash: string;
-    totalUsdAmount?: string;
-  }
-): Promise<void> {
+export async function recordStreamTransaction(streamData: {
+  usdRate?: string;
+  transactionStatus?: string;
+  network: string;
+  duration: number;
+  tokenDecimals: number;
+  tokenSymbol: string;
+  isCancellable: boolean;
+  chainName: string;
+  streamId?: string;
+  creator: string;
+  recipient: string;
+  amount: string;
+  tokenAddress: string;
+  isTransferable: boolean;
+  transactionHash: string;
+  totalUsdAmount?: string;
+}): Promise<void> {
   try {
     const payload = {
       usd_rate: streamData.usdRate || "0.00",
-      status: streamData.transactionStatus || "COMPLETED",
+      status: streamData.transactionStatus || "active",
       network: streamData.network.toUpperCase(),
       duration: streamData.duration,
       token_decimals: streamData.tokenDecimals,
       token_symbol: streamData.tokenSymbol,
       is_cancellable: streamData.isCancellable,
       chain_name: streamData.chainName,
-      created_at: Math.floor(Date.now() / 1000),
+      created_at: Date.now(),
       is_transferable: streamData.isTransferable,
-      total_usd_amount: streamData.totalUsdAmount || "0.00",
-      stream_id: streamData.streamId,
+      total_usd_amount: streamData?.totalUsdAmount
+        ? Number(streamData.totalUsdAmount)
+        : 1,
       amount: streamData.amount,
       creator: streamData.creator,
       recipient: streamData.recipient,
@@ -79,24 +82,26 @@ export async function recordStreamTransaction(
       transaction_hash: streamData.transactionHash,
     };
 
-    const response = await fetch(
-      "https://backend-main-no3f.onrender.com/api/payment-streams",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-wallet-id": streamData.creator,
-        },
-        body: JSON.stringify(payload),
-      }
+    const { data, error } = await tryCatch(
+      PaymentStreamApiService.createStream(streamData.creator, payload)
     );
 
-    if (!response.ok) {
+    // fetch(
+    //   "https://backend-main-no3f.onrender.com/api/payment-streams",
+    //   {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //       "x-wallet-id": streamData.creator,
+    //     },
+    //     body: JSON.stringify(payload),
+    //   }
+    // );
 
+    if (!data?.success) {
+      throw new Error(error?.message || "Failed to store stream transaction");
     }
   } catch {
-
+    throw new Error("Failed to store stream transaction");
   }
 }
-
-

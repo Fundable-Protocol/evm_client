@@ -23,6 +23,7 @@ export class ApiService {
       const response = await fetch(`${this.baseURL}/api${endpoint}`, {
         ...options,
         headers: {
+          "Content-Type": "application/json",
           ...options.headers,
           "x-wallet-id": walletId ?? "", // use current user wallet id
         },

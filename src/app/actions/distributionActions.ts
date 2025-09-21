@@ -6,7 +6,7 @@ import {
   updateDistributionSchema,
   createDistributionSchema,
 } from "@/policies/distribution";
-import { tryCatch } from "@/lib/utills";
+import { tryCatch } from "@/lib/utils";
 
 import { supportedTokenSymbol } from "@/lib/constant";
 import { IHistoryQueryParams } from "@/types/history";

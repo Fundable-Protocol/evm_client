@@ -10,7 +10,13 @@ const PaymentStream = () => {
       <DashboardLayout
         title="Create Payment Streams"
         className="flex flex-col gap-y-6 h-full bg-transparent"
-        availableNetwork={["testnet"]}
+        availableNetwork={["testnet", "mainnet"]}
+        infoMessage={{
+          type: "warning",
+          title: "Beta Feature",
+          message: "Feature is in beta mode. Use at your own risk.",
+          showOnNetwork: "mainnet",
+        }}
       >
         <CreatePaymentStream />
         <StreamsHistory />

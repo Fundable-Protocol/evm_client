@@ -1,4 +1,4 @@
-import { capitalizeWord, sliceAddress } from "@/lib/utills";
+import { capitalizeWord, sliceAddress } from "@/lib/utils";
 import { StreamData } from "@/types/payment-stream";
 
 const PaymentStreamSummary = ({ streamData }: { streamData: StreamData }) => {
