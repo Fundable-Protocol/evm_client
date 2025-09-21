@@ -20,18 +20,18 @@ const FeatureCards = () => {
         link="/distribution"
       />
       <FeatureCard
-        title="Airdrops"
-        linkText="Create Campaign"
-        description={airDrop}
-        imgType="airdrop"
-        link="/airdrop"
-      />
-      <FeatureCard
         title="Payment Stream"
         linkText="Create Stream"
         description={stream}
         imgType="stream"
         link="/payment-stream"
+      />
+      <FeatureCard
+        title="Airdrops"
+        linkText="Create Campaign"
+        description={airDrop}
+        imgType="airdrop"
+        link="/airdrop"
       />
     </div>
   );
