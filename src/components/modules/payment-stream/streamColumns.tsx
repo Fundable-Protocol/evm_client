@@ -112,7 +112,17 @@ export const streamColumns: ColumnDef<StreamRecord>[] = [
     accessorKey: "status",
     header: () => <div className="text-center">Status</div>,
     cell: ({ row }) => {
-      const status = row.getValue("status") as string;
+      const duration = (row?.original?.duration as number) * 1000;
+      const createdAt = new Date(row?.original?.created_at)?.getTime();
+      const endDate = new Date(createdAt + duration).getTime();
+
+      const currentTime = Date.now();
+
+      const status =
+        currentTime > endDate
+          ? "completed"
+          : (row.getValue("status") as string);
+
       return (
         <div className="flex justify-center items-center">
           <span

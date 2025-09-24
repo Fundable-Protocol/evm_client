@@ -14,7 +14,7 @@ const PaymentStream = () => {
         infoMessage={{
           type: "warning",
           title: "Beta Feature",
-          message: "Feature is in beta mode. Use at your own risk.",
+          message: "Feature is in beta mode.",
           showOnNetwork: "mainnet",
         }}
       >
