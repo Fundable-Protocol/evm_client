@@ -1,8 +1,10 @@
 "use client";
 
+import { Suspense } from "react";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import CreatePaymentStream from "@/components/modules/payment-stream/CreatePaymentStream";
 import { StreamsHistory } from "@/components/modules/payment-stream/StreamsHistory";
+import StreamsTableSkeleton from "@/components/modules/payment-stream/StreamsTableSkeleton";
 
 const PaymentStream = () => {
   return (
@@ -19,7 +21,9 @@ const PaymentStream = () => {
         }}
       >
         <CreatePaymentStream />
-        <StreamsHistory />
+        <Suspense fallback={<StreamsTableSkeleton />}>
+          <StreamsHistory />
+        </Suspense>
       </DashboardLayout>
     </>
   );
