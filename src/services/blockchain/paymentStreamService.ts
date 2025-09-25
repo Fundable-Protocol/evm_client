@@ -56,7 +56,7 @@ export class PaymentStreamService {
             params.recipient,
             low,
             high,
-            durationSeconds.toString(),
+            durationSeconds,
             params.cancellable ? "1" : "0",
             tokenAddress,
             params.transferable ? "1" : "0",

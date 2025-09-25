@@ -25,6 +25,8 @@ export function normalizeAddress(address?: string): string {
 }
 
 export function durationToSeconds(value: number, unit: DurationUnit): number {
+  console.log("value", value);
+  console.log("unit", unit);
   switch (unit) {
     case "hour":
       return value * 1;
