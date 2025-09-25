@@ -27,16 +27,16 @@ export function normalizeAddress(address?: string): string {
 export function durationToSeconds(value: number, unit: DurationUnit): number {
   switch (unit) {
     case "hour":
-      return value * 60 * 60;
+      return value * 1;
     case "day":
-      return value * 24 * 60 * 60;
+      return value * 24;
     case "week":
-      return value * 7 * 24 * 60 * 60;
+      return value * 7 * 24;
     case "month":
       // Use month as 30 days
-      return value * 30 * 24 * 60 * 60;
+      return value * 30 * 24;
     case "year":
-      return value * 365 * 24 * 60 * 60;
+      return value * 365 * 24;
     default:
       return value;
   }
