@@ -1,5 +1,5 @@
 import type { Call, AccountInterface } from "starknet";
-import { cairo } from "starknet";
+import { cairo, RpcProvider } from "starknet";
 import { Chain } from "@starknet-react/chains";
 
 import {
@@ -108,6 +108,139 @@ export class PaymentStreamService {
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to create stream";
+      return { success: false, message };
+    }
+  }
+
+  static async getWithdrawableAmount(
+    chain: Chain | undefined,
+    streamId: string
+  ): Promise<{ success: boolean; amount?: string; message?: string }> {
+    const contractAddress = getStreamContractAddress(chain);
+
+    if (!contractAddress) {
+      return { success: false, message: "Stream contract not configured" };
+    }
+
+    try {
+      const rpcUrl =
+        chain?.network === "mainnet"
+          ? "https://starknet-mainnet.public.blastapi.io"
+          : "https://starknet-sepolia.public.blastapi.io";
+
+      const provider = new RpcProvider({ nodeUrl: rpcUrl });
+      console.log("Stream ID", streamId);
+
+      const streamIdU256 = cairo.uint256(streamId);
+
+      const callResponse = await provider.callContract({
+        contractAddress,
+        entrypoint: "get_withdrawable_amount",
+        calldata: [
+          streamIdU256.low.toString(),
+          streamIdU256.high.toString(),
+        ],
+      });
+
+      const resultArray = Array.isArray(callResponse)
+        ? callResponse
+        : (callResponse as { result: string[] }).result;
+
+      // Expecting Uint256 (low, high)
+      if (!resultArray || resultArray.length < 2) {
+        return { success: false, message: "Invalid contract response" };
+      }
+
+      const low = BigInt(resultArray[0]);
+      const high = BigInt(resultArray[1]);
+      const base = BigInt(2) ** BigInt(128);
+      const amount = high * base + low;
+
+      return { success: true, amount: amount.toString() };
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to fetch withdrawable amount";
+      return { success: false, message };
+    }
+  }
+
+  static async withdrawStream(
+    account: AccountInterface | undefined,
+    chain: Chain | undefined,
+    params: { streamId: string; amount: string; to: string }
+  ): Promise<CreateStreamResponse> {
+    const contractAddress = getStreamContractAddress(chain);
+
+    if (!contractAddress) {
+      return { success: false, message: "Stream contract not configured" };
+    }
+
+    if (!account) return { success: false, message: "Wallet not connected" };
+
+    try {
+      const streamIdU256 = cairo.uint256(params.streamId);
+      const amountU256 = cairo.uint256(params.amount);
+
+      const calls: Call[] = [
+        {
+          entrypoint: "withdraw",
+          contractAddress,
+          calldata: [
+            streamIdU256.low,
+            streamIdU256.high,
+            amountU256.low,
+            amountU256.high,
+            params.to,
+          ],
+        },
+      ];
+
+      const result = await account.execute(calls);
+      const tx = result.transaction_hash;
+
+      return { success: true, data: { transactionHash: tx } };
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to withdraw from stream";
+      return { success: false, message };
+    }
+  }
+
+  static async withdrawMaxStream(
+    account: AccountInterface | undefined,
+    chain: Chain | undefined,
+    params: { streamId: string; to: string }
+  ): Promise<CreateStreamResponse> {
+    const contractAddress = getStreamContractAddress(chain);
+
+    if (!contractAddress) {
+      return { success: false, message: "Stream contract not configured" };
+    }
+
+    if (!account) return { success: false, message: "Wallet not connected" };
+
+    try {
+      const streamIdU256 = cairo.uint256(params.streamId);
+
+      const calls: Call[] = [
+        {
+          entrypoint: "withdraw_max",
+          contractAddress,
+          calldata: [
+            streamIdU256.low,
+            streamIdU256.high,
+            params.to,
+          ],
+        },
+      ];
+
+      const result = await account.execute(calls);
+      const tx = result.transaction_hash;
+
+      return { success: true, data: { transactionHash: tx } };
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to withdraw max from stream";
       return { success: false, message };
     }
   }

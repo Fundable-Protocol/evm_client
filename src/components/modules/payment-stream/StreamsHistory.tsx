@@ -10,6 +10,10 @@ import AppSelect from "@/components/molecules/AppSelect";
 import StreamsTableSkeleton from "./StreamsTableSkeleton";
 import PaymentStreamApiService from "@/services/api/paymentStreamService";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { streamColumns } from "./streamColumns";
+import StreamActionsCell from "./StreamActionsCell";
+import type { ColumnDef } from "@tanstack/react-table";
+import type { StreamRecord } from "@/types/payment-stream";
 
 export const StreamsHistory = () => {
   const { address } = useAccount();
@@ -124,6 +128,18 @@ export const StreamsHistory = () => {
                 page={streamsData?.data?.meta.currentPage}
                 limit={streamsData?.data?.meta.perPage}
                 totalCount={streamsData?.data?.meta.totalRows}
+                columns={([
+                  ...streamColumns,
+                  {
+                    id: "actions",
+                    header: () => <div className="text-center">Action</div>,
+                    cell: ({ row }) => (
+                      <div className="flex justify-center">
+                        <StreamActionsCell stream={row.original as StreamRecord} />
+                      </div>
+                    ),
+                  },
+                ]) as ColumnDef<StreamRecord>[]}
               />
             </TabsContent>
 

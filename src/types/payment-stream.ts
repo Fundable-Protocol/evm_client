@@ -1,4 +1,5 @@
 import type { DurationUnit } from "@/lib/utils/stream";
+import type { ColumnDef } from "@tanstack/react-table";
 import { Dispatch, SetStateAction } from "react";
 import { AppSelectProps } from ".";
 
@@ -70,6 +71,7 @@ export interface StreamsTableProps {
   page?: number;
   limit?: number;
   totalCount?: number;
+  columns?: ColumnDef<StreamRecord>[];
 }
 
 // New confirmation modal props

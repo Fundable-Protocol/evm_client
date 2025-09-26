@@ -37,14 +37,17 @@ function StreamsTable({
   page = 1,
   limit = 10,
   totalCount = 0,
+  columns,
 }: StreamsTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pageCount = Math.ceil(totalCount / limit);
 
+  const columnsUsed = columns ?? streamColumns;
+
   const table = useReactTable({
     data,
-    columns: streamColumns,
+    columns: columnsUsed,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -125,7 +128,7 @@ function StreamsTable({
           ) : (
             <TableRow>
               <TableCell
-                colSpan={streamColumns.length}
+                colSpan={columnsUsed.length}
                 className="h-24 text-center"
               >
                 No streams found.

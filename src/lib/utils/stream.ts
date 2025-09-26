@@ -107,3 +107,16 @@ export async function recordStreamTransaction(streamData: {
     throw new Error("Failed to store stream transaction");
   }
 }
+
+export function getStreamExplorerUrl(stream?: {
+  transaction_hash?: string;
+  network?: string;
+}): string | undefined {
+  if (!stream?.transaction_hash || !stream?.network) return;
+
+  const baseUrl = stream.network?.toUpperCase() === "MAINNET"
+    ? "https://voyager.online/tx/"
+    : "https://sepolia.voyager.online/tx/";
+
+  return `${baseUrl}${stream.transaction_hash}`;
+}
