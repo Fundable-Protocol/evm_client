@@ -79,9 +79,11 @@ export const streamColumns: ColumnDef<StreamRecord>[] = [
     accessorKey: "endDate",
     header: () => <div className="text-center">End Date</div>,
     cell: ({ row }) => {
-      const duration = (row?.original?.duration as number) * 1000;
+      // Backend returns duration in HOURS; convert hours → milliseconds for Date math
+      const durationHours = row?.original?.duration as number;
+      const durationMs = durationHours * 60 * 60 * 1000;
       const createdAt = new Date(row?.original?.created_at)?.getTime();
-      const endDate = new Date(createdAt + duration);
+      const endDate = new Date(createdAt + durationMs);
 
       const formattedEndDate = format(endDate, "MMM dd, yyyy  hh:mm a");
 
@@ -112,9 +114,11 @@ export const streamColumns: ColumnDef<StreamRecord>[] = [
     accessorKey: "status",
     header: () => <div className="text-center">Status</div>,
     cell: ({ row }) => {
-      const duration = (row?.original?.duration as number) * 1000;
+      // Backend returns duration in HOURS; convert hours → milliseconds for comparison
+      const durationHours = row?.original?.duration as number;
+      const durationMs = durationHours * 60 * 60 * 1000;
       const createdAt = new Date(row?.original?.created_at)?.getTime();
-      const endDate = new Date(createdAt + duration).getTime();
+      const endDate = new Date(createdAt + durationMs).getTime();
 
       const currentTime = Date.now();
 
