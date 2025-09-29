@@ -28,6 +28,9 @@ export const createDistributionSchema = z.object({
   total_amount: z.string(),
   fee_amount: z.string(),
   usd_rate: z.string(),
+  created_at: z.string().refine((val) => !isNaN(Date.parse(val)), {
+    message: "Invalid datetime string",
+  }),
   total_usd_amount: z.string(),
   chain_name: z.string(),
   transaction_hash: z.string().optional(),

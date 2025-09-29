@@ -1,4 +1,4 @@
-import { capitalizeWord, sliceAddress } from "@/lib/utills";
+import { capitalizeWord, sliceAddress } from "@/lib/utils";
 import { StreamData } from "@/types/payment-stream";
 
 const PaymentStreamSummary = ({ streamData }: { streamData: StreamData }) => {
@@ -25,11 +25,11 @@ const PaymentStreamSummary = ({ streamData }: { streamData: StreamData }) => {
     .filter(Boolean);
 
   return (
-    <div className="hidden xl:flex flex-col gap-y-4 p-6 rounded-[0.75rem] bg-fundable-mid-grey/50 h-max w-[30%] lg:w-[25%]">
+    <div className="hidden xl:flex flex-col gap-y-4 p-6 rounded-[0.75rem] bg-fundable-mid-grey/50  w-[30%] lg:w-[25%]">
       <h2 className="font-semibold text-fundable-white mb-3 text-nowrap pb-4 border-b border-fundable-light-grey">
         Summary
       </h2>
-      <div className="flex flex-col gap-y-5">
+      <div className="flex flex-col gap-y-7">
         {streamSummary.map((item) => (
           <div className="flex justify-between" key={item?.label}>
             <span className="text-fundable-light-grey font-semibold font-urbanist">

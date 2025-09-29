@@ -7,7 +7,7 @@ import {
   DistributionRowField,
 } from "@/types/distribution";
 
-import { createEmptyRow } from "@/lib/utills";
+import { createEmptyRow } from "@/lib/utils";
 
 const DistributionTable = ({
   isConnected,

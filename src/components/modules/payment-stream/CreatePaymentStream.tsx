@@ -1,21 +1,24 @@
-import { useMemo, useState } from "react";
-import { useAccount, useNetwork } from "@starknet-react/core";
-import type { AccountInterface } from "starknet";
 import toast from "react-hot-toast";
+import { parseUnits } from "ethers";
+import { useMemo, useState } from "react";
+import type { AccountInterface } from "starknet";
+import { useAccount, useNetwork } from "@starknet-react/core";
+import { useQueryClient } from "@tanstack/react-query";
 
 import PaymentStreamForm from "./PaymentStreamForm";
+import type { DurationUnit } from "@/lib/utils/stream";
 import PaymentStreamSummary from "./PaymentStreamSummary";
-import { capitalizeWord, getTokenOptions } from "@/lib/utills";
-import { PaymentStreamService } from "@/services/blockchain/paymentStreamService";
-import type { DurationUnit } from "@/lib/utills/stream";
-import { parseUnits } from "ethers";
-import { createPaymentStreamSchema } from "@/validations/paymentStream";
+import PaymentStreamConfirmationModal from "./PaymentStreamConfirmationModal";
+import { capitalizeWord, getTokenOptions } from "@/lib/utils";
 import type { CreateStreamResponse } from "@/types/payment-stream";
+import { createPaymentStreamSchema } from "@/validations/paymentStream";
+import { PaymentStreamService } from "@/services/blockchain/paymentStreamService";
 
 const CreatePaymentStream = () => {
   const { chain } = useNetwork();
   const { account, address } = useAccount();
   const { tokenOptions } = getTokenOptions(chain);
+  const queryClient = useQueryClient();
 
   const durationOptions = ["hour", "day", "week", "month", "year"].map(
     (option) => ({
@@ -34,8 +37,9 @@ const CreatePaymentStream = () => {
     cancellability: false,
     transferability: false,
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formKey, setFormKey] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
   const selectedTokenDecimals = useMemo(() => {
     const option = tokenOptions.find((o) => o.value === streamData.token);
@@ -47,22 +51,34 @@ const CreatePaymentStream = () => {
     return token.decimals;
   }, [tokenOptions, streamData.token, chain]);
 
-  const handleSubmit = async () => {
+  const handleFormSubmit = () => {
     if (!address) {
       toast.error("Connect your wallet");
       return;
     }
+
+    // Validate form data
+    const schema = createPaymentStreamSchema(tokenOptions, durationOptions);
+    const parsed = schema.safeParse(streamData);
+    console.log("parsed", parsed.data);
+
+    if (!parsed.success) {
+      const firstErr = parsed.error.issues[0]?.message || "Invalid form input";
+      toast.error(firstErr);
+      return;
+    }
+
+    // Show confirmation modal
+    setShowConfirmationModal(true);
+  };
+
+  const handleConfirmStream = async () => {
+    // Close modal immediately to show loading state on form
+    setShowConfirmationModal(false);
+
     try {
       setIsSubmitting(true);
-      const schema = createPaymentStreamSchema(tokenOptions, durationOptions);
-      const parsed = schema.safeParse(streamData);
-      if (!parsed.success) {
-        const firstErr =
-          parsed.error.issues[0]?.message || "Invalid form input";
-        toast.error(firstErr);
-        setIsSubmitting(false);
-        return;
-      }
+
       const totalAmountScaled = parseUnits(
         streamData.amount,
         selectedTokenDecimals
@@ -73,10 +89,11 @@ const CreatePaymentStream = () => {
           account as AccountInterface,
           chain,
           {
+            creator: address!,
             name: streamData.name,
-            recipient: streamData.recipient,
             tokenSymbol: streamData.token,
             totalAmount: totalAmountScaled,
+            recipient: streamData?.recipient?.toLowerCase(),
             durationValue: Number(streamData.durationValue),
             durationUnit: streamData.duration as DurationUnit,
             cancellable: Boolean(streamData.cancellability),
@@ -95,7 +112,9 @@ const CreatePaymentStream = () => {
       toast.success(
         `Stream created successfully!: ${transactionHash.slice(0, 10)}...`
       );
-      // Reset form to initial state
+
+      // Close modal and reset form
+      setShowConfirmationModal(false);
       setStreamData({
         name: "",
         recipient: "",
@@ -107,6 +126,14 @@ const CreatePaymentStream = () => {
         transferability: false,
       });
       setFormKey((k) => k + 1);
+
+      // Invalidate streams queries and set a flag to switch to outgoing tab
+      await queryClient.invalidateQueries({
+        queryKey: ["payment-streams-table"],
+      });
+
+      // Set a temporary query data to indicate tab should switch
+      queryClient.setQueryData(["stream-created-switch-tab"], true);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to create stream";
@@ -116,19 +143,35 @@ const CreatePaymentStream = () => {
     }
   };
 
+  const handleCloseModal = () => {
+    if (!isSubmitting) {
+      setShowConfirmationModal(false);
+    }
+  };
+
   return (
-    <main className="flex gap-x-6 h-dvh w-full justify-between">
-      <PaymentStreamForm
-        key={formKey}
+    <>
+      <main className="flex gap-x-6 h-dvh w-full justify-between">
+        <PaymentStreamForm
+          key={formKey}
+          streamData={streamData}
+          tokenOptions={tokenOptions}
+          setStreamData={setStreamData}
+          durationOptions={durationOptions}
+          onSubmit={handleFormSubmit}
+          isSubmitting={isSubmitting} // Pass the actual isSubmitting state
+        />
+        <PaymentStreamSummary streamData={streamData} />
+      </main>
+
+      <PaymentStreamConfirmationModal
+        isOpen={showConfirmationModal}
+        onClose={handleCloseModal}
+        onConfirm={handleConfirmStream}
         streamData={streamData}
-        tokenOptions={tokenOptions}
-        setStreamData={setStreamData}
-        durationOptions={durationOptions}
-        onSubmit={handleSubmit}
-        isSubmitting={isSubmitting}
+        isLoading={isSubmitting}
       />
-      <PaymentStreamSummary streamData={streamData} />
-    </main>
+    </>
   );
 };
 

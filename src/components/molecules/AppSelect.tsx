@@ -5,7 +5,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utills";
+import { cn } from "@/lib/utils";
 import { AppSelectProps } from "@/types";
 
 const AppSelect = ({
@@ -20,9 +20,7 @@ const AppSelect = ({
     <Select onValueChange={setValue}>
       <div className="flex flex-col min-w-max">
         {!!title && (
-          <h3 className={cn("font-semibold mb-3 text-nowrap", titleclassname)}>
-            {title}
-          </h3>
+          <h3 className={cn("mb-3 text-nowrap", titleclassname)}>{title}</h3>
         )}
         <SelectTrigger
           className={cn(

@@ -1,6 +1,6 @@
 "use server";
 
-import { tryCatch } from "@/lib/utills";
+import { tryCatch } from "@/lib/utils";
 import { db } from "../../../db/drizzle";
 import { and, eq, ilike } from "drizzle-orm";
 import { feeConfigModel } from "../../../db/schema";
@@ -49,7 +49,7 @@ export async function getProtocolFee(
     const andQuery = and(
       eq(
         feeConfigModel.network,
-        network?.toUpperCase() as "mainnet" | "testnet"
+        network?.toUpperCase() as (typeof supportedNetwork)[number]
       ),
       ilike(feeConfigModel.chainName, chainName)
     );
