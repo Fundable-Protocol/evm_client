@@ -54,6 +54,12 @@ export const MAINNET_SUPPORTED_TOKENS = Object.freeze({
       "0x068f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8",
     decimals: 6,
   },
+  WBTC: {
+    symbol: "WBTC",
+    address:
+      "0x03Fe2b97C1Fd336E750087D68B9b867997Fd64a2661fF3ca5A7C771641e8e7AC",
+    decimals: 8,
+  },
 }) as Readonly<Record<string, Readonly<TokenOption>>>;
 
 export const TESTNET_SUPPORTED_TOKENS = Object.freeze({
