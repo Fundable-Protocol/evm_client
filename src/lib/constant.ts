@@ -57,7 +57,7 @@ export const MAINNET_SUPPORTED_TOKENS = Object.freeze({
   WBTC: {
     symbol: "WBTC",
     address:
-      "0x03Fe2b97C1Fd336E750087D68B9b867997Fd64a2661fF3ca5A7C771641e8e7AC",
+      "0x03fe2b97c1fd336e750087d68b9b867997fd64a2661ff3ca5a7c771641e8e7ac",
     decimals: 8,
   },
 }) as Readonly<Record<string, Readonly<TokenOption>>>;
@@ -113,7 +113,7 @@ export const transactionCardTypes = [
   "addresses",
 ] as const;
 
-export const supportedTokenSymbol = ["STRK", "USDT", "USDC", "ETH"] as const;
+export const supportedTokenSymbol = ["STRK", "USDT", "USDC", "ETH", "WBTC"] as const;
 
 export const featureCardImgTypes = ["airdrop", "stream"] as const;
 
