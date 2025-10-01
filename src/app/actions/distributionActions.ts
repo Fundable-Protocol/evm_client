@@ -106,6 +106,7 @@ export async function getChartDataAction(user_address: string, date?: number) {
       STRK: 0,
       USDC: 0,
       ETH: 0,
+      WBTC: 0,
     };
     return acc;
   }, {} as Record<string, ITransactionDataPoint>);

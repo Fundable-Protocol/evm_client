@@ -28,4 +28,5 @@ export interface ITransactionDataPoint {
   STRK: number;
   USDC: number;
   ETH?: number;
+  WBTC?: number;
 }
