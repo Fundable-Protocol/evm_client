@@ -1,43 +1,6 @@
-function withValidProperties(
-  properties: Record<string, undefined | string | string[]>,
-) {
-  return Object.fromEntries(
-    Object.entries(properties).filter(([, value]) => {
-      if (Array.isArray(value)) {
-        return value.length > 0;
-      }
-      return !!value;
-    }),
-  );
-}
-
 export async function GET() {
-  const URL = process.env.NEXT_PUBLIC_URL || "https://evm.fundable.finance";
-
-  return Response.json({
-    accountAssociation: {
-      header: process.env.FARCASTER_HEADER,
-      payload: process.env.FARCASTER_PAYLOAD,
-      signature: process.env.FARCASTER_SIGNATURE,
-    },
-    frame: withValidProperties({
-      version: "1",
-      name: process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME || "Fundable",
-      subtitle: process.env.NEXT_PUBLIC_APP_SUBTITLE,
-      description: process.env.NEXT_PUBLIC_APP_DESCRIPTION,
-      screenshotUrls: [],
-      iconUrl: process.env.NEXT_PUBLIC_APP_ICON,
-      splashImageUrl: process.env.NEXT_PUBLIC_APP_SPLASH_IMAGE,
-      splashBackgroundColor: process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR,
-      homeUrl: URL,
-      webhookUrl: `${URL}/api/webhook`,
-      primaryCategory: process.env.NEXT_PUBLIC_APP_PRIMARY_CATEGORY,
-      tags: [],
-      heroImageUrl: process.env.NEXT_PUBLIC_APP_HERO_IMAGE,
-      tagline: process.env.NEXT_PUBLIC_APP_TAGLINE,
-      ogTitle: process.env.NEXT_PUBLIC_APP_OG_TITLE,
-      ogDescription: process.env.NEXT_PUBLIC_APP_OG_DESCRIPTION,
-      ogImageUrl: process.env.NEXT_PUBLIC_APP_OG_IMAGE,
-    }),
-  });
+  // Temporary redirect (307) to Farcaster Hosted Manifest
+  const hostedManifestUrl = "https://api.farcaster.xyz/miniapps/hosted-manifest/0199b3e5-59ed-40c9-c545-6a7faef649c4";
+  
+  return Response.redirect(hostedManifestUrl, 307);
 } 
