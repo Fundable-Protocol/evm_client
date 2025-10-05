@@ -9,6 +9,7 @@ import { Sidebar, useSidebar } from "@/components/ui/sidebar";
 import Logo from "../../../public/svgs/fundable_logo.svg";
 
 import { useEVM } from "@/hooks/useEVM";
+import { useIsMobile } from "@/hooks/use-mobile";
 import DistributionIcon from "../svgs/DistributionIcon";
 import DashboardIcon from "../svgs/DashboardIcon";
 import WalletIcon from "../svgs/WalletIcon";
@@ -17,7 +18,7 @@ import LogoutIcon from "../svgs/LogoutIcon";
 import BookIcon from "../svgs/BookIcon";
 import EyeIcon from "../svgs/EyeIcon";
 
-// Menu items.
+// Desktop menu items.
 const items = [
   {
     title: "Dashboard",
@@ -56,10 +57,72 @@ const items = [
   },
 ];
 
+// Mobile bottom navigation items.
+const mobileItems = [
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: <DashboardIcon aria-hidden="true" />,
+  },
+  {
+    title: "Distribute",
+    url: "/distribution",
+    icon: <DistributionIcon aria-hidden="true" />,
+  },
+  {
+    title: "Analytics",
+    url: "/analytics",
+    icon: <BookIcon aria-hidden="true" />,
+  },
+  {
+    title: "History",
+    url: "/history",
+    icon: <User2 aria-hidden="true" className="text-white size-5" />,
+  },
+];
+
 export function AppSidebar() {
   const pathname = usePathname();
   const { disconnect, isConnected } = useEVM();
   const { setOpenMobile } = useSidebar();
+  const isMobile = useIsMobile();
+
+  // Mobile bottom navigation
+  if (isMobile) {
+    return (
+      <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-800 z-50 safe-area-pb">
+        <nav className="flex items-center justify-around py-1 px-2 sm:py-2 sm:px-4">
+          {mobileItems.map((item) => {
+            const isActive = pathname === item.url;
+            
+            return (
+              <Link
+                key={item.title}
+                href={item.url}
+                className={`flex flex-col items-center justify-center py-1 px-1 sm:py-2 sm:px-3 min-w-0 flex-1 transition-colors touch-manipulation ${
+                  isActive ? "text-white" : "text-gray-400"
+                }`}
+                onClick={() => setOpenMobile(false)}
+              >
+                <div className={`mb-0.5 sm:mb-1 ${
+                  isActive ? "text-white" : "text-gray-400"
+                }`}>
+                  {item.icon}
+                </div>
+                <span className={`text-[10px] sm:text-xs font-medium leading-tight ${
+                  isActive ? "text-white" : "text-gray-400"
+                }`}>
+                  {item.title}
+                </span>
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+    );
+  }
+
+  // Desktop sidebar
   return (
     <Sidebar
       className="pt-7 bg-fundable-mid-grey/10"

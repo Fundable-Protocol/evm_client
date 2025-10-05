@@ -10,7 +10,7 @@ const layout = ({ children }: { children: ReactNode }) => {
       <AppSidebar />
       <main className="flex flex-col h-dvh w-full overflow-hidden">
         <AdminNavbar />
-        <div className="px-4 py-4 overflow-hidden">{children}</div>
+        <div className="px-4 py-4 overflow-hidden pb-16 sm:pb-20 md:pb-4">{children}</div>
       </main>
     </SidebarProvider>
   );

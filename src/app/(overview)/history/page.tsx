@@ -9,7 +9,6 @@ import {
   distributionFilterValueType,
 } from "@/types/history";
 import { DistributionAttributes } from "@/types/distribution";
-import { columns } from "@/components/modules/history/columns";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import HistoryTable from "@/components/modules/history/HistoryTable";
 import { getDistributionsAction } from "@/app/actions/distributionActions";
@@ -71,7 +70,6 @@ const HistoryPageContent = () => {
           <HistoryTableSkeleton />
         ) : (
           <HistoryTable
-            columns={columns}
             data={distributionsData?.data?.distributions ?? []}
             statusFilter={distributionFilter.status}
             typeFilter={distributionFilter.type}
