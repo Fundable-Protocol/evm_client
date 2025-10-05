@@ -78,15 +78,18 @@ export class PaymentStreamService {
         "ethereum",
         "bitcoin",
       ]);
-      let usdRate = 1;
+      let usdRate;
 
       if (params.tokenSymbol === "STRK") {
-        usdRate = tokenPrices?.["starknet"]?.usd ?? 1;
+        usdRate = tokenPrices?.["starknet"]?.usd;
+        if (!usdRate) { throw new Error("Failed to fetch STRK prices"); }
       } else if (params.tokenSymbol === "ETH") {
-        usdRate = tokenPrices?.["ethereum"]?.usd ?? 1;
+        usdRate = tokenPrices?.["ethereum"]?.usd;
+        if (!usdRate) { throw new Error("Failed to fetch ETH prices"); }
       } else if (params.tokenSymbol === "WBTC") {
         // WBTC tracks BTC price
-        usdRate = tokenPrices?.["bitcoin"]?.usd ?? 1;
+        usdRate = tokenPrices?.["bitcoin"]?.usd;
+        if (!usdRate) { throw new Error("Failed to fetch WBTC prices"); }
       }
 
       // Calculate total USD amount
