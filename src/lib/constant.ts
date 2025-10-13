@@ -53,11 +53,11 @@ export const SUPPORTED_TOKENS: Record<
     ethereum: {
       USDC: { symbol: "USDC", address: "0x036CbD53842c5426634e7929541eC2318f3dCF7e", decimals: 6 },
     },
-    base: {
-      USDC: { symbol: "USDC", address: "0x0000000000000000000000000000000000000003", decimals: 6 },
+    "base sepolia": {
+      USDC: { symbol: "USDC", address: "0x036CbD53842c5426634e7929541eC2318f3dCF7e", decimals: 6 },
     },
     arbitrum: {
-      USDC: { symbol: "USDC", address: "0x0000000000000000000000000000000000000004", decimals: 6 },
+      USDC: { symbol: "USDC", address: "0x036CbD53842c5426634e7929541eC2318f3dCF7e", decimals: 6 },
     },
     "lisk sepolia": {
       USDC: { symbol: "USDC", address: "0x0E82fDDAd51cc3ac12b69761C45bBCB9A2Bf3C83", decimals: 6 },
@@ -101,6 +101,7 @@ export const EIP_7702_CHAINS = [
   "base",
   "arbitrum",
   "bnb smart chain",
+  "base sepolia",
   // add/remove chains as support evolves
   // e.g., "arbitrum", "sepolia", "base sepolia"
 ] as const;

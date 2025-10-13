@@ -14,6 +14,7 @@ import {
   IDistributionData,
   IDistributionState,
   IDistributionInfo,
+  DistributionType,
 } from "@/types/distribution";
 import DistributionSelector from "@/components/modules/distribution/DistributionSelector";
 
@@ -35,12 +36,14 @@ import { ErrorWithCode } from "@/types";
 // import { useStarkNameResolver } from "@/hooks/useStarkNameResolver";
 import { createDistributionAction } from "@/app/actions/distributionActions";
 import DistributionConfirmationModal from "@/components/modules/distribution/DistributionConfirmationModal";
+import DistributionSuccessModal from "@/components/modules/distribution/DistributionSuccessModal";
 import { getBalance, waitForCallsStatus, waitForTransactionReceipt } from "@wagmi/core";
 import { config } from "@/config";
 import { fetchProtocolFee } from "@/lib/api";
 import { fetchTokenPrices } from "@/services/apiServices";
 import { EIP_7702_CHAINS } from "@/lib/constant";
 import { resendDistributionPayload } from "@/store/distributionEntity";
+import { DistributionAttributes } from "@/types/distribution";
 
 const DistributePage = () => {
   const { address, chain } = useAccount();
@@ -85,6 +88,10 @@ const DistributePage = () => {
   const [distributionData, setDistributionData] = useState<IDistributionData[]>(
     [createEmptyRow()]
   );
+
+  // Success modal state
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [completedDistribution, setCompletedDistribution] = useState<DistributionAttributes | null>(null);
 
   // Prefill from resend payload if available
   useEffect(() => {
@@ -470,12 +477,38 @@ const DistributePage = () => {
 
       toast.dismiss();
 
-      toast.success(
-        `Successfully distributed tokens to ${recipients.length} addresses`,
-        { duration: 800 }
-      );
+      // Create distribution object for success modal
+      const distributionForModal: DistributionAttributes = {
+        id: "", // Will be set by backend
+        user_address: address!,
+        token_address: selectedToken.address,
+        token_symbol: selectedToken.symbol,
+        token_decimals: selectedToken.decimals,
+        total_amount: baseAmount,
+        fee_amount: (Number(distributionState.protocolFee || BigInt(0)) / Math.pow(10, selectedToken.decimals)).toString(),
+        transaction_hash: transactionHash,
+        total_recipients: distributionData.length,
+        status: "completed",
+        distribution_type: distributionInfo.type.toUpperCase() as DistributionType,
+        block_number: null,
+        block_timestamp: null,
+        network: isMainNet ? "mainnet" : "testnet",
+        chain_name: chain?.name || "",
+        created_at: new Date(),
+        metadata: {
+          recipients: distributionData.map((d) => ({
+            address: d.address!,
+            amount: d.amount!,
+            ...(distributionInfo.showLabel && d.label
+              ? { label: d.label }
+              : {}),
+          })),
+        },
+      };
 
-      router.push(`/history`);
+      // Set completed distribution and show success modal
+      setCompletedDistribution(distributionForModal);
+      setShowSuccessModal(true);
     } catch (error) {
       if (error instanceof Error) {
         toast.dismiss();
@@ -497,6 +530,18 @@ const DistributePage = () => {
       ...prev,
       currentState: "process-completed",
     }));
+  };
+
+  const handleSuccessModalClose = () => {
+    setShowSuccessModal(false);
+    setCompletedDistribution(null);
+    router.push(`/history`);
+  };
+
+  const handleViewHistory = () => {
+    setShowSuccessModal(false);
+    setCompletedDistribution(null);
+    router.push(`/history`);
   };
 
   const disableDistributionBtn =
@@ -537,6 +582,15 @@ const DistributePage = () => {
           selectedToken: selectedToken["symbol"],
         }}
       />
+      
+      {completedDistribution && (
+        <DistributionSuccessModal
+          isOpen={showSuccessModal}
+          onClose={handleSuccessModalClose}
+          onViewHistory={handleViewHistory}
+          distribution={completedDistribution}
+        />
+      )}
     </DashboardLayout>
   );
 };
