@@ -50,6 +50,29 @@ class _DistributionApiService {
     );
   }
 
+  async extractAddressesFromTweetUrl(
+    walletId: string,
+    data: {
+      url: string;
+      platform: "twitter";
+      addressType: "starknet";
+    }
+  ) {
+    return baseApiService.makeRequest<{
+      success: boolean;
+      platform: string;
+      addresses: [{ type: string; address: string }];
+      total: number;
+    }>(
+      `/social/extract-addresses`,
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      },
+      walletId
+    );
+  }
+
   async getDistributionStats(walletId: string) {
     return baseApiService.makeRequest<{
       success: boolean;

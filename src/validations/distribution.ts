@@ -33,9 +33,9 @@ export async function validateDistributionAmounts(
 ): Promise<{ success: boolean; message?: string }> {
   const { distributionInfo, distributionData } = data;
 
-  const firstAmount = Number(distributionData[0]?.amount);
+  const firstAmount = distributionData[0]?.amount;
 
-  if (isInvalidAmount(firstAmount)) {
+  if (isInvalidAmount(+firstAmount)) {
     return {
       success: false,
       message: "Valid amount is required for distribution.",

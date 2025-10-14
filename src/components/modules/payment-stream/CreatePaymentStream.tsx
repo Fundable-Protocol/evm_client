@@ -60,7 +60,6 @@ const CreatePaymentStream = () => {
     // Validate form data
     const schema = createPaymentStreamSchema(tokenOptions, durationOptions);
     const parsed = schema.safeParse(streamData);
-    console.log("parsed", parsed.data);
 
     if (!parsed.success) {
       const firstErr = parsed.error.issues[0]?.message || "Invalid form input";

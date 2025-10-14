@@ -7,7 +7,7 @@ import { useAccount } from "@starknet-react/core";
 
 import { User2 } from "lucide-react";
 import { Sidebar, useSidebar } from "@/components/ui/sidebar";
-import Logo from "../../../public/svgs/fundable_logo.svg";
+import Logo from "../../../public/imgs/fundable_logo.png";
 
 import { useConnectWallet } from "@/hooks/useConnectWallet";
 import DistributionIcon from "../svgs/DistributionIcon";
@@ -73,8 +73,17 @@ export function AppSidebar() {
       className="pt-7 bg-fundable-mid-grey/10"
       aria-label="Main navigation"
     >
-      <Link href="/">
-        <Image src={Logo} alt="Fundable Logo" priority className="pl-8 mb-12" />
+      <Link href="/" className="flex items-center gap-x-2 mb-12">
+        <Image
+          src={Logo}
+          alt="Fundable Logo"
+          priority
+          className="pl-8 size-10 w-auto"
+        />
+
+        <h2 className="hidden lg:block font-medium md:text-2xl font-bricolage capitalize text-white">
+          Fundable
+        </h2>
       </Link>
       <div className="pr-4 pl-5 pb-16 flex-1 flex flex-col justify-between">
         <nav

@@ -45,6 +45,7 @@ import { fetchTokenPrices } from "@/services/apiServices";
 import { useStarkNameResolver } from "@/hooks/useStarkNameResolver";
 import DistributionConfirmationModal from "@/components/modules/distribution/DistributionConfirmationModal";
 import DistributionApiService from "@/services/api/distributionService";
+import TwitterAddressExtractor from "@/components/modules/distribution/TweeterAddressExtractor";
 
 const DistributePage = () => {
   const { account, address } = useAccount();
@@ -55,6 +56,7 @@ const DistributePage = () => {
   const [distributionInfo, setDistributionInfo] = useState<IDistributionInfo>({
     amount: 0,
     type: "equal",
+    twitterUrl: "",
     showLabel: false,
     equalAmountType: "amount_per_address",
     selectedToken: tokenOptions[0].value, // Default to STRK token
@@ -251,8 +253,6 @@ const DistributePage = () => {
       };
 
       // Generate a unique distribution ID using UUID v4 to guarantee uniqueness
-      // const distributionId = cairo.felt(generateRandomUUID());
-      // const unique_ref = distributionId;
 
       let calls: Call[];
 
@@ -440,6 +440,14 @@ const DistributePage = () => {
         setDistributionType={setDistributionInfo}
         setDistributionData={setDistributionData}
       />
+
+      <TwitterAddressExtractor
+        address={address!}
+        distributionInfo={distributionInfo}
+        setDistributionInfo={setDistributionInfo}
+        setDistributionData={setDistributionData}
+      />
+
       <DistributionFileUpload
         distributionType={distributionInfo}
         setDistributionData={setDistributionData}
