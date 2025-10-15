@@ -7,6 +7,7 @@ import {
   Eye,
   ExternalLink,
   Send,
+  Share2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -24,10 +25,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { ActionsCellProps, IAction } from "@/types/history";
 import DistributionDetailsModal from "./DistributionDetailsModal";
+import SocialShareModal from "../distribution/SocialShareModal";
 import { resendDistributionPayload } from "@/store/distributionEntity";
 
 const ActionsCell = ({ distribution }: ActionsCellProps) => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const router = useRouter();
 
   const handleViewDetails = () => {
@@ -39,12 +42,21 @@ const ActionsCell = ({ distribution }: ActionsCellProps) => {
     router.push("/distribution");
   };
 
+  const handleShareDistribution = () => {
+    setIsShareModalOpen(true);
+  };
+
   const actions: IAction[] = [
     {
       label: "View Details",
       icon: Eye,
       onClick: () => {},
     },
+    ...(distribution.status.toUpperCase() === "COMPLETED" ? [{
+      label: "Share Distribution",
+      icon: Share2,
+      onClick: handleShareDistribution,
+    }] : []),
     {
       label: "Export as PDF",
       icon: FileDown,
@@ -75,6 +87,8 @@ const ActionsCell = ({ distribution }: ActionsCellProps) => {
   const handleActionClick = (action: IAction) => {
     if (action.label === "View Details") {
       handleViewDetails();
+    } else if (action.label === "Share Distribution") {
+      handleShareDistribution();
     } else if (action.label === "Resend Distribution") {
       handleResendDistribution();
     } else {
@@ -115,6 +129,12 @@ const ActionsCell = ({ distribution }: ActionsCellProps) => {
         distribution={distribution}
         isOpen={isDetailsModalOpen}
         onClose={handleViewDetails}
+      />
+
+      <SocialShareModal
+        distribution={distribution}
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
       />
     </>
   );
