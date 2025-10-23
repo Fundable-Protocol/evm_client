@@ -17,7 +17,7 @@ const DistributionTypeSwitch = ({
 
   return (
     <div>
-      <h3 className="mb-3">Distribution Type</h3>
+      <h3 className="mb-3 text-sm">Distribution Type</h3>
       <div className="bg-fundable-mid-grey h-10 text-white py-3 rounded px-6 flex justify-center items-center gap-x-3 w-fit">
         <Label
           htmlFor="equal"

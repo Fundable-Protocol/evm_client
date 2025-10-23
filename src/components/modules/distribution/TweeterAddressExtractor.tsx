@@ -105,17 +105,17 @@ const TwitterAddressExtractor: React.FC<TwitterAddressExtractorProps> = ({
   };
 
   return (
-    <div className="flex gap-x-6">
+    <div className="flex gap-x-2 md:gap-x-6">
       <InputWithLabel
         placeholder="Enter an X post URL (https://x.com/username/status/1234567890) to extract Starknet addresses from replies."
         value={distributionInfo.twitterUrl || ""}
         onChange={handleTwitterUrlChange}
-        className="placeholder:text-fundable-light-grey"
+        className="placeholder:text-fundable-light-grey h-10 placeholder:text-xs md:placeholder:text-sm"
       />
 
       <Button
         variant="gradient"
-        className="rounded h-full"
+        className="rounded h-10  truncate"
         onClick={handleExtractAddresses}
         disabled={
           !address ||

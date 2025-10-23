@@ -41,7 +41,7 @@ const DistributionTable = ({
     distributionType?.equalAmountType !== "lump_sum";
 
   return (
-    <div className="flex flex-col items-end grow overflow-auto">
+    <div className="flex flex-col items-end h-full flex-1">
       <div className="flex gap-x-1.5">
         <Button variant="grey" className="font-bold" onClick={addRow}>
           Add Row
@@ -56,7 +56,7 @@ const DistributionTable = ({
         </Button>
       </div>
 
-      <div className="w-full flex flex-col gap-y-3 p-2 mt-6">
+      <div className="w-full flex flex-col gap-y-3 p-2 mt-6 overflow-y-auto min-h-0 flex-1">
         {distributionData?.map((row, i) => (
           <DistributionRow
             index={i}
