@@ -19,6 +19,7 @@ import {
   IDistributionData,
   IDistributionState,
   DistributionAttributes,
+  DistributionType,
 } from "@/types/distribution";
 import DistributionSelector from "@/components/modules/distribution/DistributionSelector";
 
@@ -43,8 +44,12 @@ import { ErrorWithCode } from "@/types";
 import { fetchProtocolFee } from "@/lib/api";
 import { fetchTokenPrices } from "@/services/apiServices";
 import { useStarkNameResolver } from "@/hooks/useStarkNameResolver";
-import DistributionConfirmationModal from "@/components/modules/distribution/DistributionConfirmationModal";
 import DistributionApiService from "@/services/api/distributionService";
+import {
+  DistributionSuccessModal,
+  DistributionConfirmationModal,
+  TwitterAddressExtractor,
+} from "@/components/modules/distribution";
 
 const DistributePage = () => {
   const { account, address } = useAccount();
@@ -55,6 +60,7 @@ const DistributePage = () => {
   const [distributionInfo, setDistributionInfo] = useState<IDistributionInfo>({
     amount: 0,
     type: "equal",
+    twitterUrl: "",
     showLabel: false,
     equalAmountType: "amount_per_address",
     selectedToken: tokenOptions[0].value, // Default to STRK token
@@ -71,8 +77,12 @@ const DistributePage = () => {
     [createEmptyRow()]
   );
 
-  const { queueStarkNameResolution } =
-    useStarkNameResolver(setDistributionData);
+  const { resolveStarkName } = useStarkNameResolver();
+
+  // Success modal state
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [completedDistribution, setCompletedDistribution] =
+    useState<DistributionAttributes | null>(null);
 
   // Calculate total amount including protocol fee
   const selectedToken = SUPPORTED_TOKENS[distributionInfo.selectedToken];
@@ -85,26 +95,36 @@ const DistributePage = () => {
 
   useEffect(() => {
     if (resendPayload) {
-      // Map payload to distributionInfo and distributionData
-      setDistributionInfo((prev) => ({
-        ...prev,
-        type: resendPayload.distribution_type?.toLowerCase() as typeof distributionInfo.type,
-        selectedToken: resendPayload.token_symbol,
-        amount: Number(resendPayload.total_amount || 0),
-        showLabel: !!resendPayload.recipients?.[0]?.label,
-      }));
-
-      setDistributionData(
+      const recipients =
         resendPayload.recipients?.map((r) => ({
           id: generateRandomUUID(),
           address: r.address,
           amount: r.amount,
           label: r?.label || "",
-        })) || []
-      );
+        })) || [];
+
+      const type =
+        resendPayload.distribution_type?.toLowerCase() as typeof distributionInfo.type;
+
+      const amount =
+        type === "equal"
+          ? recipients?.[0]?.amount || 0
+          : resendPayload.total_amount || 0;
+
+      // Map payload to distributionInfo and distributionData
+      setDistributionInfo((prev) => ({
+        ...prev,
+        type,
+        amount: Number(amount),
+        selectedToken: resendPayload.token_symbol,
+        showLabel: !!resendPayload.recipients?.[0]?.label,
+      }));
+
+      setDistributionData(() => recipients);
       // Clear payload after use
       resendDistributionPayload.set(null);
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resendPayload]);
 
@@ -142,13 +162,21 @@ const DistributePage = () => {
 
       // Check for unresolved SNS addresses before validation
 
-      const { success, message } = snsAddressValidation(
+      const { success, message, data } = await snsAddressValidation(
         updatedDistributionData,
-        queueStarkNameResolution,
+        resolveStarkName,
         isMainNet
       );
 
       if (!success) throw new Error(message!);
+
+      if (data && data.size > 0) {
+        for (const [index, { address }] of data.entries()) {
+          updatedDistributionData[index].address = address;
+        }
+
+        setDistributionData(() => updatedDistributionData);
+      }
 
       const {
         success: equalDistributionSuccess,
@@ -251,8 +279,6 @@ const DistributePage = () => {
       };
 
       // Generate a unique distribution ID using UUID v4 to guarantee uniqueness
-      // const distributionId = cairo.felt(generateRandomUUID());
-      // const unique_ref = distributionId;
 
       let calls: Call[];
 
@@ -397,12 +423,40 @@ const DistributePage = () => {
         }));
       }
 
-      toast.success(
-        `Successfully distributed tokens to ${recipients.length} addresses`,
-        { duration: 800 }
-      );
-
-      router.push(`/history`);
+      // Create distribution object for success modal
+      const distributionForModal: DistributionAttributes = {
+        id: "", // Will be set by backend
+        user_address: address!,
+        token_address: selectedToken.address,
+        token_symbol: selectedToken.symbol,
+        token_decimals: selectedToken.decimals,
+        total_amount: baseAmount,
+        fee_amount: (
+          Number(distributionState.protocolFee || BigInt(0)) /
+          Math.pow(10, selectedToken.decimals)
+        ).toString(),
+        transaction_hash: tx,
+        total_recipients: distributionData.length,
+        status: "completed",
+        distribution_type:
+          distributionInfo.type.toUpperCase() as DistributionType,
+        block_number: null,
+        block_timestamp: null,
+        network: isMainNet ? "mainnet" : "testnet",
+        created_at: new Date(),
+        metadata: {
+          recipients: distributionData.map((d) => ({
+            address: d.address!,
+            amount: d.amount!,
+            ...(distributionInfo.showLabel && d.label
+              ? { label: d.label }
+              : {}),
+          })),
+        },
+      };
+      // Set completed distribution and show success modal
+      setCompletedDistribution(distributionForModal);
+      setShowSuccessModal(true);
     } catch {
       toast.dismiss();
       toast.error("Distribution failed, please try again.");
@@ -419,6 +473,18 @@ const DistributePage = () => {
       ...prev,
       currentState: "process-completed",
     }));
+  };
+
+  const handleSuccessModalClose = () => {
+    setShowSuccessModal(false);
+    setCompletedDistribution(null);
+    router.push(`/history`);
+  };
+
+  const handleViewHistory = () => {
+    setShowSuccessModal(false);
+    setCompletedDistribution(null);
+    router.push(`/history`);
   };
 
   const disableDistributionBtn =
@@ -440,6 +506,14 @@ const DistributePage = () => {
         setDistributionType={setDistributionInfo}
         setDistributionData={setDistributionData}
       />
+
+      <TwitterAddressExtractor
+        address={address!}
+        distributionInfo={distributionInfo}
+        setDistributionInfo={setDistributionInfo}
+        setDistributionData={setDistributionData}
+      />
+
       <DistributionFileUpload
         distributionType={distributionInfo}
         setDistributionData={setDistributionData}
@@ -460,6 +534,14 @@ const DistributePage = () => {
           selectedToken: selectedToken["symbol"],
         }}
       />
+      {completedDistribution && (
+        <DistributionSuccessModal
+          isOpen={showSuccessModal}
+          onClose={handleSuccessModalClose}
+          onViewHistory={handleViewHistory}
+          distribution={completedDistribution}
+        />
+      )}
     </DashboardLayout>
   );
 };

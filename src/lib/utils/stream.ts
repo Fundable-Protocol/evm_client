@@ -88,18 +88,6 @@ export async function recordStreamTransaction(streamData: {
       PaymentStreamApiService.createStream(streamData.creator, payload)
     );
 
-    // fetch(
-    //   "https://backend-main-no3f.onrender.com/api/payment-streams",
-    //   {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //       "x-wallet-id": streamData.creator,
-    //     },
-    //     body: JSON.stringify(payload),
-    //   }
-    // );
-
     if (!data?.success) {
       throw new Error(error?.message || "Failed to store stream transaction");
     }
@@ -114,9 +102,10 @@ export function getStreamExplorerUrl(stream?: {
 }): string | undefined {
   if (!stream?.transaction_hash || !stream?.network) return;
 
-  const baseUrl = stream.network?.toUpperCase() === "MAINNET"
-    ? "https://voyager.online/tx/"
-    : "https://sepolia.voyager.online/tx/";
+  const baseUrl =
+    stream.network?.toUpperCase() === "MAINNET"
+      ? "https://voyager.online/tx/"
+      : "https://sepolia.voyager.online/tx/";
 
   return `${baseUrl}${stream.transaction_hash}`;
 }

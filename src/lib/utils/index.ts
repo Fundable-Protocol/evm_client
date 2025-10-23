@@ -185,3 +185,10 @@ export const getStatusColor = (status: string) => {
       return "bg-gray-500";
   }
 };
+
+export const isValidTweetUrl = (url: string) => {
+  const regex =
+    /(?:https?:\/\/)?(?:www\.)?(?:x\.com|twitter\.com)\/\w+\/status\/(\d+)/;
+
+  return regex.test(url);
+};
