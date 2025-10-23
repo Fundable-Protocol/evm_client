@@ -13,11 +13,16 @@ interface WithdrawStreamModalProps {
   stream: StreamRecord;
 }
 
-export default function WithdrawStreamModal({ isOpen, onClose, stream }: WithdrawStreamModalProps) {
+export default function WithdrawStreamModal({
+  isOpen,
+  onClose,
+  stream,
+}: WithdrawStreamModalProps) {
   const { chain } = useNetwork();
   const { account, address } = useAccount();
   const { SUPPORTED_TOKENS } = getTokenOptions(chain);
-  const tokenInfo = SUPPORTED_TOKENS[stream.token_symbol as keyof typeof SUPPORTED_TOKENS];
+  const tokenInfo =
+    SUPPORTED_TOKENS[stream.token_symbol as keyof typeof SUPPORTED_TOKENS];
 
   const [amount, setAmount] = useState("");
   const [to, setTo] = useState("");
@@ -26,13 +31,14 @@ export default function WithdrawStreamModal({ isOpen, onClose, stream }: Withdra
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [withdrawableAmount, setWithdrawableAmount] = useState<string>("0");
 
-  console.log("stream.stream_id", stream.stream_id);
-
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const result = await PaymentStreamService.getWithdrawableAmount(chain, stream.stream_id);
+        const result = await PaymentStreamService.getWithdrawableAmount(
+          chain,
+          stream.stream_id
+        );
         if (!cancelled && result.success && result.amount) {
           setWithdrawableAmount(result.amount);
         }
@@ -44,8 +50,6 @@ export default function WithdrawStreamModal({ isOpen, onClose, stream }: Withdra
       cancelled = true;
     };
   }, [chain, stream.stream_id]);
-
-  console.log("withdrawableAmount", withdrawableAmount);
 
   const estimatedMaxSmallest = useMemo(() => {
     try {
@@ -115,11 +119,17 @@ export default function WithdrawStreamModal({ isOpen, onClose, stream }: Withdra
     >
       <div className="space-y-4">
         <div className="grid gap-2">
-          <label className="text-sm text-fundable-light-grey">Amount ({stream.token_symbol})</label>
+          <label className="text-sm text-fundable-light-grey">
+            Amount ({stream.token_symbol})
+          </label>
           <div className="flex items-center gap-2">
             <button
               type="button"
-              className={`px-3 py-1 rounded border text-sm ${useMax ? "bg-fundable-violet text-white border-fundable-violet" : "bg-fundable-mid-dark text-white border-gray-700"}`}
+              className={`px-3 py-1 rounded border text-sm ${
+                useMax
+                  ? "bg-fundable-violet text-white border-fundable-violet"
+                  : "bg-fundable-mid-dark text-white border-gray-700"
+              }`}
               onClick={() => setUseMax(true)}
               disabled={isSubmitting}
             >
@@ -127,14 +137,20 @@ export default function WithdrawStreamModal({ isOpen, onClose, stream }: Withdra
             </button>
             <button
               type="button"
-              className={`px-3 py-1 rounded border text-sm ${!useMax ? "bg-fundable-violet text-white border-fundable-violet" : "bg-fundable-mid-dark text-white border-gray-700"}`}
+              className={`px-3 py-1 rounded border text-sm ${
+                !useMax
+                  ? "bg-fundable-violet text-white border-fundable-violet"
+                  : "bg-fundable-mid-dark text-white border-gray-700"
+              }`}
               onClick={() => setUseMax(false)}
               disabled={isSubmitting}
             >
               Custom
             </button>
             {useMax && (
-              <span className="text-xs text-fundable-light-grey ml-2">~ {estimatedMaxDisplay}</span>
+              <span className="text-xs text-fundable-light-grey ml-2">
+                ~ {estimatedMaxDisplay}
+              </span>
             )}
           </div>
           {!useMax && (
@@ -149,11 +165,17 @@ export default function WithdrawStreamModal({ isOpen, onClose, stream }: Withdra
         </div>
 
         <div className="grid gap-2">
-          <label className="text-sm text-fundable-light-grey">Withdraw To</label>
+          <label className="text-sm text-fundable-light-grey">
+            Withdraw To
+          </label>
           <div className="flex items-center gap-2">
             <button
               type="button"
-              className={`px-3 py-1 rounded border text-sm ${useSelf ? "bg-fundable-violet text-white border-fundable-violet" : "bg-fundable-mid-dark text-white border-gray-700"}`}
+              className={`px-3 py-1 rounded border text-sm ${
+                useSelf
+                  ? "bg-fundable-violet text-white border-fundable-violet"
+                  : "bg-fundable-mid-dark text-white border-gray-700"
+              }`}
               onClick={() => setUseSelf(true)}
               disabled={isSubmitting}
             >
@@ -161,7 +183,11 @@ export default function WithdrawStreamModal({ isOpen, onClose, stream }: Withdra
             </button>
             <button
               type="button"
-              className={`px-3 py-1 rounded border text-sm ${!useSelf ? "bg-fundable-violet text-white border-fundable-violet" : "bg-fundable-mid-dark text-white border-gray-700"}`}
+              className={`px-3 py-1 rounded border text-sm ${
+                !useSelf
+                  ? "bg-fundable-violet text-white border-fundable-violet"
+                  : "bg-fundable-mid-dark text-white border-gray-700"
+              }`}
               onClick={() => setUseSelf(false)}
               disabled={isSubmitting}
             >
@@ -178,12 +204,12 @@ export default function WithdrawStreamModal({ isOpen, onClose, stream }: Withdra
             />
           )}
           {useSelf && (
-            <p className="text-xs text-fundable-light-grey break-all">{address}</p>
+            <p className="text-xs text-fundable-light-grey break-all">
+              {address}
+            </p>
           )}
         </div>
       </div>
     </ConfirmationModal>
   );
 }
-
-

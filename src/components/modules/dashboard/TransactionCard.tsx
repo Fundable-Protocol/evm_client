@@ -55,7 +55,7 @@ const TransactionCard = ({
         <span className="text-3xl font-bold text-white font-geist-sans">
           {amount}
         </span>
-        {isWalletConnected ? (
+        {isWalletConnected && Number(amount) > 0 ? (
           <div
             className={cn({
               "flex items-center gap-x-1 text-xs py-1 px-1.5 rounded border":
@@ -66,7 +66,7 @@ const TransactionCard = ({
                 isPercentageDecreased,
             })}
           >
-            <span className="">{percentage}%</span>
+            <span>{percentage}%</span>
             {isPercentageIncreased ? <PercentageIncreaseIcon /> : null}
             {isPercentageDecreased ? <PercentageDecreaseIcon /> : null}
           </div>

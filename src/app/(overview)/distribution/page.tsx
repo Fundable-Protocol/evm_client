@@ -73,8 +73,7 @@ const DistributePage = () => {
     [createEmptyRow()]
   );
 
-  const { queueStarkNameResolution } =
-    useStarkNameResolver(setDistributionData);
+  const { resolveStarkName } = useStarkNameResolver();
 
   // Calculate total amount including protocol fee
   const selectedToken = SUPPORTED_TOKENS[distributionInfo.selectedToken];
@@ -87,26 +86,36 @@ const DistributePage = () => {
 
   useEffect(() => {
     if (resendPayload) {
-      // Map payload to distributionInfo and distributionData
-      setDistributionInfo((prev) => ({
-        ...prev,
-        type: resendPayload.distribution_type?.toLowerCase() as typeof distributionInfo.type,
-        selectedToken: resendPayload.token_symbol,
-        amount: Number(resendPayload.total_amount || 0),
-        showLabel: !!resendPayload.recipients?.[0]?.label,
-      }));
-
-      setDistributionData(
+      const recipients =
         resendPayload.recipients?.map((r) => ({
           id: generateRandomUUID(),
           address: r.address,
           amount: r.amount,
           label: r?.label || "",
-        })) || []
-      );
+        })) || [];
+
+      const type =
+        resendPayload.distribution_type?.toLowerCase() as typeof distributionInfo.type;
+
+      const amount =
+        type === "equal"
+          ? recipients?.[0]?.amount || 0
+          : resendPayload.total_amount || 0;
+
+      // Map payload to distributionInfo and distributionData
+      setDistributionInfo((prev) => ({
+        ...prev,
+        type,
+        amount: Number(amount),
+        selectedToken: resendPayload.token_symbol,
+        showLabel: !!resendPayload.recipients?.[0]?.label,
+      }));
+
+      setDistributionData(() => recipients);
       // Clear payload after use
       resendDistributionPayload.set(null);
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resendPayload]);
 
@@ -144,13 +153,21 @@ const DistributePage = () => {
 
       // Check for unresolved SNS addresses before validation
 
-      const { success, message } = snsAddressValidation(
+      const { success, message, data } = await snsAddressValidation(
         updatedDistributionData,
-        queueStarkNameResolution,
+        resolveStarkName,
         isMainNet
       );
 
       if (!success) throw new Error(message!);
+
+      if (data && data.size > 0) {
+        for (const [index, { address }] of data.entries()) {
+          updatedDistributionData[index].address = address;
+        }
+
+        setDistributionData(() => updatedDistributionData);
+      }
 
       const {
         success: equalDistributionSuccess,
