@@ -3,13 +3,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useAccount } from "@starknet-react/core";
 
 import { User2 } from "lucide-react";
 import { Sidebar, useSidebar } from "@/components/ui/sidebar";
-import Logo from "../../../public/imgs/fundable_logo.png";
+import Logo from "../../../public/svgs/fundable_logo.svg";
 
-import { useConnectWallet } from "@/hooks/useConnectWallet";
+import { useEVM } from "@/hooks/useEVM";
+import { useIsMobile } from "@/hooks/use-mobile";
 import DistributionIcon from "../svgs/DistributionIcon";
 import DashboardIcon from "../svgs/DashboardIcon";
 import WalletIcon from "../svgs/WalletIcon";
@@ -18,7 +18,7 @@ import LogoutIcon from "../svgs/LogoutIcon";
 import BookIcon from "../svgs/BookIcon";
 import EyeIcon from "../svgs/EyeIcon";
 
-// Menu items.
+// Desktop menu items.
 const items = [
   {
     title: "Dashboard",
@@ -57,33 +57,79 @@ const items = [
   },
 ];
 
+// Mobile bottom navigation items.
+const mobileItems = [
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: <DashboardIcon aria-hidden="true" />,
+  },
+  {
+    title: "Distribute",
+    url: "/distribution",
+    icon: <DistributionIcon aria-hidden="true" />,
+  },
+  {
+    title: "Analytics",
+    url: "/analytics",
+    icon: <BookIcon aria-hidden="true" />,
+  },
+  {
+    title: "History",
+    url: "/history",
+    icon: <User2 aria-hidden="true" className="text-white size-5" />,
+  },
+];
+
 export function AppSidebar() {
   const pathname = usePathname();
-  const { disConnectWallet } = useConnectWallet();
+  const { disconnect, isConnected } = useEVM();
   const { setOpenMobile } = useSidebar();
+  const isMobile = useIsMobile();
 
-  const { address } = useAccount();
+  // Mobile bottom navigation
+  if (isMobile) {
+    return (
+      <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-800 z-50 safe-area-pb">
+        <nav className="flex items-center justify-around py-1 px-2 sm:py-2 sm:px-4">
+          {mobileItems.map((item) => {
+            const isActive = pathname === item.url;
+            
+            return (
+              <Link
+                key={item.title}
+                href={item.url}
+                className={`flex flex-col items-center justify-center py-1 px-1 sm:py-2 sm:px-3 min-w-0 flex-1 transition-colors touch-manipulation ${
+                  isActive ? "text-white" : "text-gray-400"
+                }`}
+                onClick={() => setOpenMobile(false)}
+              >
+                <div className={`mb-0.5 sm:mb-1 ${
+                  isActive ? "text-white" : "text-gray-400"
+                }`}>
+                  {item.icon}
+                </div>
+                <span className={`text-[10px] sm:text-xs font-medium leading-tight ${
+                  isActive ? "text-white" : "text-gray-400"
+                }`}>
+                  {item.title}
+                </span>
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+    );
+  }
 
-  const handleLinkClick = () => {
-    setOpenMobile(false);
-  };
-
+  // Desktop sidebar
   return (
     <Sidebar
       className="pt-7 bg-fundable-mid-grey/10"
       aria-label="Main navigation"
     >
-      <Link href="https://fundable.finance" className="flex items-center gap-x-2 mb-12">
-        <Image
-          src={Logo}
-          alt="Fundable Logo"
-          priority
-          className="pl-8 size-10 w-auto"
-        />
-
-        <h2 className="hidden lg:block font-medium md:text-2xl font-bricolage capitalize text-white">
-          Fundable
-        </h2>
+      <Link href="https://fundable.finance">
+        <Image src={Logo} alt="Fundable Logo" priority className="pl-8 mb-12" />
       </Link>
       <div className="pr-4 pl-5 pb-16 flex-1 flex flex-col justify-between">
         <nav
@@ -99,7 +145,7 @@ export function AppSidebar() {
                 <li key={link.title}>
                   <Link
                     href={link.url}
-                    onClick={handleLinkClick}
+                    onClick={() => setOpenMobile(false)}
                     className={`flex items-center gap-x-2 rounded p-2  transition-colors focus:outline-none focus:ring-1 focus:ring-fundable-purple-2 focus:ring-offset-2 focus:ring-offset-black 
                     ${
                       isActive
@@ -129,11 +175,11 @@ export function AppSidebar() {
           </ul>
         </nav>
 
-        {address ? (
+        {isConnected ? (
           <div
             className="text-white flex items-center gap-x-4 cursor-pointer hover:bg-fundable-purple-2 p-2 rounded hover:text-black transition-all active:bg-fundable-purple-2"
             onClick={() => {
-              disConnectWallet();
+              disconnect();
               setOpenMobile(false);
             }}
           >

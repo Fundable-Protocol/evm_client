@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-import { isDuplicateAddress, isSnsAddress } from ".";
-import { capitalizeWord, validateDistribution } from "@/lib/utils";
+import { isDuplicateAddress } from ".";
+import { validateDistribution } from "@/lib/utils";
 import {
   IDistributionData,
   IValidateDistributionAmounts,
@@ -21,7 +21,7 @@ export const isEmptyDistributionData = (
 ) => {
   if (!distributionData.length) return true;
 
-  return distributionData.some((row) => !row.address && !row.starkAddress);
+  return distributionData.some((row) => !row.address);
 };
 
 const isInvalidAmount = (amount: number) => {
@@ -163,77 +163,43 @@ export function calculateLumpSumAmount(data: ICalculateLumpSumAmount) {
   };
 }
 
-export const snsAddressValidation = async (
-  distributionData: IDistributionData[],
-  resolveStarkName: (starkName: string) => Promise<string | null>,
-  isMainNet: boolean
-) => {
-  const hasUnresolvedSns = distributionData.some((data) => {
-    const hasSnsAddress = isSnsAddress(data.address!);
-    const hasSnsName = isSnsAddress(data.starkAddress!);
-    return hasSnsAddress || (hasSnsName && !data.address);
-  });
+// export const snsAddressValidation = (
+//   data: IDistributionData[],
+//   queueStarkNameResolution: (index: number, starkName: string) => void,
+//   isMainNet: boolean
+// ) => {
+//   const hasUnresolvedSns = data.some((data) => {
+//     const hasSnsAddress = isSnsAddress(data.address!);
+//     // const hasSnsName = isSnsAddress(data.starkAddress!);
+//     return hasSnsAddress || (hasSnsAddress && !data.address);
+//   });
 
-  if (hasUnresolvedSns && !isMainNet) {
-    return {
-      data: null,
-      success: false,
-      message: "SNS addresses are not supported on testnet.",
-    };
-  }
+//   if (hasUnresolvedSns && !isMainNet) {
+//     return {
+//       success: false,
+//       hasUnresolvedSns,
+//       message: "SNS addresses are not supported on testnet.",
+//     };
+//   }
 
-  if (!hasUnresolvedSns) return { success: true, data: null };
+//   if (!hasUnresolvedSns) return { success: true };
 
-  const addressToResolve: Map<
-    number,
-    {
-      index: number;
-      address: string;
-      type: "address" | "starkAddress";
-    }
-  > = new Map();
+//   data.forEach((data, i) => {
+//     const hasSnsAddress = isSnsAddress(data.address!);
+//     const hasSnsName = isSnsAddress(data.starkAddress!);
 
-  distributionData.forEach((data, i) => {
-    const hasSnsAddress = isSnsAddress(data.address!);
-    const hasSnsName = isSnsAddress(data.starkAddress!);
+//     if (hasSnsAddress) {
+//       queueStarkNameResolution(i, data.address!);
+//     }
 
-    if (hasSnsAddress) {
-      addressToResolve.set(i, {
-        index: i,
-        type: "address",
-        address: data.address!.toLowerCase(),
-      });
-    }
+//     if (hasSnsName && !data.address) {
+//       queueStarkNameResolution(i, data.starkAddress!);
+//     }
+//   });
 
-    if (hasSnsName && !data.address) {
-      addressToResolve.set(i, {
-        index: i,
-        type: "starkAddress",
-        address: data.starkAddress!.toLowerCase(),
-      });
-    }
-  });
-
-  for (const [index, { type, address }] of addressToResolve.entries()) {
-    const resolvedAddress = await resolveStarkName(address);
-
-    if (!resolvedAddress) {
-      return {
-        success: false,
-        message: `Failed to resolve SNS ${capitalizeWord(type)} for row ${
-          index + 1
-        }.`,
-      };
-    }
-
-    addressToResolve.set(index, {
-      ...addressToResolve.get(index)!,
-      address: resolvedAddress,
-    });
-  }
-
-  return {
-    success: true,
-    data: addressToResolve,
-  };
-};
+//   return {
+//     success: false,
+//     message:
+//       "Please wait for SNS addresses to resolve or enter a valid starknet address, and try again.",
+//   };
+// };

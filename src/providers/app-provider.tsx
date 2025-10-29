@@ -1,31 +1,63 @@
 "use client";
 
-import React, { ReactNode } from "react";
-import { Toaster } from "react-hot-toast";
+import { wagmiAdapter, projectId, networks } from '@/config'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { createAppKit } from '@reown/appkit/react'
+import { base, AppKitNetwork } from '@reown/appkit/networks'
+import React, { type ReactNode } from 'react'
+import { cookieToInitialState, WagmiProvider, type Config } from 'wagmi'
+import { Toaster } from "react-hot-toast"
+import { MiniKitContextProvider } from './minikit-provider'
+import { SidebarProvider } from '@/components/ui/sidebar'
+import AdminNavbar from '@/components/organisms/AdminNavbar'
+import { AppSidebar } from '@/components/ui/app-sidebar'
 
-import { StarknetProvider } from "./starknet-provider";
-import TanstackQueryProvider from "./tanstack-query-provider";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/ui/app-sidebar";
-import AdminNavbar from "@/components/organisms/AdminNavbar";
+// Set up queryClient
+const queryClient = new QueryClient()
 
-const AppProvider = ({ children }: { children: ReactNode }) => {
+if (!projectId) {
+  throw new Error('Project ID is not defined')
+}
+
+// Set up metadata
+const metadata = {
+  name: 'Fundable',
+  description: "A decentralized funding application.",
+  url: typeof window !== 'undefined' ? window.location.origin : '',
+  icons: ["/favicon_io/favicon.ico"]
+}
+
+// Create the modal
+createAppKit({
+  adapters: [wagmiAdapter],
+  projectId,
+  networks: networks as unknown as [AppKitNetwork, ...AppKitNetwork[]],
+  defaultNetwork: base,
+  metadata: metadata,
+  features: {
+    analytics: true
+  }
+})
+
+function AppProvider({ children, cookies }: { children: ReactNode; cookies: string | null }) {
+  const initialState = cookieToInitialState(wagmiAdapter.wagmiConfig as Config, cookies)
+
   return (
-    <main>
-      <TanstackQueryProvider>
-        <StarknetProvider>
+    <WagmiProvider config={wagmiAdapter.wagmiConfig as Config} initialState={initialState}>
+      <QueryClientProvider client={queryClient}>
+        <MiniKitContextProvider>
           <SidebarProvider>
             <AppSidebar />
             <main className="flex flex-col h-dvh w-full overflow-hidden">
               <AdminNavbar />
-              <div className="px-4 py-4 overflow-hidden">{children}</div>
+              <div className="px-4 py-4 overflow-hidden pb-16 sm:pb-20 md:pb-4">{children}</div>
+              <Toaster position="bottom-right" />
             </main>
           </SidebarProvider>
-        </StarknetProvider>
-      </TanstackQueryProvider>
-      <Toaster position="bottom-right" />
-    </main>
-  );
-};
+        </MiniKitContextProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
+  )
+}
 
-export default AppProvider;
+export default AppProvider

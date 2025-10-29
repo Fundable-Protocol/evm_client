@@ -3,6 +3,18 @@ import { autoTable } from "jspdf-autotable";
 
 import Logo from "../../../public/imgs/fundable_logo.png";
 import { DistributionAttributes, RecipientData } from "@/types/distribution";
+import {
+  arbitrum,
+  arbitrumSepolia,
+  base,
+  baseSepolia,
+  mainnet,
+  sepolia,
+  bsc,
+  bscTestnet,
+  lisk,
+  liskSepolia,
+} from "wagmi/chains";
 
 export const generateDistributionPDF = (
   distribution: DistributionAttributes
@@ -34,6 +46,7 @@ export const generateDistributionPDF = (
     ["Distribution Type", distribution.distribution_type],
     ["Total Recipients", distribution.total_recipients.toString()],
     ["Network", distribution.network],
+    ["Chain", distribution.chain_name],
     [
       "Total Amount",
       `${distribution.total_amount} ${distribution.token_symbol}`,
@@ -122,6 +135,7 @@ export const generateDistributionCSV = async (
     ["Distribution Type", distribution.distribution_type],
     ["Total Recipients", distribution.total_recipients.toString()],
     ["Network", distribution.network],
+    ["Chain", distribution.chain_name],
     [
       "Total Amount",
       `${distribution.total_amount} ${distribution.token_symbol}`,
@@ -155,15 +169,40 @@ export const generateDistributionCSV = async (
 };
 
 // Function to get the explorer URL based on network and tx hash
-export const getExplorerUrl = (distribution: DistributionAttributes) => {
+export const getExplorerUrl = (
+  distribution: DistributionAttributes
+) => {
   if (!distribution?.transaction_hash || !distribution?.network) return;
 
   const { transaction_hash, network } = distribution;
 
-  const baseUrl =
-    network?.toUpperCase() === "MAINNET"
-      ? "https://voyager.online/tx/"
-      : "https://sepolia.voyager.online/tx/";
+  const chainName = (distribution.chain_name || "").trim().toLowerCase();
+  const net = network.trim().toLowerCase();
 
-  return `${baseUrl}${transaction_hash}`;
+  // Map distribution chain/network to viem chain objects
+  const chainMap: Record<string, { blockExplorers?: { default?: { url?: string } } } | undefined> = {
+    "ethereum:mainnet": mainnet,
+    "ethereum:testnet": sepolia,
+    "sepolia:testnet": sepolia,
+    "base:mainnet": base,
+    "base:testnet": baseSepolia,
+    "base sepolia:testnet": baseSepolia,
+    "arbitrum:mainnet": arbitrum,
+    "arbitrum:testnet": arbitrumSepolia,
+    "arbitrum sepolia:testnet": arbitrumSepolia,
+    "bnb smart chain:mainnet": bsc,
+    "bsc:mainnet": bsc,
+    "bnb smart chain:testnet": bscTestnet,
+    "bsc:testnet": bscTestnet,
+    "lisk:mainnet": lisk,
+    "lisk:testnet": liskSepolia,
+    "lisk sepolia:testnet": liskSepolia,
+  };
+
+  const key = `${chainName}:${net}`;
+  const chain = chainMap[key];
+  const baseUrl = chain?.blockExplorers?.default?.url;
+  if (!baseUrl) return;
+
+  return `${baseUrl}/tx/${transaction_hash}`;
 };

@@ -29,75 +29,56 @@ export const equalDistributionType = [
   { label: "Calculate Lump Sum", value: "lump_sum" },
 ] as const;
 
-export const MAINNET_SUPPORTED_TOKENS = Object.freeze({
-  STRK: {
-    symbol: "STRK",
-    address:
-      "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
-    decimals: 18,
+export const SUPPORTED_TOKENS: Record<
+  string, // network: "mainnet" | "testnet"
+  Record<
+    string, // chain: "ethereum" | "base" | "arbitrum" | etc.
+    Record<string, TokenOption> // token symbol: "USDC", "ETH", etc.
+  >
+> = {
+  mainnet: {
+    ethereum: {
+      USDC: { symbol: "USDC", address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", decimals: 6 },
+      ETH: { symbol: "ETH", address: "0x0000000000000000000000000000000000000000", decimals: 18 },
+    },
+    base: {
+      USDC: { symbol: "USDC", address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", decimals: 6 },
+    },
+    arbitrum: {
+      USDC: { symbol: "USDC", address: "0x0000000000000000000000000000000000000002", decimals: 6 },
+    },
+    "bnb smart chain": {
+      USDC: { symbol: "USDC", address: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d", decimals: 18 },
+      LUR: { symbol: "LUR", address: "0xc66B6f38aE5053A109cfd8639E0Ee17EC69cf788", decimals: 18 },
+    },
+    lisk : {
+      USDC: { symbol: "USDC", address: "0xF242275d3a6527d877f2c927a82D9b057609cc71", decimals: 6 },
+      LSK: { symbol: "LSK", address: "0xac485391EB2d7D88253a7F1eF18C37f4242D1A24", decimals: 18 },
+      USDT: { symbol: "USDT", address: "0x05D032ac25d322df992303dCa074EE7392C117b9", decimals: 6 },
+      ETH: { symbol: "ETH", address: "0x0000000000000000000000000000000000000000", decimals: 18 },
+    }
+    // ...add more chains as needed
   },
-  USDC: {
-    symbol: "USDC",
-    address:
-      "0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8",
-    decimals: 6,
+  testnet: {
+    ethereum: {
+      USDC: { symbol: "USDC", address: "0x036CbD53842c5426634e7929541eC2318f3dCF7e", decimals: 6 },
+    },
+    "base sepolia": {
+      USDC: { symbol: "USDC", address: "0x036CbD53842c5426634e7929541eC2318f3dCF7e", decimals: 6 },
+    },
+    arbitrum: {
+      USDC: { symbol: "USDC", address: "0x036CbD53842c5426634e7929541eC2318f3dCF7e", decimals: 6 },
+    },
+    "lisk sepolia": {
+      USDC: { symbol: "USDC", address: "0x0E82fDDAd51cc3ac12b69761C45bBCB9A2Bf3C83", decimals: 6 },
+    },
+    // ...add more chains as needed
   },
-  ETH: {
-    symbol: "ETH",
-    address:
-      "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-    decimals: 18,
-  },
-  USDT: {
-    symbol: "USDT",
-    address:
-      "0x068f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8",
-    decimals: 6,
-  },
-  WBTC: {
-    symbol: "WBTC",
-    address:
-      "0x03fe2b97c1fd336e750087d68b9b867997fd64a2661ff3ca5a7c771641e8e7ac",
-    decimals: 8,
-  },
-}) as Readonly<Record<string, Readonly<TokenOption>>>;
+  // ...add more networks as needed
+};
 
-export const TESTNET_SUPPORTED_TOKENS = Object.freeze({
-  STRK: {
-    symbol: "STRK",
-    address:
-      "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
-    decimals: 18,
-  },
-  USDC: {
-    symbol: "USDC",
-    address:
-      "0x05be0e73ef0f477eb8d4fbea87802acbf55c266c2bab64aa93b2db573be15c41",
-    decimals: 6,
-  },
-  ETH: {
-    symbol: "ETH",
-    address:
-      "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-    decimals: 18,
-  },
-}) as Readonly<Record<string, Readonly<TokenOption>>>;
-
-export const TESTNET_CONTRACT_ADDRESS =
-  "0x02495b0832001cde19e2bd3ec27beabe07b913000e155864a77b5e834ce60b6a";
-
-export const MAINNET_CONTRACT_ADDRESS =
-  "0x67a27274b63fa3b070cabf7adf59e7b1c1e5b768b18f84b50f6cb85f59c42e5";
-
-export const MAINNET_RPC_URL = process.env.STARKNET_RPC_MAINNET ?? "";
-
-export const TESTNET_RPC_URL = process.env.STARKNET_RPC_TESTNET ?? "";
-
-export const TESTNET_STREAM_CONTRACT_ADDRESS =
-  "0x0150f8e99d665ab76dca2f5816930cf14987d947a6ea7e0934c6ac2b4243b735";
-
-export const MAINNET_STREAM_CONTRACT_ADDRESS =
-  "0x07097d3e5851088ce1d8bf9280c3f9b52f59db92bf5af2226338f15c837f13bd";
+export const CONTRACT_ADDRESS =
+  "0xaa0939b802060785c541553911caa6781c41f5d5";
 
 export const distributionState = [
   "process-started",
@@ -113,12 +94,24 @@ export const transactionCardTypes = [
   "addresses",
 ] as const;
 
-export const supportedTokenSymbol = ["STRK", "USDT", "USDC", "ETH", "WBTC"] as const;
+export const supportedTokenSymbol = ["STRK", "USDT", "USDC", "ETH"] as const;
+
+export const supportedChainName = ["Starknet", "Ethereum"] as const;
 
 export const featureCardImgTypes = ["airdrop", "stream"] as const;
 
 export const apiSecretKey = process.env.API_SECRET_KEY || "";
 
-export const supportedChainName = ["Starknet", "Ethereum"] as const;
-
 export const validPageLimits = [10, 20, 50] as const;
+
+// Chains that support EIP-7702 style bundled calls via sendCallsAsync
+// Values must match chain.name.toLowerCase()
+export const EIP_7702_CHAINS = [
+  "ethereum",
+  "base",
+  "arbitrum",
+  "bnb smart chain",
+  "base sepolia",
+  // add/remove chains as support evolves
+  // e.g., "arbitrum", "sepolia", "base sepolia"
+] as const;

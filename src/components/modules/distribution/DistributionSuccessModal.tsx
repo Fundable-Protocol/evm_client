@@ -105,7 +105,7 @@ const DistributionSuccessModal: React.FC<DistributionSuccessModalProps> = ({
               <div className="space-y-1">
                 <p className="text-fundable-white/70 text-sm font-medium uppercase tracking-wide">Network</p>
                 <p className="text-white font-semibold">
-                  {distribution.network}
+                  {distribution.chain_name}
                 </p>
               </div>
             </div>

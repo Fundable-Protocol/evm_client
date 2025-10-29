@@ -104,7 +104,6 @@ const HelpPage = () => {
     <DashboardLayout
       title=""
       className="h-screen overflow-hidden"
-      availableNetwork={["testnet", "mainnet"]}
     >
       <div className="h-full flex flex-col">
         <div className="mb-6 flex-shrink-0">

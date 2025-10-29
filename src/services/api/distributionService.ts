@@ -18,7 +18,7 @@ class _DistributionApiService {
 
     const endpoint = `/distributions?${queryString}`;
 
-    return baseApiService.makeRequest<{
+    const result = await baseApiService.makeRequest<{
       success: boolean;
       distributions: DistributionAttributes[];
       meta: {
@@ -30,6 +30,8 @@ class _DistributionApiService {
         prevPage: number | null;
       };
     }>(endpoint, { method: "GET" }, walletId);
+
+    return result;
   }
 
   async getDistributionById(walletId: string, id: string) {
@@ -55,7 +57,7 @@ class _DistributionApiService {
     data: {
       url: string;
       platform: "twitter";
-      addressType: "starknet";
+      addressType: "evm";
     }
   ) {
     return baseApiService.makeRequest<{

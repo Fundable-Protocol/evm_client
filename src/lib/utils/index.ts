@@ -4,20 +4,13 @@ import { v4 as uuidv4 } from "uuid";
 import { twMerge } from "tailwind-merge";
 import { clsx, type ClassValue } from "clsx";
 
-import { shortString } from "starknet";
-
 import {
-  MAINNET_CONTRACT_ADDRESS,
-  MAINNET_RPC_URL,
-  MAINNET_SUPPORTED_TOKENS,
-  TESTNET_CONTRACT_ADDRESS,
-  TESTNET_RPC_URL,
-  TESTNET_SUPPORTED_TOKENS,
+  CONTRACT_ADDRESS,
+  SUPPORTED_TOKENS,
 } from "../constant";
 import { IDistributionData } from "@/types/distribution";
-import { isValidAmount, isValidStarknetAddress } from "@/validations";
+import { isValidAmount } from "@/validations";
 import { ErrorWithCode, PromiseResult, TokenOption } from "@/types";
-import { Chain } from "@starknet-react/chains";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -61,46 +54,27 @@ export const createEmptyRow = (data?: IDistributionData): IDistributionData => {
     label: "",
     amount: "",
     address: "",
-    starkAddress: "",
+    // starkAddress: "",
   };
 };
 
-export const getContractAddress = (isMainnet: boolean) =>
-  isMainnet ? MAINNET_CONTRACT_ADDRESS : TESTNET_CONTRACT_ADDRESS;
+export const getContractAddress = () => CONTRACT_ADDRESS;
 
-export const getSupportedTokens = (isMainnet: boolean) =>
-  isMainnet ? MAINNET_SUPPORTED_TOKENS : TESTNET_SUPPORTED_TOKENS;
+export const getSupportedTokens = (network: string, chain: string) =>
+  SUPPORTED_TOKENS[network]?.[chain] || {};
 
-export const getRPCUrl = (isMainnet: boolean) =>
-  isMainnet ? MAINNET_RPC_URL : TESTNET_RPC_URL;
-
-export const getTokenOptions = (chain: Chain) => {
-  const isMainNet = chain.network === "mainnet";
-
-  const SUPPORTED_TOKENS = getSupportedTokens(isMainNet);
-
-  const tokenOptions = Object.values(getSupportedTokens(isMainNet)).map(
-    (token) => ({
-      label: token.symbol,
-      value: token.symbol,
-    })
-  );
-
-  return { isMainNet, SUPPORTED_TOKENS, tokenOptions };
+export const getTokenOptions = (network: string, chain: string) => {
+  return getSupportedTokens(network, chain);
 };
 
 export const validateDistribution = (
   address: string,
   amount: string
 ): { isValid: boolean; error?: string } => {
-  if (!isValidStarknetAddress(address)) {
-    return { isValid: false, error: "Invalid Starknet address" };
-  }
-
+  console.log("address", address);
   if (!isValidAmount(amount)) {
     return { isValid: false, error: "Invalid amount" };
   }
-
   return { isValid: true };
 };
 
@@ -110,11 +84,11 @@ export const calculateTotalDistributionAmount = (
   protocolFeePercentage = 0
 ) => {
   const amounts = distributions.map((dist) =>
-    BigInt(parseUnits(dist.amount || "0", selectedToken.decimals))
+    parseUnits(dist.amount || "0", selectedToken.decimals)
   );
 
   const totalAmount = amounts.reduce(
-    (sum, amount) => sum + BigInt(amount),
+    (sum, amount) => sum + amount,
     BigInt(0)
   );
 
@@ -141,9 +115,6 @@ export function generateUUID() {
   return crypto.randomUUID();
 }
 
-export const getDistributionUniqueRef = () => {
-  return shortString.encodeShortString(uuidv4().replace(/-/g, "").slice(0, 31));
-};
 export function generateRandomUUID() {
   return Math.random().toString(36).slice(2);
 }

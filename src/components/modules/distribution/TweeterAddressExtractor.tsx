@@ -52,7 +52,7 @@ const TwitterAddressExtractor: React.FC<TwitterAddressExtractorProps> = ({
         DistributionApiService.extractAddressesFromTweetUrl(address!, {
           url: distributionInfo.twitterUrl,
           platform: "twitter",
-          addressType: "starknet",
+          addressType: "evm",
         })
       );
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useAccount } from "@starknet-react/core";
+import { useAccount } from "wagmi";
 
 import { formatThousandNumber } from "@/lib/utils";
 
@@ -12,21 +12,22 @@ import DistributionApiService from "@/services/api/distributionService";
 const TransactionCards = () => {
   const { address } = useAccount();
 
-  const { data: totalDistributionAmount, isFetching } = useQuery({
+  const { data: totalDistributionAmount, isPending } = useQuery({
     queryKey: ["totalDistributionAmount"],
     queryFn: () => DistributionApiService.getDistributionStats(address!),
     enabled: !!address,
+    refetchInterval: 1000,
     refetchOnWindowFocus: true,
   });
 
-  if (isFetching) return <TransactionSkeletonLoader />;
+  if (isPending) return <TransactionSkeletonLoader />;
 
   const {
     totalAmount,
-    totalDistributions,
-    totalFundedAddresses,
     totalAmountPercentageChange,
+    totalDistributions,
     totalDistributionsPercentageChange,
+    totalFundedAddresses,
     totalFundedAddressesPercentageChange,
   } = totalDistributionAmount?.data ?? {};
 
@@ -35,14 +36,12 @@ const TransactionCards = () => {
       <TransactionCard
         type="amount"
         title="Total Amount Sent"
-        isWalletConnected={!!address}
         amount={`$${formatThousandNumber(!address ? 0 : totalAmount ?? 0)}`}
         percentage={totalAmountPercentageChange ?? 0}
       />
 
       <TransactionCard
         type="distributions"
-        isWalletConnected={!!address}
         title="Total Distribution Made"
         amount={formatThousandNumber(!address ? 0 : totalDistributions ?? 0)}
         percentage={totalDistributionsPercentageChange ?? 0}
@@ -51,7 +50,6 @@ const TransactionCards = () => {
       <TransactionCard
         type="addresses"
         title="Total Address Funded"
-        isWalletConnected={!!address}
         amount={formatThousandNumber(!address ? 0 : totalFundedAddresses ?? 0)}
         percentage={totalFundedAddressesPercentageChange ?? 0}
       />

@@ -49,7 +49,7 @@ const DistributionTable = ({
         <Button
           variant="gradient"
           className="font-bold"
-          disabled={isConnected}
+          disabled={!isConnected}
           onClick={handleDistribution}
         >
           Distribute Token

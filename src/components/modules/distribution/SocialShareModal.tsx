@@ -151,7 +151,7 @@ const SocialShareModal: React.FC<SocialShareModalProps> = ({
                   <div className="space-y-2">
                     <p className="text-fundable-white/60 text-xs font-medium uppercase tracking-wider">Network</p>
                     <p className="text-white font-semibold">
-                      {distribution.network}
+                      {distribution.chain_name}
                     </p>
                   </div>
                 </div>
@@ -216,7 +216,7 @@ const SocialShareModal: React.FC<SocialShareModalProps> = ({
                       <div className="flex-1 min-w-0">
                         <p className="text-white font-medium text-sm">Copy Transaction Link</p>
                         <p className="text-fundable-white/60 text-xs truncate">
-                          View transaction on {distribution.network} explorer
+                          View transaction on {distribution.chain_name} explorer
                         </p>
                       </div>
                       <button

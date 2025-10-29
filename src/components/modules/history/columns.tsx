@@ -34,7 +34,7 @@ export const columns: ColumnDef<DistributionAttributes>[] = [
       const distribution = row.original;
       return (
         <div className="text-white">
-          {format(distribution.created_at, "MMM dd, yyyy hh:mm a")}
+          {format(new Date(distribution.created_at), "MMM dd, yyyy hh:mm a")}
         </div>
       );
     },
@@ -59,7 +59,7 @@ export const columns: ColumnDef<DistributionAttributes>[] = [
   },
   {
     accessorKey: "chain_name",
-    header: "Chain",
+    header: "Network",
   },
   {
     id: "actions",

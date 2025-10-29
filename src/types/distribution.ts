@@ -24,7 +24,6 @@ export interface IDistributionData {
   amount: string;
   label?: string;
   address?: string;
-  starkAddress?: string;
 }
 
 export interface IDistribution {
@@ -113,6 +112,7 @@ export interface DistributionAttributes {
   block_number?: bigint | number | null;
   block_timestamp?: Date | null;
   network: (typeof supportedNetwork)[number];
+  chain_name: string;
   created_at: Date | string;
   metadata?: { recipients: Array<RecipientData> } | null;
   recipients?: Array<RecipientData>;

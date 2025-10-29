@@ -2,14 +2,13 @@
 
 import { useState, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useAccount } from "@starknet-react/core";
+import { useAccount } from "wagmi";
 
 import {
   distributionFilterType,
   distributionFilterValueType,
 } from "@/types/history";
 import { DistributionAttributes } from "@/types/distribution";
-import { columns } from "@/components/modules/history/columns";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import HistoryTable from "@/components/modules/history/HistoryTable";
 import HistoryTableSkeleton from "@/components/modules/history/HistoryTableSkeleton";
@@ -39,8 +38,16 @@ const HistoryPageContent = () => {
 
   const { data: distributionsData, isPending } = useQuery({
     queryKey: ["distributions-table", distributionFilter, page, limit],
-    queryFn: () =>
-      DistributionApiService.getDistributions(address ?? "", {
+    queryFn: async () => {
+      console.log("🔍 [History] Fetching distributions with params:", {
+        address,
+        page,
+        limit,
+        status: distributionFilter.status !== "all" ? distributionFilter.status : undefined,
+        type: distributionFilter.type !== "all" ? distributionFilter.type : undefined,
+      });
+      
+      const result = await DistributionApiService.getDistributions(address ?? "", {
         page,
         limit,
         status:
@@ -51,7 +58,10 @@ const HistoryPageContent = () => {
           distributionFilter.type !== "all"
             ? distributionFilter.type
             : undefined,
-      }),
+      });
+      
+      return result;
+    },
 
     enabled: !!address,
   });
@@ -67,16 +77,12 @@ const HistoryPageContent = () => {
   };
 
   return (
-    <DashboardLayout
-      title="Transaction History"
-      availableNetwork={["testnet", "mainnet"]}
-    >
+    <DashboardLayout title="Transaction History">
       <div className="h-full overflow-y-auto">
         {address && isPending ? (
           <HistoryTableSkeleton />
         ) : (
           <HistoryTable
-            columns={columns}
             data={distributionsData?.data?.distributions ?? []}
             statusFilter={distributionFilter.status}
             typeFilter={distributionFilter.type}

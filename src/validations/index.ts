@@ -1,24 +1,14 @@
 import { createEmptyRow } from "@/lib/utils";
 import { IDistributionData } from "@/types/distribution";
-
-import { z } from "zod";
 import { parseUnits } from "ethers";
-import { validateAndParseAddress } from "starknet";
+import { z } from "zod";
 
 export const saveWalletPolicy = z.object({
-  walletAddress: z.string().regex(/^0x[a-fA-F0-9]{64}$/, {
+  walletAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
     message: "Invalid wallet address format.",
   }),
 });
 
-export const isValidStarknetAddress = (address: string): boolean => {
-  try {
-    validateAndParseAddress(address);
-    return true;
-  } catch {
-    return false;
-  }
-};
 export const isSnsAddress = (address: string) => {
   if (!address) return false;
 
@@ -34,10 +24,10 @@ export const isDuplicateAddress = (distributionData: IDistributionData[]) => {
       addressSet.add(row.address);
     }
 
-    if (row.starkAddress) {
-      if (addressSet.has(row.starkAddress)) return true;
-      addressSet.add(row.starkAddress);
-    }
+    // if (row.starkAddress) {
+    //   if (addressSet.has(row.starkAddress)) return true;
+    //   addressSet.add(row.starkAddress);
+    // }
 
     return false;
   });
@@ -59,6 +49,7 @@ export const isEmptyAmount = (distributionData: IDistributionData[]) => {
 };
 
 export const validateCsvData = (data: unknown) => {
+  console.log('validateCsvData input:', data);
   if (!Array.isArray(data)) {
     return {
       success: false,
@@ -83,11 +74,12 @@ export const validateCsvData = (data: unknown) => {
 
       if (i === 1 && hasHeader) return null;
 
-      if (isValidStarknetAddress(address) || isSnsAddress(address)) {
+      // Accept any non-empty address, amount is optional
+      if (address) {
         return createEmptyRow({
-          amount,
-          ...(label && label),
-          ...(isSnsAddress(address) ? { starkAddress: address } : { address }),
+          address,
+          ...(amount && { amount }),
+          ...(label && { label }),
         });
       }
 
@@ -95,11 +87,13 @@ export const validateCsvData = (data: unknown) => {
     })
     .filter(Boolean);
 
+  console.log('validateCsvData transformedData:', transformedData);
+
   if (!transformedData.length) {
     return {
       success: false,
       message:
-        "File contains invalid data, Only valid Starknet address, amount, and label (if enabled) is required.",
+        "File contains invalid data. Only valid address, amount, and label (if enabled) are required.",
     };
   }
 
