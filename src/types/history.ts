@@ -13,7 +13,7 @@ export interface IHistoryData {
 }
 
 export interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
+  columns?: ColumnDef<TData, TValue>[];
   data: TData[];
   onStatusFilterChange: Dispatch<
     SetStateAction<DistributionAttributes["status"] | "all">

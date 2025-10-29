@@ -6,7 +6,7 @@ import {
   updateDistributionSchema,
   createDistributionSchema,
 } from "@/policies/distribution";
-import { tryCatch } from "@/lib/utills";
+import { tryCatch } from "@/lib/utils";
 
 import { supportedTokenSymbol } from "@/lib/constant";
 import { ITransactionDataPoint } from "@/types/dashboard";
@@ -106,6 +106,7 @@ export async function getChartDataAction(user_address: string, date?: number) {
       STRK: 0,
       USDC: 0,
       ETH: 0,
+      WBTC: 0,
     };
     return acc;
   }, {} as Record<string, ITransactionDataPoint>);

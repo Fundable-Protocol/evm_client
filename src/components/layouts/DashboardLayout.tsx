@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utills";
+import { cn } from "@/lib/utils";
 import { ReactNode } from "react";
 
 const DashboardLayout = ({

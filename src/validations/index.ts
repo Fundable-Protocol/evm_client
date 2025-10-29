@@ -1,4 +1,4 @@
-import { createEmptyRow } from "@/lib/utills";
+import { createEmptyRow } from "@/lib/utils";
 import { IDistributionData } from "@/types/distribution";
 import { parseUnits } from "ethers";
 import { z } from "zod";

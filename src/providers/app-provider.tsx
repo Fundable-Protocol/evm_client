@@ -8,6 +8,9 @@ import React, { type ReactNode } from 'react'
 import { cookieToInitialState, WagmiProvider, type Config } from 'wagmi'
 import { Toaster } from "react-hot-toast"
 import { MiniKitContextProvider } from './minikit-provider'
+import { SidebarProvider } from '@/components/ui/sidebar'
+import AdminNavbar from '@/components/organisms/AdminNavbar'
+import { AppSidebar } from '@/components/ui/app-sidebar'
 
 // Set up queryClient
 const queryClient = new QueryClient()
@@ -43,10 +46,14 @@ function AppProvider({ children, cookies }: { children: ReactNode; cookies: stri
     <WagmiProvider config={wagmiAdapter.wagmiConfig as Config} initialState={initialState}>
       <QueryClientProvider client={queryClient}>
         <MiniKitContextProvider>
-          <main>
-            {children}
-            <Toaster position="bottom-right" />
-          </main>
+          <SidebarProvider>
+            <AppSidebar />
+            <main className="flex flex-col h-dvh w-full overflow-hidden">
+              <AdminNavbar />
+              <div className="px-4 py-4 overflow-hidden pb-16 sm:pb-20 md:pb-4">{children}</div>
+              <Toaster position="bottom-right" />
+            </main>
+          </SidebarProvider>
         </MiniKitContextProvider>
       </QueryClientProvider>
     </WagmiProvider>

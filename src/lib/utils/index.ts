@@ -63,6 +63,10 @@ export const getContractAddress = () => CONTRACT_ADDRESS;
 export const getSupportedTokens = (network: string, chain: string) =>
   SUPPORTED_TOKENS[network]?.[chain] || {};
 
+export const getTokenOptions = (network: string, chain: string) => {
+  return getSupportedTokens(network, chain);
+};
+
 export const validateDistribution = (
   address: string,
   amount: string
@@ -111,6 +115,10 @@ export function generateUUID() {
   return crypto.randomUUID();
 }
 
+export function generateRandomUUID() {
+  return Math.random().toString(36).slice(2);
+}
+
 export const generateKey = crypto.randomBytes(32).toString("hex");
 
 export const formatThousandNumber = (number: number) => {
@@ -147,4 +155,11 @@ export const getStatusColor = (status: string) => {
     default:
       return "bg-gray-500";
   }
+};
+
+export const isValidTweetUrl = (url: string) => {
+  const regex =
+    /(?:https?:\/\/)?(?:www\.)?(?:x\.com|twitter\.com)\/\w+\/status\/(\d+)/;
+
+  return regex.test(url);
 };

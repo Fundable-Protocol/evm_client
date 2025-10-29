@@ -13,8 +13,8 @@ import { LineChart, Line, XAxis, YAxis } from "recharts";
 import { useQuery } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 import { ITransactionDataPoint } from "@/types/dashboard";
-import { getChartDataAction } from "@/app/actions/distributionActions";
 import DashboardChartSkeleton from "./DashboardChartSkeleton";
+import DistributionApiService from "@/services/api/distributionService";
 
 // Define chart configuration for the 3 cryptocurrencies
 const chartConfig = {
@@ -39,7 +39,13 @@ function DashboardChart() {
     ITransactionDataPoint[]
   >({
     queryKey: ["transactionChartData", address],
-    queryFn: () => getChartDataAction(address!),
+    queryFn: async () => {
+      const response = await DistributionApiService.getDistributionChartData(
+        address!
+      );
+
+      return (response.data as unknown as ITransactionDataPoint[]) || [];
+    },
     enabled: !!address,
     refetchOnWindowFocus: true,
   });

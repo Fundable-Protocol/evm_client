@@ -12,9 +12,10 @@ export type DistributionType = (typeof distributionType)[number];
 
 export interface IDistributionInfo {
   amount?: number;
+  showLabel?: boolean;
+  twitterUrl?: string;
   selectedToken: string;
   type: DistributionType;
-  showLabel?: boolean;
   equalAmountType?: (typeof equalDistributionType)[number]["value"];
 }
 
@@ -34,6 +35,7 @@ export interface IDistribution {
 export type DistributionRowField = "address" | "amount" | "label";
 
 export interface IDistributionRow {
+  index: number;
   row: IDistributionData;
   isEqualDistribution: boolean;
   addLabel: boolean;

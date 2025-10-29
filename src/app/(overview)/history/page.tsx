@@ -11,11 +11,11 @@ import {
 import { DistributionAttributes } from "@/types/distribution";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import HistoryTable from "@/components/modules/history/HistoryTable";
-import { getDistributionsAction } from "@/app/actions/distributionActions";
 import HistoryTableSkeleton from "@/components/modules/history/HistoryTableSkeleton";
 
 import { useSearchParams } from "next/navigation";
 import { validPageLimits } from "@/lib/constant";
+import DistributionApiService from "@/services/api/distributionService";
 
 const HistoryPageContent = () => {
   const { address } = useAccount();
@@ -38,10 +38,17 @@ const HistoryPageContent = () => {
 
   const { data: distributionsData, isPending } = useQuery({
     queryKey: ["distributions-table", distributionFilter, page, limit],
-    queryFn: () =>
-      getDistributionsAction({
-        user_address: address ?? "",
-        page, // Convert to 1-based for API
+    queryFn: async () => {
+      console.log("🔍 [History] Fetching distributions with params:", {
+        address,
+        page,
+        limit,
+        status: distributionFilter.status !== "all" ? distributionFilter.status : undefined,
+        type: distributionFilter.type !== "all" ? distributionFilter.type : undefined,
+      });
+      
+      const result = await DistributionApiService.getDistributions(address ?? "", {
+        page,
         limit,
         status:
           distributionFilter.status !== "all"
@@ -51,7 +58,10 @@ const HistoryPageContent = () => {
           distributionFilter.type !== "all"
             ? distributionFilter.type
             : undefined,
-      }),
+      });
+      
+      return result;
+    },
 
     enabled: !!address,
   });
@@ -60,7 +70,10 @@ const HistoryPageContent = () => {
     filter: distributionFilterType,
     value: distributionFilterValueType
   ) => {
-    setDistributionFilter((prev) => ({ ...prev, [filter]: value }));
+    setDistributionFilter((prev) => ({
+      ...prev,
+      [filter]: value === "all" ? "" : value?.toUpperCase(),
+    }));
   };
 
   return (
@@ -85,7 +98,7 @@ const HistoryPageContent = () => {
                 value as typeof distributionFilter.type
               )
             }
-            totalCount={distributionsData?.data?.total ?? 0}
+            totalCount={distributionsData?.data?.meta?.totalRows ?? 0}
             page={page}
             limit={limit}
           />

@@ -24,8 +24,8 @@ const AppSelect = ({
           {options?.map((option) => {
             return (
               <SelectItem
-                key={option.value}
-                value={option.value}
+                key={option.value as unknown as string}
+                value={option.value as unknown as string}
                 className="text-white bg-[#252939] hover:bg-[#252939] hover:text-white"
               >
                 {option.label}

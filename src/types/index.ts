@@ -6,9 +6,11 @@ export interface TokenOption {
 
 export interface AppSelectProps {
   title?: string;
+  className?: string;
   placeholder?: string;
+  titleclassname?: string;
   setValue: (value: string) => void;
-  options: { label: string; value: string }[];
+  options: { label: string; value: unknown }[];
 }
 
 export type ErrorWithCode = Error & { code: string };

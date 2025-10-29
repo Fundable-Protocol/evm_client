@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utills";
+import { cn } from "@/lib/utils";
 
 import PlusIcon from "@/components/svgs/PlusIcon";
 import UserIcon from "@/components/svgs/UserIcon";

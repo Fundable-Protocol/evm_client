@@ -1,6 +1,6 @@
 "use server";
 
-import { tryCatch } from "@/lib/utills";
+import { tryCatch } from "@/lib/utils";
 import { db } from "../../../db/drizzle";
 import { and, eq, ilike } from "drizzle-orm";
 import { feeConfigModel } from "../../../db/schema";
