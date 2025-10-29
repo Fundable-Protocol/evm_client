@@ -8,7 +8,7 @@ import AvaTar from "../../../public/svgs/avatar.svg";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import NotificationIcon from "@/components/svgs/NotificationIcon";
 
-import { sliceAddress } from "@/lib/utills";
+import { sliceAddress } from "@/lib/utils";
 import { useMount } from "@/hooks/useMount";
 import SkeletonNavbar from "@/components/organisms/NavbarLoader";
 // import NetworkIndicator from "@/components/molecules/NetworkIndicator";

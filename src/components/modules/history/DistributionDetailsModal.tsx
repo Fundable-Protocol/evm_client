@@ -1,6 +1,6 @@
 "use client";
 
-import { getStatusColor } from "@/lib/utills";
+import { getStatusColor } from "@/lib/utils";
 import { X } from "lucide-react";
 import { DistributionDetailsModalProps } from "@/types/history";
 

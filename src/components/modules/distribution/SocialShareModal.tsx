@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { DistributionAttributes } from "@/types/distribution";
 import { toast } from "react-hot-toast";
-import { getExplorerUrl } from "@/lib/utills/history";
+import { getExplorerUrl } from "@/lib/utils/history";
 
 interface SocialShareModalProps {
   isOpen: boolean;

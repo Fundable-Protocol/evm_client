@@ -2,8 +2,9 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { DistributionAttributes } from "@/types/distribution";
-import { getStatusColor } from "@/lib/utills";
+import { getStatusColor } from "@/lib/utils";
 import ActionsCell from "./ActionsCell";
+import { format } from "date-fns";
 
 export const columns: ColumnDef<DistributionAttributes>[] = [
   {
@@ -29,6 +30,14 @@ export const columns: ColumnDef<DistributionAttributes>[] = [
   {
     accessorKey: "created_at",
     header: "Date",
+    cell: ({ row }) => {
+      const distribution = row.original;
+      return (
+        <div className="text-white">
+          {format(distribution.created_at, "MMM dd, yyyy hh:mm a")}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "status",

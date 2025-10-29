@@ -3,18 +3,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 
-import { formatThousandNumber } from "@/lib/utills";
+import { formatThousandNumber } from "@/lib/utils";
 
 import TransactionCard from "./TransactionCard";
 import TransactionSkeletonLoader from "./TransactionSkeletonLoader";
-import { getCardStatsAction } from "@/app/actions/distributionActions";
+import DistributionApiService from "@/services/api/distributionService";
 
 const TransactionCards = () => {
   const { address } = useAccount();
 
   const { data: totalDistributionAmount, isPending } = useQuery({
     queryKey: ["totalDistributionAmount"],
-    queryFn: () => getCardStatsAction(address!),
+    queryFn: () => DistributionApiService.getDistributionStats(address!),
     enabled: !!address,
     refetchInterval: 1000,
     refetchOnWindowFocus: true,
@@ -29,7 +29,7 @@ const TransactionCards = () => {
     totalDistributionsPercentageChange,
     totalFundedAddresses,
     totalFundedAddressesPercentageChange,
-  } = totalDistributionAmount ?? {};
+  } = totalDistributionAmount?.data ?? {};
 
   return (
     <div className="grid grid-cols-[repeat(auto-fit,minmax(20rem,1fr))] gap-4 md:gap-8">

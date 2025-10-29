@@ -22,7 +22,7 @@ import EyeIcon from "../svgs/EyeIcon";
 const items = [
   {
     title: "Dashboard",
-    url: "/dashboard",
+    url: "/",
     icon: <DashboardIcon aria-hidden="true" />,
   },
   {
@@ -145,6 +145,7 @@ export function AppSidebar() {
                 <li key={link.title}>
                   <Link
                     href={link.url}
+                    onClick={() => setOpenMobile(false)}
                     className={`flex items-center gap-x-2 rounded p-2  transition-colors focus:outline-none focus:ring-1 focus:ring-fundable-purple-2 focus:ring-offset-2 focus:ring-offset-black 
                     ${
                       isActive
@@ -153,7 +154,6 @@ export function AppSidebar() {
                     }`}
                     data-slot="sidebar-menu"
                     aria-current={isActive ? "page" : undefined}
-                    onClick={() => setOpenMobile(false)}
                   >
                     <span
                       data-slot="sidebar-icon"

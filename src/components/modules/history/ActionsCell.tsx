@@ -15,7 +15,7 @@ import {
   getExplorerUrl,
   generateDistributionPDF,
   generateDistributionCSV,
-} from "@/lib/utills/history";
+} from "@/lib/utils/history";
 import {
   DropdownMenu,
   DropdownMenuItem,

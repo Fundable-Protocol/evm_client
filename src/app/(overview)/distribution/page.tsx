@@ -24,7 +24,7 @@ import {
   getContractAddress,
   getSupportedTokens,
   calculateTotalDistributionAmount,
-} from "@/lib/utills";
+} from "@/lib/utils";
 
 import {
   // snsAddressValidation,
@@ -34,9 +34,12 @@ import {
 } from "@/validations/distribution";
 import { ErrorWithCode } from "@/types";
 // import { useStarkNameResolver } from "@/hooks/useStarkNameResolver";
-import { createDistributionAction } from "@/app/actions/distributionActions";
-import DistributionConfirmationModal from "@/components/modules/distribution/DistributionConfirmationModal";
-import DistributionSuccessModal from "@/components/modules/distribution/DistributionSuccessModal";
+import DistributionApiService from "@/services/api/distributionService";
+import {
+  DistributionSuccessModal,
+  DistributionConfirmationModal,
+  TwitterAddressExtractor,
+} from "@/components/modules/distribution";
 import { getBalance, waitForCallsStatus, waitForTransactionReceipt } from "@wagmi/core";
 import { config } from "@/config";
 import { fetchProtocolFee } from "@/lib/api";
@@ -73,6 +76,7 @@ const DistributePage = () => {
   const [distributionInfo, setDistributionInfo] = useState<IDistributionInfo>({
     amount: 0,
     type: "equal",
+    twitterUrl: "",
     showLabel: false,
     equalAmountType: "amount_per_address",
     selectedToken: supportedTokens[0]?.value || "USDC", // Default to USDC or first available token
@@ -430,17 +434,18 @@ const DistributePage = () => {
       const totalUsdAmount = totalBaseAmount.multiply(usdRate).toString();
 
       const distribution = {
-        status: "COMPLETED",
+        status: "PENDING",
         transaction_hash: transactionHash,
         user_address: address!,
+        chain_name: chain?.name ?? "",
         total_amount: baseAmount,
+        usd_rate: usdRate?.toString(),
         total_usd_amount: totalUsdAmount,
         token_symbol: selectedToken.symbol,
+        created_at: new Date().toISOString(),
         token_address: selectedToken.address,
         token_decimals: selectedToken.decimals,
         total_recipients: distributionData.length,
-        chain_name: chain?.name || "",
-        usd_rate: usdRate?.toString(),
         network: isMainNet ? "MAINNET" : "TESTNET",
         distribution_type: distributionInfo.type.toUpperCase(),
         fee_amount: (Number(distributionState.protocolFee || BigInt(0)) / Math.pow(10, selectedToken.decimals)).toString(),
@@ -457,11 +462,11 @@ const DistributePage = () => {
 
       console.log("distribution", distribution);
 
-      const { error, success } = await tryCatch(
-        createDistributionAction(distribution)
+      const { error, data } = await tryCatch(
+        DistributionApiService.createDistribution(address!, distribution as unknown as DistributionAttributes)
       );
 
-      if (!success) {
+      if (!data?.success) {
         toast.error(error?.message || "Something went wrong");
         return;
       }
@@ -554,6 +559,7 @@ const DistributePage = () => {
     <DashboardLayout
       title="Create Distribution"
       className="flex flex-col gap-y-6 h-full"
+      availableNetwork={["testnet", "mainnet"]}
     >
       <DistributionSelector
         supportedTokens={supportedTokens}
@@ -562,6 +568,14 @@ const DistributePage = () => {
         setDistributionType={setDistributionInfo}
         setDistributionData={setDistributionData}
       />
+
+      <TwitterAddressExtractor
+        address={address!}
+        distributionInfo={distributionInfo}
+        setDistributionInfo={setDistributionInfo}
+        setDistributionData={setDistributionData}
+      />
+
       <DistributionFileUpload
         distributionType={distributionInfo}
         setDistributionData={setDistributionData}

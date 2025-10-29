@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import Navbar from "@/components/organisms/Navbar";
+import AdminNavbar from "@/components/organisms/AdminNavbar";
 import Footer from "@/components/organisms/Footer";
 
 export default function NotFound() {
   return (
     <main className="h-dvh flex flex-col overflow-auto text-white">
-      <Navbar />
+      <AdminNavbar />
       <div className="flex-1 flex flex-col items-center justify-center">
         <div className="text-center space-y-6">
           <h1 className="text-4xl md:text-6xl font-bricolage font-bold bg-gradient-to-r from-fundable-purple via-fundable-purple-2 to-fundable-violet bg-clip-text text-transparent">

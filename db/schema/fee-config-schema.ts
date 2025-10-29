@@ -1,4 +1,4 @@
-import { generateUUID } from "@/lib/utills";
+import { generateUUID } from "@/lib/utils";
 import { network } from "./distribution-schema";
 
 import { numeric, pgTable, text, timestamp, unique } from "drizzle-orm/pg-core";

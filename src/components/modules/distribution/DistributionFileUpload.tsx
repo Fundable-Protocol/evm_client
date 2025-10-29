@@ -1,7 +1,7 @@
 "use client";
 
 import UploadIcon from "@/components/svgs/UploadIcon";
-import { cn } from "@/lib/utills";
+import { cn } from "@/lib/utils";
 import { parse as papaParse } from "papaparse";
 import { useDropzone } from "react-dropzone";
 import { useCallback } from "react";
@@ -77,7 +77,8 @@ function DistributionFileUpload({
           Drag and drop a CSV file here, or click to select a file
         </h3>
         <p className="text-xs md:text-sm text-gray-400 font-normal mb-4">
-          CSV format: {isEqualDistribution ? "address, label" : "address, amount, label"}
+          CSV format:{" "}
+          {isEqualDistribution ? "address, label" : "address, amount, label"}
           (one per line)
         </p>
         <input {...getInputProps()} />

@@ -6,6 +6,8 @@ import { TokenOption } from "@/types";
 
 export const databaseUrl = process.env.DATABASE_URL ?? "";
 
+export const backendBaseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL ?? "";
+
 export const projectId = "4f854415eedab0dd9258793f029e728d";
 
 export const distributionType = ["equal", "weighted"] as const;
@@ -13,6 +15,14 @@ export const distributionType = ["equal", "weighted"] as const;
 export const supportedNetwork = ["mainnet", "testnet"] as const;
 
 export const distributionStatus = ["completed", "failed", "pending"] as const;
+
+export const paymentStreamStatus = [
+  "active",
+  "paused",
+  "canceled",
+  "completed",
+  "transfered",
+] as const;
 
 export const equalDistributionType = [
   { label: "Equal amount per address", value: "amount_per_address" },

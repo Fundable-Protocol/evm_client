@@ -57,9 +57,9 @@ const DistributionSelector = ({
 
   return (
     <div className="flex flex-col xl:flex-row gap-y-6 xl:gap-y-0 gap-x-12 justify-between">
-      <div className="flex gap-6 flex-col md:flex-row md:items-center pl-1">
+      <div className="flex gap-6 flex-col md:flex-row md:items-end pl-1">
         <AppSelect
-          title="Token"
+          className="text-xs md:text-sm font-medium"
           placeholder={distributionType.selectedToken}
           options={supportedTokens!}
           setValue={(value) =>
@@ -78,10 +78,10 @@ const DistributionSelector = ({
         />
       </div>
       {distributionType.type === "equal" ? (
-        <div className="flex flex-col lg:flex-row lg:items-center gap-y-6 gap-x-6 ">
+        <div className="flex flex-col lg:flex-row lg:items-end gap-y-6 gap-x-6 ">
           <AppSelect
             placeholder="Equal Amount per address"
-            title="Equal distribution type"
+            // title="Equal distribution type"
             options={[...equalDistributionType]}
             setValue={(value) =>
               handleDistributionTypeChange("equalAmountType", value)
@@ -89,11 +89,11 @@ const DistributionSelector = ({
           />
 
           <div className="flex flex-col">
-            <h3 className="font-semibold mb-3 text-nowrap">
+            {/* <h3 className="mb-3 text-sm text-nowrap">
               {distributionType["equalAmountType"] === "amount_per_address"
                 ? "Amount per address"
                 : "Lump sum to distribute."}
-            </h3>
+            </h3> */}
 
             <div className="flex gap-x-3 items-center">
               <Input

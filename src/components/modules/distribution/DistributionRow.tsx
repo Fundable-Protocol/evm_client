@@ -1,11 +1,12 @@
 import { FC } from "react";
 import { Trash2Icon } from "lucide-react";
 
-import { cn } from "@/lib/utills";
+import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { IDistributionRow } from "@/types/distribution";
 
 const DistributionRow: FC<IDistributionRow> = ({
+  index,
   onChange,
   onDelete,
   row,
@@ -18,8 +19,17 @@ const DistributionRow: FC<IDistributionRow> = ({
     "md:max-w-max": isEqualDistribution,
   });
 
+  const rowIndexStyle =
+    "group place-content-center bg-fundable-mid-grey h-12 md:h-14 px-4 rounded hover:bg-fundable-mid-grey/80 focus-visible:outline-none focus-visible:ring-ring/50 focus-visible:ring-[2px] transition-colors cursor-pointer";
+
   return (
     <div className="w-full flex flex-col md:flex-row items-center gap-3">
+      <span
+        className={cn(rowIndexStyle, "hidden md:grid")}
+        aria-label="Row Index"
+      >
+        {index + 1}
+      </span>
       {addLabel ? (
         <Input
           className="border-none bg-fundable-mid-grey rounded h-12 md:h-14 md:w-1/4"
@@ -29,20 +39,30 @@ const DistributionRow: FC<IDistributionRow> = ({
           onChange={(e) => onChange(row.id, e.target.value, "label")}
         />
       ) : null}
-      <Input
-        className="border-none h-12 md:h-14 rounded"
-        placeholder="Address"
-        name="address"
-        value={row.address}
-        onChange={(e) => onChange(row.id, e.target.value, "address")}
-      />
 
+      <div className="flex items-center gap-x-3 w-full">
+        <span
+          className={cn(rowIndexStyle, "grid md:hidden")}
+          aria-label="Row Index"
+        >
+          {index + 1}
+        </span>
+        <Input
+          className="border-none h-12 md:h-14 rounded"
+          placeholder="Address"
+          name="address"
+          value={row.address}
+          onChange={(e) => onChange(row.id, e.target.value, "address")}
+        />
+      </div>
       <div className={isEqualStyle}>
         <Input
           className="border-none rounded h-12 md:h-14"
           name="amount"
           placeholder="Amount"
-          value={isEqualDistribution ? equalAmount?.toString() || "0" : row.amount}
+          value={
+            isEqualDistribution ? equalAmount?.toString() || "0" : row.amount
+          }
           onChange={(e) => onChange(row.id, e.target.value, "amount")}
           disabled={isEqualDistribution}
         />
