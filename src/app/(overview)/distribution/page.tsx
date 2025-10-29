@@ -559,7 +559,6 @@ const DistributePage = () => {
     <DashboardLayout
       title="Create Distribution"
       className="flex flex-col gap-y-6 h-full"
-      availableNetwork={["testnet", "mainnet"]}
     >
       <DistributionSelector
         supportedTokens={supportedTokens}

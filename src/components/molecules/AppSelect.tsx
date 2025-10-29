@@ -5,16 +5,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
 import { AppSelectProps } from "@/types";
 
 const AppSelect = ({
   title,
   options,
   setValue,
-  className,
   placeholder,
-  titleclassname,
 }: AppSelectProps) => {
   return (
     <Select onValueChange={setValue}>

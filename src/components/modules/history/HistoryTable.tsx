@@ -9,6 +9,7 @@ import {
   ColumnFiltersState,
   Updater,
   PaginationState,
+  type ColumnDef,
 } from "@tanstack/react-table";
 
 import {
@@ -59,6 +60,7 @@ function HistoryTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const router = useRouter();
+  const isMobile = useIsMobile();
   const pageCount = Math.ceil(totalCount / limit);
 
   const handlePaginationChange = (updater: Updater<PaginationState>) => {
@@ -70,9 +72,11 @@ function HistoryTable<TData, TValue>({
     router.push(`?page=${newPage}&limit=${limit}`);
   };
 
+  const tableColumns = columns || (isMobile ? mobileColumns : desktopColumns) as ColumnDef<TData, TValue>[];
+
   const table = useReactTable({
-    data,
-    columns,
+    data: data || [],
+    columns: tableColumns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -178,7 +182,7 @@ function HistoryTable<TData, TValue>({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
+              <TableCell colSpan={tableColumns.length} className="h-24 text-center">
                 No results.
               </TableCell>
             </TableRow>

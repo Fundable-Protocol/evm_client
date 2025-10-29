@@ -38,8 +38,16 @@ const HistoryPageContent = () => {
 
   const { data: distributionsData, isPending } = useQuery({
     queryKey: ["distributions-table", distributionFilter, page, limit],
-    queryFn: () =>
-      DistributionApiService.getDistributions(address ?? "", {
+    queryFn: async () => {
+      console.log("🔍 [History] Fetching distributions with params:", {
+        address,
+        page,
+        limit,
+        status: distributionFilter.status !== "all" ? distributionFilter.status : undefined,
+        type: distributionFilter.type !== "all" ? distributionFilter.type : undefined,
+      });
+      
+      const result = await DistributionApiService.getDistributions(address ?? "", {
         page,
         limit,
         status:
@@ -50,7 +58,10 @@ const HistoryPageContent = () => {
           distributionFilter.type !== "all"
             ? distributionFilter.type
             : undefined,
-      }),
+      });
+      
+      return result;
+    },
 
     enabled: !!address,
   });
@@ -66,10 +77,7 @@ const HistoryPageContent = () => {
   };
 
   return (
-    <DashboardLayout
-      title="Transaction History"
-      availableNetwork={["testnet", "mainnet"]}
-    >
+    <DashboardLayout title="Transaction History">
       <div className="h-full overflow-y-auto">
         {address && isPending ? (
           <HistoryTableSkeleton />

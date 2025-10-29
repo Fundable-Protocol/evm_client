@@ -5,7 +5,6 @@ const AnalyticsPage = () => {
     <DashboardLayout
       title="View Analytics"
       className="flex flex-col gap-y-6 h-full"
-      availableNetwork={[]}
     ></DashboardLayout>
   );
 };

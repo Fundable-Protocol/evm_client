@@ -18,7 +18,10 @@ export async function saveWalletAction(data: { walletAddress: string }) {
       .where(eq(walletModel.address, walletAddress))
       .limit(1);
 
-    if (existingWallet[0]?.id) return;
+    if (existingWallet[0]?.id) {
+      console.log("ℹ️ [saveWalletAction] Wallet already exists:", walletAddress);
+      return { message: "Wallet already exists", wallet: null };
+    }
 
     const [newWallet] = await db
       .insert(walletModel)
@@ -26,5 +29,8 @@ export async function saveWalletAction(data: { walletAddress: string }) {
       .returning();
 
     return { message: "Wallet saved successfully", wallet: newWallet };
-  } catch {}
+  } catch (error) {
+    console.error("❌ [saveWalletAction] Error saving wallet:", error);
+    throw error;
+  }
 }

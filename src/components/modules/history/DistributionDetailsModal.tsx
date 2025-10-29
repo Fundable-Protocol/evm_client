@@ -3,6 +3,7 @@
 import { getStatusColor } from "@/lib/utils";
 import { X } from "lucide-react";
 import { DistributionDetailsModalProps } from "@/types/history";
+import { format } from "date-fns";
 
 const DistributionDetailsModal = ({
   distribution,
@@ -60,7 +61,7 @@ const DistributionDetailsModal = ({
     },
     {
       label: "Date",
-      value: new Date(distribution.created_at).toLocaleString(),
+      value: format(new Date(distribution.created_at), "MMM dd, yyyy hh:mm a"),
     },
     {
       label: "Tx Hash",

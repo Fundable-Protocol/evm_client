@@ -20,7 +20,9 @@ export class ApiService {
         };
       }
 
-      const response = await fetch(`${this.baseURL}/api${endpoint}`, {
+      const fullUrl = `${this.baseURL}/api${endpoint}`;
+
+      const response = await fetch(fullUrl, {
         ...options,
         headers: {
           "Content-Type": "application/json",
