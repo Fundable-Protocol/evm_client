@@ -74,6 +74,11 @@ export type starkNameResolverState = Record<
   { resolving: boolean; starkName: string }
 >;
 
+export type ensResolverState = Record<
+  number,
+  { resolving: boolean; ensName: string }
+>;
+
 export interface IDistributionState {
   totalAmount?: bigint;
   recipientCount: number;
