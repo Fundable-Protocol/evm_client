@@ -198,10 +198,22 @@ const DistributePage = () => {
         throw new Error(individualValidationMessage!);
       }
 
+      // const {
+      //   message: protocolFeeMessage,
+      //   success: protocolFeeSuccess,
+      //   data: protocolFeePercentage,
+      // } = await fetchProtocolFee({
+      //   account,
+      //   contractAddress: CONTRACT_ADDRESS,
+      // });
+
+      // if (!protocolFeeSuccess) {
+      //   throw new Error(protocolFeeMessage);
+      // }
+
       const {
         data: protocolFeePercentage,
       } = await fetchProtocolFee(isMainNet ? "mainnet" : "testnet", "Starknet");
-
       const { totalAmountString, amounts, protocolFee, totalAmount } =
         calculateTotalDistributionAmount(
           updatedDistributionData,
@@ -398,8 +410,8 @@ const DistributePage = () => {
          const result = await sendCallsAsync({ calls: [approveCall, distributeCall] });
 
          const { receipts } = await waitForCallsStatus(config, {
-          id: result?.id,
-          pollingInterval: 1000,
+           id: result?.id,
+           pollingInterval: 1000,
          });
 
          transactionHash = receipts?.[0]?.transactionHash as `0x${string}` | undefined;
@@ -483,7 +495,6 @@ const DistributePage = () => {
       const { error, data } = await tryCatch(
         DistributionApiService.createDistribution(address!, distribution as unknown as DistributionAttributes)
       );
-
       if (!data?.success) {
         toast.error(error?.message || "Something went wrong");
         return;
