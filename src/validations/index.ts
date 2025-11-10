@@ -9,10 +9,10 @@ export const saveWalletPolicy = z.object({
   }),
 });
 
-export const isSnsAddress = (address: string) => {
+export const isENSAddress = (address: string) => {
   if (!address) return false;
 
-  return address?.toLowerCase().endsWith(".stark");
+  return address?.toLowerCase().endsWith(".eth");
 };
 
 export const isDuplicateAddress = (distributionData: IDistributionData[]) => {
@@ -49,7 +49,6 @@ export const isEmptyAmount = (distributionData: IDistributionData[]) => {
 };
 
 export const validateCsvData = (data: unknown) => {
-  console.log('validateCsvData input:', data);
   if (!Array.isArray(data)) {
     return {
       success: false,
@@ -86,8 +85,6 @@ export const validateCsvData = (data: unknown) => {
       return null;
     })
     .filter(Boolean);
-
-  console.log('validateCsvData transformedData:', transformedData);
 
   if (!transformedData.length) {
     return {

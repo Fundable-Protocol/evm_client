@@ -26,14 +26,16 @@ import {
   calculateTotalDistributionAmount,
 } from "@/lib/utils";
 
+
 import {
-  // snsAddressValidation,
   validateDistributionAmounts,
   checkDistributionDataValidity,
   validateIndividualDistributions,
+  getUnresolvedENSRows,
+  formatUnresolvedENSError,
 } from "@/validations/distribution";
 import { ErrorWithCode } from "@/types";
-// import { useStarkNameResolver } from "@/hooks/useStarkNameResolver";
+import { useENSResolver } from "@/hooks/useENSResolver";
 import DistributionApiService from "@/services/api/distributionService";
 import {
   DistributionSuccessModal,
@@ -52,21 +54,14 @@ const DistributePage = () => {
   const { address, chain } = useAccount();
   const { sendCallsAsync } = useSendCalls();
   const { writeContractAsync } = useWriteContract();
-  // const { data: callReceipts, isSuccess, isError } = useWaitForCallsStatus({
-  //   id: bundle?.id,
-  //   pollingInterval: 1000,
-  // });
-  // console.log("callReceipts", callReceipts);
   const chainNames = ["base", "ethereum", "bnb smart chain", "arbitrum", "lisk"];
   const chainName = chain?.name?.toLowerCase() || "";
   const isEip7702Chain = (EIP_7702_CHAINS as readonly string[]).includes(chainName);
-  console.log("chainName", chainName);
 
   const router = useRouter();
   const isMainNet = chainNames.includes(chainName);
   const network = isMainNet ? "mainnet" : "testnet";
   const SUPPORTED_TOKENS = getSupportedTokens(network, chainName);
-  console.log("SUPPORTED_TOKENS", SUPPORTED_TOKENS);
 
   const supportedTokens = useMemo(() => Object.values(SUPPORTED_TOKENS).map((token) => ({
     label: token.symbol,
@@ -137,8 +132,7 @@ const DistributePage = () => {
     resendDistributionPayload.set(null);
   }, [supportedTokens]);
 
-  // const { queueStarkNameResolution } =
-  //   useStarkNameResolver(setDistributionData);
+  const { resolveAllENS, ensState } = useENSResolver(setDistributionData);
 
   // Calculate total amount including protocol fee
   const selectedToken = SUPPORTED_TOKENS[distributionInfo.selectedToken] || {
@@ -182,16 +176,6 @@ const DistributePage = () => {
         setDistributionData(updatedDistributionData);
       }
 
-      // Check for unresolved SNS addresses before validation
-
-      // const { success, message } = snsAddressValidation(
-      //   updatedDistributionData,
-      //   queueStarkNameResolution,
-      //   isMainNet
-      // );
-
-      // if (!success) throw new Error(message!);
-
       const {
         success: equalDistributionSuccess,
         message: equalDistributionMessage,
@@ -214,28 +198,9 @@ const DistributePage = () => {
         throw new Error(individualValidationMessage!);
       }
 
-      // const {
-      //   message: protocolFeeMessage,
-      //   success: protocolFeeSuccess,
-      //   data: protocolFeePercentage,
-      // } = await fetchProtocolFee({
-      //   account,
-      //   contractAddress: CONTRACT_ADDRESS,
-      // });
-
-      // if (!protocolFeeSuccess) {
-      //   throw new Error(protocolFeeMessage);
-      // }
-
       const {
-        // message: protocolFeeMessage,
-        // success: protocolFeeSuccess,
         data: protocolFeePercentage,
       } = await fetchProtocolFee(isMainNet ? "mainnet" : "testnet", "Starknet");
-
-      console.log("protocolFeePercentage", protocolFeePercentage);
-
-      // const protocolFeePercentage = 2500;
 
       const { totalAmountString, amounts, protocolFee, totalAmount } =
         calculateTotalDistributionAmount(
@@ -254,6 +219,11 @@ const DistributePage = () => {
         recipientCount: updatedDistributionData.length,
         protocolFeePercentage: protocolFeePercentage!,
       }));
+
+      // Resolve all ENS names in parallel when modal is shown (don't await - let it run in background)
+      resolveAllENS(updatedDistributionData).catch((error) => {
+        console.error("Error resolving ENS names:", error);
+      });
     } catch (error) {
       if ((error as ErrorWithCode)?.code === "INVALID_ARGUMENT") {
         toast.error("Invalid amount — please provide a valid amount");
@@ -274,6 +244,38 @@ const DistributePage = () => {
 
   const handleModalConfirmation = async () => {
     try {
+      // Check for unresolved ENS addresses and wait if still resolving
+      let unresolvedRows = getUnresolvedENSRows(distributionData);
+
+      // If still resolving, wait a bit
+      if (unresolvedRows.length > 0 && Object.keys(ensState).length > 0) {
+        toast.loading("Resolving ENS addresses...", {
+          duration: Number.POSITIVE_INFINITY,
+        });
+
+        // Wait up to 10 seconds for resolution
+        let attempts = 0;
+        const maxAttempts = 20; // 20 attempts * 500ms = 10 seconds
+        while (attempts < maxAttempts && Object.keys(ensState).length > 0) {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          attempts++;
+        }
+
+        toast.dismiss();
+
+        // Re-check after waiting
+        unresolvedRows = getUnresolvedENSRows(distributionData);
+      }
+
+      if (unresolvedRows.length > 0) {
+        const errorMessage = formatUnresolvedENSError(unresolvedRows);
+
+        toast.error(errorMessage, {
+          duration: 6000, // Longer duration for detailed messages
+        });
+        return;
+      }
+
       setDistributionState((prev) => ({
         ...prev,
         currentState: "process-started",
@@ -359,23 +361,13 @@ const DistributePage = () => {
 
      let transactionHash: `0x${string}` | undefined;
 
-     if (isEip7702Chain) {
-       const result = await sendCallsAsync({ calls: [approveCall, distributeCall] });
-       console.log("result", result);
-
-       const { receipts } = await waitForCallsStatus(config, {
-        id: result?.id,
-        pollingInterval: 1000,
-       });
-
-       transactionHash = receipts?.[0]?.transactionHash as `0x${string}` | undefined;
-     } else {
+     // helper to run manual sequential approve + distribute
+     const runManualSequential = async (): Promise<`0x${string}`> => {
        toast.dismiss();
        toast.loading("Approving tokens...", {
          duration: Number.POSITIVE_INFINITY,
        });
 
-       // Fallback: send sequential transactions
        const approveHash = await writeContractAsync({
          address: selectedToken.address as `0x${string}`,
          abi: erc20ApproveAbi,
@@ -398,8 +390,36 @@ const DistributePage = () => {
            : [amounts!, recipients, selectedToken.address as `0x${string}`]
        });
        const distributeReceipt: TransactionReceipt = await waitForTransactionReceipt(config, { hash: distributeHash });
-       // Prefer the receipt's hash if available
-       transactionHash = distributeReceipt.transactionHash ?? distributeHash;
+       return (distributeReceipt.transactionHash ?? distributeHash) as `0x${string}`;
+     };
+
+     if (isEip7702Chain) {
+       try {
+         const result = await sendCallsAsync({ calls: [approveCall, distributeCall] });
+
+         const { receipts } = await waitForCallsStatus(config, {
+          id: result?.id,
+          pollingInterval: 1000,
+         });
+
+         transactionHash = receipts?.[0]?.transactionHash as `0x${string}` | undefined;
+       } catch (e) {
+         const message = (e as Error)?.message || String(e);
+         const isBatchUnsupported =
+           message.toLowerCase().includes("not supported batch request") ||
+           message.toLowerCase().includes("batch request") ||
+           message.toLowerCase().includes("does not support the requested chain id");
+
+         if (isBatchUnsupported) {
+           toast.dismiss();
+           toast.success("Wallet doesn't support batching on this chain. Falling back.");
+           transactionHash = await runManualSequential();
+         } else {
+           throw e;
+         }
+       }
+     } else {
+       transactionHash = await runManualSequential();
      }
 
      if (!transactionHash) {
@@ -439,7 +459,7 @@ const DistributePage = () => {
         user_address: address!,
         chain_name: chain?.name ?? "",
         total_amount: baseAmount,
-        usd_rate: usdRate?.toString(),
+        usd_rate: usdRate.toString(),
         total_usd_amount: totalUsdAmount,
         token_symbol: selectedToken.symbol,
         created_at: new Date().toISOString(),
@@ -459,8 +479,6 @@ const DistributePage = () => {
           })),
         },
       };
-
-      console.log("distribution", distribution);
 
       const { error, data } = await tryCatch(
         DistributionApiService.createDistribution(address!, distribution as unknown as DistributionAttributes)

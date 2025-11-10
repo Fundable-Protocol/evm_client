@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { isDuplicateAddress } from ".";
+import { isDuplicateAddress, isENSAddress } from ".";
 import { validateDistribution } from "@/lib/utils";
 import {
   IDistributionData,
@@ -163,43 +163,40 @@ export function calculateLumpSumAmount(data: ICalculateLumpSumAmount) {
   };
 }
 
-// export const snsAddressValidation = (
-//   data: IDistributionData[],
-//   queueStarkNameResolution: (index: number, starkName: string) => void,
-//   isMainNet: boolean
-// ) => {
-//   const hasUnresolvedSns = data.some((data) => {
-//     const hasSnsAddress = isSnsAddress(data.address!);
-//     // const hasSnsName = isSnsAddress(data.starkAddress!);
-//     return hasSnsAddress || (hasSnsAddress && !data.address);
-//   });
+export const getUnresolvedENSRows = (
+  distributionData: IDistributionData[]
+): Array<{ rowNumber: number; ensName: string }> => {
+  return distributionData
+    .map((row, index) => {
+      if (!row.address) return null;
+      const hasENSAddress = isENSAddress(row.address);
+      if (hasENSAddress && !row.address.startsWith("0x")) {
+        return { rowNumber: index + 1, ensName: row.address };
+      }
+      return null;
+    })
+    .filter((item): item is { rowNumber: number; ensName: string } => item !== null);
+};
 
-//   if (hasUnresolvedSns && !isMainNet) {
-//     return {
-//       success: false,
-//       hasUnresolvedSns,
-//       message: "SNS addresses are not supported on testnet.",
-//     };
-//   }
+export function formatUnresolvedENSError(unresolvedRows: Array<{ rowNumber: number; ensName: string }>): string {
+  let errorMessage: string;
 
-//   if (!hasUnresolvedSns) return { success: true };
+  if (unresolvedRows.length === 1) {
+    errorMessage = `Row ${unresolvedRows[0].rowNumber} (${unresolvedRows[0].ensName}) could not be resolved. Please use an Ethereum address instead.`;
+  } else if (unresolvedRows.length <= 5) {
+    const rowsList = unresolvedRows
+      .map(({ rowNumber, ensName }) => `Row ${rowNumber} (${ensName})`)
+      .join(", ");
+    errorMessage = `${unresolvedRows.length} rows have unresolved ENS addresses: ${rowsList}. Please use Ethereum addresses instead.`;
+  } else {
+    // For many rows, show first few and count
+    const firstFew = unresolvedRows
+      .slice(0, 3)
+      .map(({ rowNumber, ensName }) => `Row ${rowNumber} (${ensName})`)
+      .join(", ");
+    const remainingCount = unresolvedRows.length - 3;
+    errorMessage = `${unresolvedRows.length} rows have unresolved ENS addresses: ${firstFew}, and ${remainingCount} more. Please use Ethereum addresses instead.`;
+  }
 
-//   data.forEach((data, i) => {
-//     const hasSnsAddress = isSnsAddress(data.address!);
-//     const hasSnsName = isSnsAddress(data.starkAddress!);
-
-//     if (hasSnsAddress) {
-//       queueStarkNameResolution(i, data.address!);
-//     }
-
-//     if (hasSnsName && !data.address) {
-//       queueStarkNameResolution(i, data.starkAddress!);
-//     }
-//   });
-
-//   return {
-//     success: false,
-//     message:
-//       "Please wait for SNS addresses to resolve or enter a valid starknet address, and try again.",
-//   };
-// };
+  return errorMessage;
+}
