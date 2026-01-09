@@ -49,6 +49,12 @@ const items = [
     attribute: "airdrop",
   },
   {
+    title: "Offramp",
+    url: "/offramp",
+    icon: HelpSvg,
+    attribute: "offramp",
+  },
+  {
     title: "Analytics",
     url: "/admin/analytics",
     icon: AnalyticSvg,
@@ -63,7 +69,7 @@ const items = [
   {
     title: "Help",
     url: "/admin/help",
-    icon: HelpSvg,
+    icon: AnalyticSvg,
     attribute: "help",
   },
 ];

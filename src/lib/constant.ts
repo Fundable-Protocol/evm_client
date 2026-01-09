@@ -16,6 +16,10 @@ export const supportedNetwork = ["mainnet", "testnet"] as const;
 
 export const distributionStatus = ["completed", "failed", "pending"] as const;
 
+export const supportedMainnetChains = ["ethereum", "base", "arbitrum", "bnb smart chain", "lisk"] as const;
+
+export const supportedTestnetChains = ["ethereum", "base sepolia", "lisk sepolia"] as const;
+
 export const paymentStreamStatus = [
   "active",
   "paused",
@@ -112,6 +116,6 @@ export const EIP_7702_CHAINS = [
   "arbitrum",
   "bnb smart chain",
   "base sepolia",
-  // add/remove chains as support evolves
+  "lisk"
   // e.g., "arbitrum", "sepolia", "base sepolia"
 ] as const;

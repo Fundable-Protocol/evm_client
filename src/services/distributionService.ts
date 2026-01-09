@@ -120,6 +120,7 @@ export class DistributionService {
   static async getAllDistributions({
     type,
     status,
+    chain,
     page = 1,
     limit = 10,
     user_address,
@@ -142,6 +143,9 @@ export class DistributionService {
             distributionModel.distribution_type,
             type.toUpperCase() as DistributionAttributes["distribution_type"]
           )
+        : undefined,
+      chain
+        ? eq(distributionModel.chain_name, chain)
         : undefined
     );
 

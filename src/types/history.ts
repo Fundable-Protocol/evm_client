@@ -21,8 +21,12 @@ export interface DataTableProps<TData, TValue> {
   onTypeFilterChange: Dispatch<
     SetStateAction<DistributionAttributes["distribution_type"] | "all">
   >;
+  onChainFilterChange: Dispatch<
+    SetStateAction<string | "all">
+  >;
   statusFilter: DistributionAttributes["status"] | "all";
   typeFilter: DistributionAttributes["distribution_type"] | "all";
+  chainFilter: DistributionAttributes["chain_name"] | "all";
   totalCount?: number;
   page: number;
   limit: number;
@@ -34,6 +38,7 @@ export interface IHistoryQueryParams {
   user_address: string;
   status?: DistributionAttributes["status"];
   type?: DistributionAttributes["distribution_type"];
+  chain?: DistributionAttributes["chain_name"];
 }
 
 export interface DistributionDetailsModalProps {
@@ -52,9 +57,10 @@ export interface IAction {
   onClick: (distribution: ActionsCellProps["distribution"]) => void;
 }
 
-export type distributionFilterType = "status" | "type";
+export type distributionFilterType = "status" | "type" | "chain";
 
 export type distributionFilterValueType =
   | DistributionAttributes["status"]
   | DistributionAttributes["distribution_type"]
+  | string
   | "all";
