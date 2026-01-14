@@ -3,11 +3,12 @@
 import { Button } from "@/components/ui/button";
 import { Loader2, X } from "lucide-react";
 
-import type { OfframpQuoteResponse } from "@/types/offramp";
+import type { OfframpQuoteData, OfframpFormState } from "@/types/offramp";
 
 interface OfframpQuoteModalProps {
     isOpen: boolean;
-    quote: OfframpQuoteResponse["data"] | null;
+    quote: OfframpQuoteData | null;
+    formState: OfframpFormState;
     onClose: () => void;
     onConfirm: () => void;
     isLoading: boolean;
@@ -16,11 +17,21 @@ interface OfframpQuoteModalProps {
 export default function OfframpQuoteModal({
     isOpen,
     quote,
+    formState,
     onClose,
     onConfirm,
     isLoading,
 }: OfframpQuoteModalProps) {
     if (!isOpen || !quote) return null;
+
+    const getCurrencySymbol = (currency: string) => {
+        const symbols: Record<string, string> = {
+            NGN: "₦",
+            GHS: "₵",
+            KES: "KSh ",
+        };
+        return symbols[currency] || currency + " ";
+    };
 
     return (
         <div className="fixed inset-0 bg-fundable-dark/80 backdrop-blur-sm flex justify-center items-center z-50">
@@ -43,14 +54,14 @@ export default function OfframpQuoteModal({
                     <div className="bg-fundable-dark p-4 rounded-lg">
                         <p className="text-fundable-light-grey text-sm">You Send</p>
                         <p className="text-white text-xl font-semibold">
-                            {quote.tokenAmount} {quote.token}
+                            {quote.totalDepositInCryptoAsset} {formState.token}
                         </p>
                     </div>
 
                     <div className="bg-fundable-dark p-4 rounded-lg">
                         <p className="text-fundable-light-grey text-sm">You Receive</p>
                         <p className="text-white text-xl font-semibold">
-                            {quote.localCurrency} {quote.localAmount}
+                            {getCurrencySymbol(quote.currency)}{quote.payoutAmountInLocalCurrency?.toLocaleString()}
                         </p>
                     </div>
 
@@ -59,29 +70,28 @@ export default function OfframpQuoteModal({
                         <div className="flex justify-between">
                             <span className="text-fundable-light-grey">Exchange Rate</span>
                             <span className="text-white">
-                                1 {quote.token} = {quote.exchangeRate} {quote.localCurrency}
+                                1 {formState.token} = {getCurrencySymbol(quote.rateCurrency)}{quote.cryptoRate?.toLocaleString()}
                             </span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-fundable-light-grey">Network Fee</span>
-                            <span className="text-white">{quote.networkFee} {quote.token}</span>
+                            <span className="text-fundable-light-grey">Fee Type</span>
+                            <span className="text-white capitalize">{quote.feeType}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-fundable-light-grey">Service Fee</span>
-                            <span className="text-white">{quote.serviceFee} {quote.token}</span>
+                            <span className="text-fundable-light-grey">Expires In</span>
+                            <span className="text-fundable-purple">{quote.expireInMinutes} minutes</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-fundable-light-grey">Estimated Time</span>
-                            <span className="text-white">{quote.estimatedTime}</span>
+                            <span className="text-fundable-light-grey">Reference</span>
+                            <span className="text-white text-xs font-mono">{quote.transactionReference}</span>
                         </div>
                     </div>
 
                     {/* Bank Details */}
                     <div className="bg-fundable-dark p-4 rounded-lg">
                         <p className="text-fundable-light-grey text-sm mb-2">Bank Details</p>
-                        <p className="text-white font-medium">{quote.bankDetails.bankName}</p>
-                        <p className="text-white">{quote.bankDetails.accountNumber}</p>
-                        <p className="text-fundable-light-grey">{quote.bankDetails.accountName}</p>
+                        <p className="text-white font-medium">{formState.accountName}</p>
+                        <p className="text-white">{formState.accountNumber}</p>
                     </div>
 
                     {/* Actions */}

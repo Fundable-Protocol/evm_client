@@ -10,12 +10,16 @@ import OfframpQuoteModal from "./OfframpQuoteModal";
 import OfframpSuccessModal from "./OfframpSuccessModal";
 
 import { cashwyreService } from "@/services/cashwyreService";
+import { useOfframpTransaction } from "@/hooks/useOfframpTransaction";
 import type {
     OfframpFormState,
-    OfframpQuoteResponse,
+    OfframpQuoteData,
     OfframpConfirmResponse,
     Bank,
+    RateInfo,
+    LockedQuote,
 } from "@/types/offramp";
+import { SUPPORTED_COUNTRIES } from "@/types/offramp";
 
 const initialFormState: OfframpFormState = {
     token: "USDC",
@@ -34,10 +38,28 @@ export default function OfframpModule() {
     const [isLoadingQuote, setIsLoadingQuote] = useState(false);
     const [isConfirming, setIsConfirming] = useState(false);
 
-    const [quote, setQuote] = useState<OfframpQuoteResponse["data"] | null>(null);
+    const [quote, setQuote] = useState<OfframpQuoteData | null>(null);
+    const [quoteError, setQuoteError] = useState<string | null>(null);
     const [showQuoteModal, setShowQuoteModal] = useState(false);
     const [confirmResult, setConfirmResult] = useState<OfframpConfirmResponse["data"] | null>(null);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+    // Live rate state
+    const [rateInfo, setRateInfo] = useState<RateInfo | null>(null);
+    const [isLoadingRate, setIsLoadingRate] = useState(false);
+
+    // Quote locking state
+    const [isQuoteLocked, setIsQuoteLocked] = useState(false);
+    const [lockedQuote, setLockedQuote] = useState<LockedQuote | null>(null);
+
+    // TX signing hook
+    const {
+        address,
+        isConnected,
+        isSupportedChain,
+        getCurrentNetwork,
+        sendOfframpTransaction,
+    } = useOfframpTransaction();
 
     // Fetch banks when country changes
     useEffect(() => {
@@ -54,7 +76,12 @@ export default function OfframpModule() {
             const result = await cashwyreService.getBankList(formState.country);
 
             if (result.success && result.data) {
-                setBanks(result.data);
+                // Deduplicate banks by code to prevent key collisions
+                const uniqueBanks = result.data.filter(
+                    (bank, index, self) =>
+                        index === self.findIndex((b) => b.code === bank.code)
+                );
+                setBanks(uniqueBanks);
             } else {
                 toast.error(result.error || "Failed to load banks");
             }
@@ -64,6 +91,33 @@ export default function OfframpModule() {
 
         fetchBanks();
     }, [formState.country]);
+
+    // Fetch live rate when country or token changes
+    useEffect(() => {
+        const fetchRate = async () => {
+            setIsLoadingRate(true);
+
+            // Get currency from country
+            const selectedCountry = SUPPORTED_COUNTRIES.find(c => c.code === formState.country);
+            const currency = selectedCountry?.currency || "NGN";
+
+            const result = await cashwyreService.getRateInfo(formState.token, currency);
+
+            if (result.success && result.data) {
+                setRateInfo(result.data);
+            } else {
+                setRateInfo(null);
+            }
+
+            setIsLoadingRate(false);
+        };
+
+        fetchRate();
+
+        // Refresh rate every 30 seconds
+        const interval = setInterval(fetchRate, 30000);
+        return () => clearInterval(interval);
+    }, [formState.country, formState.token]);
 
     // Verify bank account when bank and account number are provided
     const verifyAccount = useCallback(async () => {
@@ -111,10 +165,59 @@ export default function OfframpModule() {
                 ? { accountName: "" }
                 : {}),
         }));
+
+        // Clear quote when amount changes (will be refetched by the effect)
+        if (field === "amount") {
+            setQuote(null);
+        }
     };
 
-    // Get quote
-    const handleGetQuote = async () => {
+    // Fetch real-time quote when amount, token, or country changes (debounced)
+    useEffect(() => {
+        // Don't update quote while locked in confirmation flow
+        if (isQuoteLocked) return;
+
+        const amount = parseFloat(formState.amount);
+        if (!formState.amount || isNaN(amount) || amount <= 0) {
+            setQuote(null);
+            return;
+        }
+
+        const selectedCountry = SUPPORTED_COUNTRIES.find(c => c.code === formState.country);
+        const currency = selectedCountry?.currency || "NGN";
+
+        const fetchQuote = async () => {
+            setIsLoadingQuote(true);
+            console.log("[Offramp] Fetching quote for:", { token: formState.token, amount, country: formState.country, currency });
+
+            const result = await cashwyreService.getOfframpQuote({
+                token: formState.token,
+                amount: amount,
+                country: formState.country,
+                currency: currency,
+                network: "polygon", // Default for EVM chains
+            });
+
+            console.log("[Offramp] Quote result:", result);
+
+            if (result.success && result.data) {
+                setQuote(result.data);
+                setQuoteError(null);
+            } else {
+                console.error("[Offramp] Quote error:", result.error);
+                setQuote(null);
+                setQuoteError(result.error || "Failed to get quote");
+            }
+            setIsLoadingQuote(false);
+        };
+
+        // Debounce quote fetching by 500ms
+        const timer = setTimeout(fetchQuote, 500);
+        return () => clearTimeout(timer);
+    }, [formState.amount, formState.token, formState.country, isQuoteLocked]);
+
+    // Proceed to confirmation (quote is already fetched in real-time)
+    const handleProceedToConfirm = () => {
         if (!formState.amount || parseFloat(formState.amount) <= 0) {
             toast.error("Please enter a valid amount");
             return;
@@ -131,45 +234,125 @@ export default function OfframpModule() {
             toast.error("Please wait for account verification");
             return;
         }
-
-        setIsLoadingQuote(true);
-        const result = await cashwyreService.getOfframpQuote({
-            token: formState.token,
-            amount: formState.amount,
-            country: formState.country,
-            bankCode: formState.bankCode,
-            accountNumber: formState.accountNumber,
-        });
-
-        if (result.success && result.data) {
-            setQuote(result.data);
-            setShowQuoteModal(true);
-        } else {
-            toast.error(result.error || "Failed to get quote");
+        if (!quote) {
+            toast.error("Please wait for quote to load");
+            return;
         }
 
-        setIsLoadingQuote(false);
+        // Lock the quote to prevent updates during confirmation flow
+        setLockedQuote({
+            transactionReference: quote.transactionReference,
+            inputSnapshot: { ...formState },
+            quoteData: quote,
+            network: "polygon", // Current network
+            lockedAt: Date.now(),
+        });
+        setIsQuoteLocked(true);
+        setShowQuoteModal(true);
     };
 
-    // Confirm quote
+    // Handle modal close - unlock quote
+    const handleCloseModal = () => {
+        setShowQuoteModal(false);
+        setIsQuoteLocked(false);
+        setLockedQuote(null);
+    };
+
+    // Confirm quote and trigger TX signing
     const handleConfirmQuote = async () => {
-        if (!quote?.quoteId) return;
+        if (!quote?.transactionReference || !lockedQuote) return;
 
-        setIsConfirming(true);
-        const result = await cashwyreService.confirmOfframpQuote(quote.quoteId);
-
-        if (result.success && result.data) {
-            setConfirmResult(result.data);
-            setShowQuoteModal(false);
-            setShowSuccessModal(true);
-            // Reset form
-            setFormState(initialFormState);
-            setQuote(null);
-        } else {
-            toast.error(result.error || "Failed to confirm offramp");
+        if (!isConnected) {
+            toast.error("Please connect your wallet");
+            return;
         }
 
-        setIsConfirming(false);
+        if (!isSupportedChain) {
+            toast.error("Please switch to Polygon or BSC");
+            return;
+        }
+
+        setIsConfirming(true);
+
+        try {
+            // Step 1: Confirm quote with Cashwyre to get deposit address
+            const result = await cashwyreService.confirmOfframpQuote(
+                {
+                    transactionReference: quote.transactionReference,
+                    accountNumber: formState.accountNumber,
+                    accountName: formState.accountName,
+                    bankCode: formState.bankCode,
+                },
+                address // Pass connected wallet address for auth
+            );
+
+            if (!result.success || !result.data) {
+                toast.error(result.error || "Failed to confirm offramp");
+                setIsConfirming(false);
+                return;
+            }
+
+            // Extract crypto address for deposit
+            const cryptoAssetAddress = (result.data as { cryptoAssetAddress?: string })?.cryptoAssetAddress;
+
+            if (!cryptoAssetAddress) {
+                toast.error("No deposit address received");
+                setIsConfirming(false);
+                return;
+            }
+
+            // Step 2: Save quote to database for tracking
+            const selectedCountry = SUPPORTED_COUNTRIES.find(c => c.code === formState.country);
+            const currency = selectedCountry?.currency || "NGN";
+
+            await cashwyreService.saveQuote(
+                {
+                    walletAddress: address || "",
+                    transactionReference: quote.transactionReference,
+                    token: formState.token,
+                    amount: parseFloat(formState.amount),
+                    country: formState.country,
+                    currency: currency,
+                    network: getCurrentNetwork(),
+                    quoteData: quote as unknown as Record<string, unknown>,
+                    bankCode: formState.bankCode,
+                    accountNumber: formState.accountNumber,
+                    accountName: formState.accountName,
+                    expiresAt: quote.expireOn,
+                    amountUsd: quote.amountInCryptoAsset,
+                    amountLocal: quote.amountInLocalCurrency,
+                },
+                address
+            );
+
+            // Step 3: Trigger TX signing to send crypto to the deposit address
+            await sendOfframpTransaction({
+                transactionReference: quote.transactionReference,
+                token: formState.token as "USDC" | "USDT",
+                amount: quote.totalDepositInCryptoAsset || parseFloat(formState.amount),
+                cryptoAssetAddress,
+                onSuccess: () => {
+                    toast.dismiss("tx-confirming");
+                    toast.success("Transaction submitted successfully!");
+                    setConfirmResult(result.data);
+                    setShowQuoteModal(false);
+                    setShowSuccessModal(true);
+                    // Reset form and unlock quote
+                    setFormState(initialFormState);
+                    setQuote(null);
+                    setIsQuoteLocked(false);
+                    setLockedQuote(null);
+                    setIsConfirming(false);
+                },
+                onError: () => {
+                    toast.error("Transaction failed. You can try again.");
+                    setIsConfirming(false);
+                },
+            });
+        } catch {
+            toast.error("Failed to process offramp");
+            setIsConfirming(false);
+        }
     };
 
     // Close success modal
@@ -186,6 +369,8 @@ export default function OfframpModule() {
                     <OfframpForm
                         formState={formState}
                         onChange={handleFormChange}
+                        rateInfo={rateInfo}
+                        isLoadingRate={isLoadingRate}
                     />
                 </div>
 
@@ -201,7 +386,9 @@ export default function OfframpModule() {
 
                     <OfframpSummary
                         formState={formState}
-                        onGetQuote={handleGetQuote}
+                        quote={quote}
+                        quoteError={quoteError}
+                        onProceed={handleProceedToConfirm}
                         isLoading={isLoadingQuote}
                     />
                 </div>
@@ -211,7 +398,8 @@ export default function OfframpModule() {
             <OfframpQuoteModal
                 isOpen={showQuoteModal}
                 quote={quote}
-                onClose={() => setShowQuoteModal(false)}
+                formState={formState}
+                onClose={handleCloseModal}
                 onConfirm={handleConfirmQuote}
                 isLoading={isConfirming}
             />

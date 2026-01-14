@@ -8,6 +8,7 @@ import type {
     OfframpConfirmResponse,
     BankListResponse,
     VerifyBankAccountResponse,
+    RateInfoResponse,
     OfframpCountry,
 } from "@/types/offramp";
 
@@ -59,14 +60,19 @@ export const cashwyreService = {
      * Confirm an offramp quote and get deposit address
      */
     async confirmOfframpQuote(
-        quoteId: string,
+        params: {
+            transactionReference: string;
+            accountNumber: string;
+            accountName: string;
+            bankCode: string;
+        },
         walletId?: string
     ): Promise<OfframpConfirmResponse> {
         try {
             const res = await fetch(`${OFFRAMP_API_BASE}/confirm`, {
                 method: "POST",
                 headers: getHeaders(walletId),
-                body: JSON.stringify({ quoteId }),
+                body: JSON.stringify(params),
             });
 
             const data = await res.json();
@@ -162,6 +168,122 @@ export const cashwyreService = {
                     error instanceof Error
                         ? error.message
                         : "Failed to verify bank account",
+            };
+        }
+    },
+
+    /**
+     * Get live exchange rates for crypto to local currencies
+     */
+    async getRateInfo(cryptoAsset: string, currency: string): Promise<RateInfoResponse> {
+        try {
+            const url = `${OFFRAMP_API_BASE}/rate?cryptoAsset=${cryptoAsset}&currency=${currency}`;
+
+            const res = await fetch(url, {
+                method: "GET",
+                headers: getHeaders(),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                return {
+                    success: false,
+                    error: data.message || data.error || "Failed to fetch rate info",
+                };
+            }
+
+            return {
+                success: true,
+                data: data.data || data,
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error:
+                    error instanceof Error
+                        ? error.message
+                        : "Failed to fetch rate info",
+            };
+        }
+    },
+
+    /**
+     * Save a quote to the backend database
+     */
+    async saveQuote(
+        params: {
+            walletAddress: string;
+            transactionReference: string;
+            token: string;
+            amount: number;
+            country: string;
+            currency: string;
+            network: string;
+            quoteData: Record<string, unknown>;
+            bankCode?: string;
+            accountNumber?: string;
+            accountName?: string;
+            expiresAt?: string;
+            amountUsd?: number;
+            amountLocal?: number;
+        },
+        walletId?: string
+    ): Promise<{ success: boolean; data?: unknown; error?: string }> {
+        try {
+            const res = await fetch(`${OFFRAMP_API_BASE}/quote/save`, {
+                method: "POST",
+                headers: getHeaders(walletId),
+                body: JSON.stringify(params),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                return {
+                    success: false,
+                    error: data.message || data.error || "Failed to save quote",
+                };
+            }
+
+            return { success: true, data: data.data || data };
+        } catch (error) {
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : "Failed to save quote",
+            };
+        }
+    },
+
+    /**
+     * Update quote with user's transaction hash
+     */
+    async updateQuoteTxHash(
+        transactionReference: string,
+        txHash: string,
+        walletId?: string
+    ): Promise<{ success: boolean; data?: unknown; error?: string }> {
+        try {
+            const res = await fetch(`${OFFRAMP_API_BASE}/quote/update-tx`, {
+                method: "POST",
+                headers: getHeaders(walletId),
+                body: JSON.stringify({ transactionReference, txHash }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                return {
+                    success: false,
+                    error: data.message || data.error || "Failed to update tx hash",
+                };
+            }
+
+            return { success: true, data: data.data || data };
+        } catch (error) {
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : "Failed to update tx hash",
             };
         }
     },

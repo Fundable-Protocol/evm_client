@@ -3,18 +3,22 @@
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
-import type { OfframpFormState } from "@/types/offramp";
+import type { OfframpFormState, OfframpQuoteData } from "@/types/offramp";
 import { SUPPORTED_COUNTRIES } from "@/types/offramp";
 
 interface OfframpSummaryProps {
     formState: OfframpFormState;
-    onGetQuote: () => void;
+    quote: OfframpQuoteData | null;
+    quoteError?: string | null;
+    onProceed: () => void;
     isLoading: boolean;
 }
 
 export default function OfframpSummary({
     formState,
-    onGetQuote,
+    quote,
+    quoteError,
+    onProceed,
     isLoading,
 }: OfframpSummaryProps) {
     const selectedCountry = SUPPORTED_COUNTRIES.find(
@@ -27,51 +31,97 @@ export default function OfframpSummary({
         formState.accountNumber.length >= 10 &&
         formState.accountName;
 
+    const canProceed = isFormValid && quote && !isLoading;
+
     return (
         <div className="bg-fundable-mid-dark rounded-2xl p-6 border border-gray-800">
             <h2 className="text-xl font-syne font-semibold text-white mb-6">
-                Summary
+                Quote Summary
             </h2>
 
             <div className="space-y-4">
-                {/* Fee Info */}
-                <div className="space-y-3">
-                    <div className="flex justify-between text-sm">
-                        <span className="text-fundable-light-grey">Network Fee</span>
-                        <span className="text-white">Calculated on quote</span>
+                {/* Real-time Quote Info */}
+                {isLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                        <Loader2 className="h-6 w-6 animate-spin text-fundable-purple mr-2" />
+                        <span className="text-fundable-light-grey">Fetching quote...</span>
                     </div>
-                    <div className="flex justify-between text-sm">
-                        <span className="text-fundable-light-grey">Service Fee</span>
-                        <span className="text-white">0.5%</span>
+                ) : quote ? (
+                    <div className="space-y-3">
+                        <div className="flex justify-between text-sm">
+                            <span className="text-fundable-light-grey">You Send</span>
+                            <span className="text-white font-medium">
+                                {quote.amountInCryptoAsset} {formState.token}
+                            </span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                            <span className="text-fundable-light-grey">Exchange Rate</span>
+                            <span className="text-white">
+                                1 {formState.token} = {quote.rateCurrency} {quote.cryptoRate?.toLocaleString()}
+                            </span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                            <span className="text-fundable-light-grey">Fee Type</span>
+                            <span className="text-white capitalize">{quote.feeType}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                            <span className="text-fundable-light-grey">Expires In</span>
+                            <span className="text-fundable-purple">{quote.expireInMinutes} minutes</span>
+                        </div>
                     </div>
-                    <div className="flex justify-between text-sm">
-                        <span className="text-fundable-light-grey">Exchange Rate</span>
-                        <span className="text-white">Live rate on quote</span>
+                ) : quoteError ? (
+                    <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+                        <p className="text-red-400 text-sm">{quoteError}</p>
                     </div>
-                    <div className="flex justify-between text-sm">
-                        <span className="text-fundable-light-grey">Estimated Time</span>
-                        <span className="text-white">5-10 Minutes</span>
+                ) : (
+                    <div className="space-y-3">
+                        <div className="flex justify-between text-sm">
+                            <span className="text-fundable-light-grey">You Send</span>
+                            <span className="text-white">
+                                {formState.amount || "0"} {formState.token}
+                            </span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                            <span className="text-fundable-light-grey">Exchange Rate</span>
+                            <span className="text-fundable-light-grey">Enter amount for quote</span>
+                        </div>
                     </div>
-                </div>
+                )}
 
                 <div className="border-t border-gray-700 pt-4">
                     <div className="flex justify-between items-center">
                         <span className="text-fundable-light-grey">You Receive</span>
                         <div className="text-right">
-                            <p className="text-2xl font-bold text-white">
-                                {selectedCountry?.currency || "---"}
-                            </p>
-                            <p className="text-fundable-light-grey text-sm">
-                                Get quote for exact amount
-                            </p>
+                            {quote ? (
+                                <>
+                                    <p className="text-2xl font-bold text-white">
+                                        {selectedCountry?.currency === "NGN" ? "₦" :
+                                            selectedCountry?.currency === "GHS" ? "₵" :
+                                                selectedCountry?.currency === "KES" ? "KSh " : ""}
+                                        {quote.payoutAmountInLocalCurrency?.toLocaleString()}
+                                    </p>
+                                    <p className="text-fundable-light-grey text-xs">
+                                        Total Required: {quote.totalDepositInCryptoAsset} {formState.token}
+                                    </p>
+                                </>
+                            ) : (
+                                <>
+                                    <p className="text-2xl font-bold text-fundable-light-grey">
+                                        {selectedCountry?.currency || "---"}
+                                    </p>
+                                    <p className="text-fundable-light-grey text-sm">
+                                        Enter amount for quote
+                                    </p>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
 
-                {/* Get Quote Button */}
+                {/* Proceed Button */}
                 <Button
-                    onClick={onGetQuote}
-                    disabled={!isFormValid || isLoading}
+                    onClick={onProceed}
+                    disabled={!canProceed}
                     variant="gradient"
                     size="lg"
                     className="w-full h-14 text-lg font-semibold mt-4"
@@ -79,10 +129,12 @@ export default function OfframpSummary({
                     {isLoading ? (
                         <>
                             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                            Getting Quote...
+                            Loading Quote...
                         </>
+                    ) : quote ? (
+                        "Proceed to Confirm"
                     ) : (
-                        "Get Quote"
+                        "Enter Amount for Quote"
                     )}
                 </Button>
             </div>

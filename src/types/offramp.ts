@@ -18,7 +18,7 @@ export const SUPPORTED_COUNTRIES: CountryInfo[] = [
 ];
 
 // Supported crypto tokens for offramp
-export type OfframpToken = "ETH" | "USDC" | "USDT";
+export type OfframpToken = "USDC" | "USDT";
 
 export interface TokenInfo {
     symbol: OfframpToken;
@@ -28,7 +28,6 @@ export interface TokenInfo {
 }
 
 export const SUPPORTED_OFFRAMP_TOKENS: TokenInfo[] = [
-    { symbol: "ETH", name: "Ethereum", icon: "/svgs/tokens/eth.svg", decimals: 18 },
     { symbol: "USDC", name: "USD Coin", icon: "/svgs/tokens/usdc.svg", decimals: 6 },
     { symbol: "USDT", name: "Tether", icon: "/svgs/tokens/usdt.svg", decimals: 6 },
 ];
@@ -49,32 +48,34 @@ export interface BankAccount {
 // API Request/Response types
 export interface OfframpQuoteRequest {
     token: OfframpToken;
-    amount: string;
+    amount: number;
     country: OfframpCountry;
-    bankCode: string;
-    accountNumber: string;
+    currency: OfframpCurrency;
+    network?: string; // e.g., "binance_smart_chain", "ethereum"
+    bankCode?: string;
+    accountNumber?: string;
+}
+
+export interface OfframpQuoteData {
+    reference: string;
+    transactionReference: string;
+    cryptoAsset: string;
+    amountInCryptoAsset: number;
+    currency: OfframpCurrency;
+    amountInLocalCurrency: number;
+    payoutAmountInLocalCurrency: number;
+    totalDepositInCryptoAsset: number;
+    cryptoRate: number;
+    rateCurrency: string;
+    feeType: string;
+    expireOn: string;
+    expireInMinutes: number;
+    country: OfframpCountry;
 }
 
 export interface OfframpQuoteResponse {
     success: boolean;
-    data?: {
-        quoteId: string;
-        token: OfframpToken;
-        tokenAmount: string;
-        localCurrency: OfframpCurrency;
-        localAmount: string;
-        exchangeRate: string;
-        networkFee: string;
-        serviceFee: string;
-        totalFee: string;
-        estimatedTime: string;
-        expiresAt: string;
-        bankDetails: {
-            bankName: string;
-            accountNumber: string;
-            accountName: string;
-        };
-    };
+    data?: OfframpQuoteData;
     error?: string;
 }
 
@@ -116,6 +117,27 @@ export interface VerifyBankAccountResponse {
     error?: string;
 }
 
+// Rate information for crypto to local currency
+export interface CurrencyRateInfo {
+    currency: string;
+    symbol: string;
+    rate: number;
+}
+
+export interface RateInfo {
+    cryptoAsset: string;
+    currency: string;
+    cryptoAssetInfo: CurrencyRateInfo;
+    currencyInfo: CurrencyRateInfo;
+    timestamp: string;
+}
+
+export interface RateInfoResponse {
+    success: boolean;
+    data?: RateInfo;
+    error?: string;
+}
+
 // Component state types
 export interface OfframpFormState {
     token: OfframpToken;
@@ -131,3 +153,41 @@ export interface OfframpQuoteState {
     quote: OfframpQuoteResponse["data"] | null;
     error: string | null;
 }
+
+// Locked quote for confirmation flow
+export interface LockedQuote {
+    transactionReference: string;
+    inputSnapshot: OfframpFormState;
+    quoteData: OfframpQuoteData;
+    network: string;
+    lockedAt: number;
+}
+
+// Confirm response with crypto address
+export interface OfframpConfirmData {
+    transactionId: string;
+    transactionReference: string;
+    cryptoAssetAddress: string;
+    amount: number;
+    cryptoAsset: string;
+    status: string;
+    expireOn: string;
+}
+
+// Token contract addresses per network
+export const TOKEN_CONTRACTS: Record<string, Record<string, string>> = {
+    // Polygon Mainnet
+    "137": {
+        USDC: "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+        USDT: "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+    },
+    // BSC Mainnet
+    "56": {
+        USDC: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+        USDT: "0x55d398326f99059fF775485246999027B3197955",
+    },
+};
+
+// Supported chain IDs for offramp
+export const OFFRAMP_CHAIN_IDS = [137, 56]; // Polygon, BSC
+
