@@ -16,7 +16,6 @@ import type {
     OfframpQuoteData,
     OfframpConfirmResponse,
     Bank,
-    RateInfo,
     LockedQuote,
 } from "@/types/offramp";
 import { SUPPORTED_COUNTRIES } from "@/types/offramp";
@@ -43,10 +42,6 @@ export default function OfframpModule() {
     const [showQuoteModal, setShowQuoteModal] = useState(false);
     const [confirmResult, setConfirmResult] = useState<OfframpConfirmResponse["data"] | null>(null);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
-
-    // Live rate state
-    const [rateInfo, setRateInfo] = useState<RateInfo | null>(null);
-    const [isLoadingRate, setIsLoadingRate] = useState(false);
 
     // Quote locking state
     const [isQuoteLocked, setIsQuoteLocked] = useState(false);
@@ -91,33 +86,6 @@ export default function OfframpModule() {
 
         fetchBanks();
     }, [formState.country]);
-
-    // Fetch live rate when country or token changes
-    useEffect(() => {
-        const fetchRate = async () => {
-            setIsLoadingRate(true);
-
-            // Get currency from country
-            const selectedCountry = SUPPORTED_COUNTRIES.find(c => c.code === formState.country);
-            const currency = selectedCountry?.currency || "NGN";
-
-            const result = await cashwyreService.getRateInfo(formState.token, currency);
-
-            if (result.success && result.data) {
-                setRateInfo(result.data);
-            } else {
-                setRateInfo(null);
-            }
-
-            setIsLoadingRate(false);
-        };
-
-        fetchRate();
-
-        // Refresh rate every 30 seconds
-        const interval = setInterval(fetchRate, 30000);
-        return () => clearInterval(interval);
-    }, [formState.country, formState.token]);
 
     // Verify bank account when bank and account number are provided
     const verifyAccount = useCallback(async () => {
@@ -369,8 +337,6 @@ export default function OfframpModule() {
                     <OfframpForm
                         formState={formState}
                         onChange={handleFormChange}
-                        rateInfo={rateInfo}
-                        isLoadingRate={isLoadingRate}
                     />
                 </div>
 
@@ -408,6 +374,8 @@ export default function OfframpModule() {
             <OfframpSuccessModal
                 isOpen={showSuccessModal}
                 data={confirmResult}
+                transactionReference={lockedQuote?.transactionReference || quote?.transactionReference}
+                walletId={address}
                 onClose={handleCloseSuccess}
             />
         </>

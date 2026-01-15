@@ -287,4 +287,50 @@ export const cashwyreService = {
             };
         }
     },
+
+    /**
+     * Get quote/payout status by transaction reference
+     * Polls the backend for webhook-updated status
+     */
+    async getQuoteStatus(
+        transactionReference: string,
+        walletId?: string
+    ): Promise<{
+        success: boolean;
+        data?: {
+            id: number;
+            transactionReference: string;
+            status: string;
+            cashwyreStatus: string | null;
+            cashwyreMessage: string | null;
+            payoutCompletedAt: string | null;
+        };
+        error?: string;
+    }> {
+        try {
+            const res = await fetch(
+                `${backendBaseUrl}/api/webhook/quote/${transactionReference}`,
+                {
+                    method: "GET",
+                    headers: getHeaders(walletId),
+                }
+            );
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                return {
+                    success: false,
+                    error: data.message || data.error || "Failed to get quote status",
+                };
+            }
+
+            return { success: true, data: data.data || data };
+        } catch (error) {
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : "Failed to get quote status",
+            };
+        }
+    },
 };

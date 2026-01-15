@@ -191,3 +191,20 @@ export const TOKEN_CONTRACTS: Record<string, Record<string, string>> = {
 // Supported chain IDs for offramp
 export const OFFRAMP_CHAIN_IDS = [137, 56]; // Polygon, BSC
 
+// Quote status from webhook polling
+export type PayoutStatus = "pending" | "processing" | "confirmed" | "completed" | "failed" | "expired";
+
+export interface QuoteStatusData {
+    id: number;
+    transactionReference: string;
+    status: PayoutStatus;
+    cashwyreStatus: string | null;
+    cashwyreMessage: string | null;
+    payoutCompletedAt: string | null;
+}
+
+export interface QuoteStatusResponse {
+    success: boolean;
+    data?: QuoteStatusData;
+    error?: string;
+}

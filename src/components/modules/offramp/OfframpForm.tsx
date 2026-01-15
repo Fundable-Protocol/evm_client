@@ -10,17 +10,15 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
-import type { OfframpFormState, OfframpToken, OfframpCountry, RateInfo } from "@/types/offramp";
+import type { OfframpFormState, OfframpToken, OfframpCountry } from "@/types/offramp";
 import { SUPPORTED_COUNTRIES, SUPPORTED_OFFRAMP_TOKENS } from "@/types/offramp";
 
 interface OfframpFormProps {
     formState: OfframpFormState;
     onChange: (field: keyof OfframpFormState, value: string) => void;
-    rateInfo: RateInfo | null;
-    isLoadingRate: boolean;
 }
 
-export default function OfframpForm({ formState, onChange, rateInfo, isLoadingRate }: OfframpFormProps) {
+export default function OfframpForm({ formState, onChange }: OfframpFormProps) {
     return (
         <div className="bg-fundable-mid-dark rounded-2xl p-6 border border-gray-800">
             <h2 className="text-xl font-syne font-semibold text-white mb-6">
@@ -75,33 +73,6 @@ export default function OfframpForm({ formState, onChange, rateInfo, isLoadingRa
                             Max
                         </button>
                     </div>
-                </div>
-
-                {/* Exchange Rate Display */}
-                <div className="bg-fundable-dark rounded-lg p-4 border border-gray-800">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-sm">
-                            <span className="text-fundable-light-grey">Live Exchange Rate</span>
-                            <span className="text-green-400 text-xs">●</span>
-                        </div>
-                        {isLoadingRate && (
-                            <span className="text-fundable-light-grey text-xs">Updating...</span>
-                        )}
-                    </div>
-                    {rateInfo ? (
-                        <>
-                            <p className="text-white text-lg font-medium mt-2">
-                                1 {formState.token} ≈ {rateInfo.currencyInfo.symbol}{rateInfo.currencyInfo.rate.toLocaleString()}
-                            </p>
-                            <p className="text-fundable-light-grey text-xs mt-1">
-                                Updated {new Date(rateInfo.timestamp).toLocaleTimeString()}
-                            </p>
-                        </>
-                    ) : (
-                        <p className="text-fundable-light-grey text-sm mt-2">
-                            {isLoadingRate ? "Loading rate..." : "Rate unavailable"}
-                        </p>
-                    )}
                 </div>
 
                 {/* Destination Country */}
