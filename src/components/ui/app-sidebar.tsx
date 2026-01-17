@@ -70,6 +70,11 @@ const mobileItems = [
     icon: <DashboardIcon aria-hidden="true" />,
   },
   {
+    title: "Offramp",
+    url: "/offramp",
+    icon: <Banknote aria-hidden="true" className="text-white size-5" />,
+  },
+  {
     title: "Distribute",
     url: "/distribution",
     icon: <DistributionIcon aria-hidden="true" />,
@@ -96,7 +101,7 @@ export function AppSidebar() {
   if (isMobile) {
     return (
       <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-800 z-50 safe-area-pb">
-        <nav className="flex items-center justify-around py-1 px-2 sm:py-2 sm:px-4">
+        <nav className="flex items-center overflow-x-auto scrollbar-hide py-1 px-2 sm:py-2 sm:px-4 gap-1">
           {mobileItems.map((item) => {
             const isActive = pathname === item.url;
 
@@ -104,7 +109,7 @@ export function AppSidebar() {
               <Link
                 key={item.title}
                 href={item.url}
-                className={`flex flex-col items-center justify-center py-1 px-1 sm:py-2 sm:px-3 min-w-0 flex-1 transition-colors touch-manipulation ${isActive ? "text-white" : "text-gray-400"
+                className={`flex flex-col items-center justify-center py-1 px-3 sm:py-2 sm:px-4 min-w-[60px] flex-shrink-0 transition-colors touch-manipulation ${isActive ? "text-white" : "text-gray-400"
                   }`}
                 onClick={() => setOpenMobile(false)}
               >
@@ -112,7 +117,7 @@ export function AppSidebar() {
                   }`}>
                   {item.icon}
                 </div>
-                <span className={`text-[10px] sm:text-xs font-medium leading-tight ${isActive ? "text-white" : "text-gray-400"
+                <span className={`text-[10px] sm:text-xs font-medium leading-tight whitespace-nowrap ${isActive ? "text-white" : "text-gray-400"
                   }`}>
                   {item.title}
                 </span>
