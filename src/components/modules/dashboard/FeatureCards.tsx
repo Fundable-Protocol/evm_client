@@ -10,6 +10,9 @@ const FeatureCards = () => {
   const distribution =
     "Distribute tokens to thousands instantly. One transaction, multiple recipients. Equal or weighted splits with real-time tracking. Execute distribution.";
 
+  const offramp =
+    "Convert your crypto to local currency instantly. Withdraw to bank accounts in Nigeria, Ghana, and Kenya with real-time rates.";
+
   return (
     <div className="grid grid-cols-[repeat(auto-fit,minmax(22rem,1fr))] gap-4 md:gap-8">
       <FeatureCard
@@ -32,6 +35,13 @@ const FeatureCards = () => {
         description={airDrop}
         imgType="airdrop"
         link="/airdrop"
+      />
+      <FeatureCard
+        title="Offramp"
+        linkText="Cash Out Now"
+        description={offramp}
+        imgType="stream"
+        link="/offramp"
       />
     </div>
   );

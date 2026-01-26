@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/pagination";
 
 import { DataTableProps } from "@/types/history";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 import { DistributionAttributes } from "@/types/distribution";
 import AppSelect from "@/components/molecules/AppSelect";
@@ -53,9 +53,11 @@ function HistoryTable<TData, TValue>({
   columns,
   typeFilter,
   statusFilter,
+  chainFilter,
   totalCount = 0,
   onTypeFilterChange,
   onStatusFilterChange,
+  onChainFilterChange,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
@@ -103,6 +105,21 @@ function HistoryTable<TData, TValue>({
     );
   };
 
+  const handleChainChange = (value: string) => {
+    onChainFilterChange(value as DistributionAttributes["chain_name"] | "all");
+  };
+
+  // Get unique chains from the data
+  const uniqueChains = useMemo(() => {
+    const chains = new Set<string>();
+    (data as DistributionAttributes[]).forEach((distribution) => {
+      if (distribution.chain_name) {
+        chains.add(distribution.chain_name);
+      }
+    });
+    return Array.from(chains).sort();
+  }, [data]);
+
   const statusOptions = ["all", ...distributionStatus].map((status) => ({
     label: capitalizeWord(status),
     value: status,
@@ -111,6 +128,11 @@ function HistoryTable<TData, TValue>({
   const typeOptions = ["all", ...distributionType].map((type) => ({
     label: capitalizeWord(type),
     value: type,
+  }));
+
+  const chainOptions = ["all", ...uniqueChains].map((chain) => ({
+    label: capitalizeWord(chain),
+    value: chain,
   }));
 
   const pageSize = validPageLimits.map((limit) => ({
@@ -125,7 +147,7 @@ function HistoryTable<TData, TValue>({
 
   return (
     <div className="h-full flex flex-col space-y-4 overflow-y-auto pb-4">
-      <div className="grid grid-cols-2 gap-x-8 w-full lg:w-1/3">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-8 w-full lg:w-1/2">
         <AppSelect
           placeholder={capitalizeWord(statusFilter) || statusOptions[0].label}
           options={statusOptions}
@@ -136,6 +158,12 @@ function HistoryTable<TData, TValue>({
           placeholder={capitalizeWord(typeFilter) || typeOptions[0].label}
           options={typeOptions}
           setValue={handleTypeChange}
+        />
+
+        <AppSelect
+          placeholder={capitalizeWord(chainFilter) || chainOptions[0].label}
+          options={chainOptions}
+          setValue={handleChainChange}
         />
       </div>
 

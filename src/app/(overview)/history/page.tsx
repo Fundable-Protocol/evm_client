@@ -34,7 +34,8 @@ const HistoryPageContent = () => {
   const [distributionFilter, setDistributionFilter] = useState<{
     status: DistributionAttributes["status"] | "all";
     type: DistributionAttributes["distribution_type"] | "all";
-  }>({ status: "all", type: "all" });
+    chain: DistributionAttributes["chain_name"] | "all";
+  }>({ status: "all", type: "all", chain: "all" });
 
   const { data: distributionsData, isPending } = useQuery({
     queryKey: ["distributions-table", distributionFilter, page, limit],
@@ -45,6 +46,7 @@ const HistoryPageContent = () => {
         limit,
         status: distributionFilter.status !== "all" ? distributionFilter.status : undefined,
         type: distributionFilter.type !== "all" ? distributionFilter.type : undefined,
+        chain: distributionFilter.chain !== "all" ? distributionFilter.chain : undefined,
       });
       
       const result = await DistributionApiService.getDistributions(address ?? "", {
@@ -57,6 +59,10 @@ const HistoryPageContent = () => {
         type:
           distributionFilter.type !== "all"
             ? distributionFilter.type
+            : undefined,
+        chain:
+          distributionFilter.chain !== "all"
+            ? distributionFilter.chain
             : undefined,
       });
       
@@ -72,7 +78,7 @@ const HistoryPageContent = () => {
   ) => {
     setDistributionFilter((prev) => ({
       ...prev,
-      [filter]: value === "all" ? "" : value?.toUpperCase(),
+      [filter]: value === "all" ? "all" : (filter === "chain" ? value : value?.toUpperCase()),
     }));
   };
 
@@ -86,6 +92,7 @@ const HistoryPageContent = () => {
             data={distributionsData?.data?.distributions ?? []}
             statusFilter={distributionFilter.status}
             typeFilter={distributionFilter.type}
+            chainFilter={distributionFilter.chain}
             onStatusFilterChange={(value) =>
               handleDistributionFilter(
                 "status",
@@ -96,6 +103,12 @@ const HistoryPageContent = () => {
               handleDistributionFilter(
                 "type",
                 value as typeof distributionFilter.type
+              )
+            }
+            onChainFilterChange={(value) =>
+              handleDistributionFilter(
+                "chain",
+                value as typeof distributionFilter.chain
               )
             }
             totalCount={distributionsData?.data?.meta?.totalRows ?? 0}
