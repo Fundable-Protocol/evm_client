@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import toast from "react-hot-toast";
+import { useBalance, useChainId } from "wagmi";
+import { formatUnits } from "viem";
 
 import OfframpForm from "./OfframpForm";
 import BankDetailsCard from "./BankDetailsCard";
@@ -18,7 +20,7 @@ import type {
     Bank,
     LockedQuote,
 } from "@/types/offramp";
-import { SUPPORTED_COUNTRIES } from "@/types/offramp";
+import { SUPPORTED_COUNTRIES, TOKEN_CONTRACTS } from "@/types/offramp";
 
 const initialFormState: OfframpFormState = {
     token: "USDC",
@@ -42,6 +44,7 @@ export default function OfframpModule() {
     const [showQuoteModal, setShowQuoteModal] = useState(false);
     const [confirmResult, setConfirmResult] = useState<OfframpConfirmResponse["data"] | null>(null);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [successTransactionReference, setSuccessTransactionReference] = useState<string | null>(null);
 
     // Quote locking state
     const [isQuoteLocked, setIsQuoteLocked] = useState(false);
@@ -55,6 +58,33 @@ export default function OfframpModule() {
         getCurrentNetwork,
         sendOfframpTransaction,
     } = useOfframpTransaction();
+    const chainId = useChainId();
+
+    // Get token contract address for current chain and token
+    const tokenAddress = chainId && TOKEN_CONTRACTS[chainId.toString()]
+        ? TOKEN_CONTRACTS[chainId.toString()][formState.token] as `0x${string}` | undefined
+        : undefined;
+
+    // Fetch token balance
+    const { data: balanceData } = useBalance({
+        address: address as `0x${string}` | undefined,
+        token: tokenAddress,
+        query: {
+            enabled: !!address && !!tokenAddress,
+        },
+    });
+
+    // Format balance for display
+    const maxBalance = balanceData
+        ? formatUnits(balanceData.value, balanceData.decimals)
+        : undefined;
+
+    // Handle Max button click
+    const handleMaxClick = useCallback(() => {
+        if (maxBalance) {
+            setFormState(prev => ({ ...prev, amount: maxBalance }));
+        }
+    }, [maxBalance]);
 
     // Fetch banks when country changes
     useEffect(() => {
@@ -297,11 +327,13 @@ export default function OfframpModule() {
             await sendOfframpTransaction({
                 transactionReference: quote.transactionReference,
                 token: formState.token as "USDC" | "USDT",
-                amount: quote.totalDepositInCryptoAsset || parseFloat(formState.amount),
+                amount: quote.totalDepositInCryptoAsset?.toString() || formState.amount,
                 cryptoAssetAddress,
                 onSuccess: () => {
                     toast.dismiss("tx-confirming");
                     toast.success("Transaction submitted successfully!");
+                    // Set success state before clearing quote data
+                    setSuccessTransactionReference(quote.transactionReference);
                     setConfirmResult(result.data);
                     setShowQuoteModal(false);
                     setShowSuccessModal(true);
@@ -327,6 +359,7 @@ export default function OfframpModule() {
     const handleCloseSuccess = () => {
         setShowSuccessModal(false);
         setConfirmResult(null);
+        setSuccessTransactionReference(null);
     };
 
     return (
@@ -337,6 +370,8 @@ export default function OfframpModule() {
                     <OfframpForm
                         formState={formState}
                         onChange={handleFormChange}
+                        maxBalance={maxBalance}
+                        onMaxClick={handleMaxClick}
                     />
                 </div>
 
@@ -374,7 +409,7 @@ export default function OfframpModule() {
             <OfframpSuccessModal
                 isOpen={showSuccessModal}
                 data={confirmResult}
-                transactionReference={lockedQuote?.transactionReference || quote?.transactionReference}
+                transactionReference={successTransactionReference || undefined}
                 walletId={address}
                 onClose={handleCloseSuccess}
             />

@@ -36,7 +36,7 @@ const CHAIN_TO_NETWORK: Record<number, string> = {
 interface UseOfframpTransactionProps {
     transactionReference: string;
     token: "USDC" | "USDT";
-    amount: number;
+    amount: string;  // Use string to avoid floating-point precision issues
     cryptoAssetAddress: string;
     onSuccess?: (txHash: string) => void;
     onError?: (error: Error) => void;
@@ -175,7 +175,7 @@ export function useOfframpTransaction() {
         try {
             // Get correct decimals for token on this chain
             const decimals = getTokenDecimals(token);
-            const amountInWei = parseUnits(amount.toString(), decimals);
+            const amountInWei = parseUnits(amount, decimals);
 
             // Store pending TX data for confirmation callback
             setPendingTxData({ transactionReference, onSuccess });
