@@ -30,7 +30,7 @@ const TOKEN_DECIMALS: Record<string, Record<string, number>> = {
 // Chain ID to network mapping for Cashwyre API
 const CHAIN_TO_NETWORK: Record<number, string> = {
     137: "polygon",
-    56: "binance_smart_chain",
+    56: "bsc",
 };
 
 interface UseOfframpTransactionProps {
