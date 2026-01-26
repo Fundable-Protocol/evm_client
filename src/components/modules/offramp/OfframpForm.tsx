@@ -16,9 +16,11 @@ import { SUPPORTED_COUNTRIES, SUPPORTED_OFFRAMP_TOKENS } from "@/types/offramp";
 interface OfframpFormProps {
     formState: OfframpFormState;
     onChange: (field: keyof OfframpFormState, value: string) => void;
+    maxBalance?: string;
+    onMaxClick?: () => void;
 }
 
-export default function OfframpForm({ formState, onChange }: OfframpFormProps) {
+export default function OfframpForm({ formState, onChange, maxBalance, onMaxClick }: OfframpFormProps) {
     return (
         <div className="bg-fundable-mid-dark rounded-2xl p-6 border border-gray-800">
             <h2 className="text-xl font-syne font-semibold text-white mb-6">
@@ -28,12 +30,12 @@ export default function OfframpForm({ formState, onChange }: OfframpFormProps) {
             {/* Token Selector */}
             <div className="space-y-4">
                 <div className="space-y-2">
-                    <Label className="text-fundable-light-grey text-sm">Select Token</Label>
+                    <Label htmlFor="token" className="text-fundable-light-grey text-sm">Select Token</Label>
                     <Select
                         value={formState.token}
                         onValueChange={(value) => onChange("token", value as OfframpToken)}
                     >
-                        <SelectTrigger className="bg-fundable-dark border-gray-700 text-white h-12">
+                        <SelectTrigger id="token" className="bg-fundable-dark border-gray-700 text-white h-12">
                             <SelectValue placeholder="Select token" />
                         </SelectTrigger>
                         <SelectContent className="bg-fundable-dark border-gray-700">
@@ -57,9 +59,10 @@ export default function OfframpForm({ formState, onChange }: OfframpFormProps) {
 
                 {/* Amount Input */}
                 <div className="space-y-2">
-                    <Label className="text-fundable-light-grey text-sm">Amount</Label>
+                    <Label htmlFor="amount" className="text-fundable-light-grey text-sm">Amount</Label>
                     <div className="relative">
                         <Input
+                            id="amount"
                             type="number"
                             placeholder="0.00"
                             value={formState.amount}
@@ -68,7 +71,9 @@ export default function OfframpForm({ formState, onChange }: OfframpFormProps) {
                         />
                         <button
                             type="button"
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-fundable-purple text-sm font-medium hover:text-fundable-violet"
+                            onClick={onMaxClick}
+                            disabled={!maxBalance}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-fundable-purple text-sm font-medium hover:text-fundable-violet disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Max
                         </button>
@@ -77,14 +82,14 @@ export default function OfframpForm({ formState, onChange }: OfframpFormProps) {
 
                 {/* Destination Country */}
                 <div className="space-y-2">
-                    <Label className="text-fundable-light-grey text-sm">
+                    <Label htmlFor="country" className="text-fundable-light-grey text-sm">
                         Destination Country
                     </Label>
                     <Select
                         value={formState.country}
                         onValueChange={(value) => onChange("country", value as OfframpCountry)}
                     >
-                        <SelectTrigger className="bg-fundable-dark border-gray-700 text-white h-12">
+                        <SelectTrigger id="country" className="bg-fundable-dark border-gray-700 text-white h-12">
                             <SelectValue placeholder="Select country" />
                         </SelectTrigger>
                         <SelectContent className="bg-fundable-dark border-gray-700">

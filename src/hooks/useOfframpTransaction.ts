@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 import { useAccount, useChainId, useSwitchChain, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { parseUnits, isAddress } from "viem";
 import toast from "react-hot-toast";
@@ -54,6 +54,7 @@ export function useOfframpTransaction() {
     } | null>(null);
 
     const { writeContract, data: hash, isPending: isWritePending, error: writeError } = useWriteContract();
+    const isProcessingRef = useRef(false);
 
     // Wait for transaction receipt
     const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
@@ -118,6 +119,7 @@ export function useOfframpTransaction() {
             // Clean up
             setPendingTxData(null);
             setIsProcessing(false);
+            isProcessingRef.current = false;
         }
     }, [isConfirmed, hash, pendingTxData, address]);
 
@@ -130,6 +132,12 @@ export function useOfframpTransaction() {
         onSuccess,
         onError,
     }: UseOfframpTransactionProps) => {
+        // Prevent duplicate submissions
+        if (isProcessingRef.current) {
+            toast("Transaction already in progress", { icon: "⏳" });
+            return;
+        }
+
         // Validation: Wallet connected
         if (!isConnected || !address) {
             toast.error("Please connect your wallet");
@@ -162,6 +170,7 @@ export function useOfframpTransaction() {
         }
 
         setIsProcessing(true);
+        isProcessingRef.current = true;
 
         try {
             // Get correct decimals for token on this chain
@@ -204,6 +213,7 @@ export function useOfframpTransaction() {
                     console.error("Transaction failed:", error);
                     onError?.(error);
                     setIsProcessing(false);
+                    isProcessingRef.current = false;
                     setPendingTxData(null);
                 },
             });
@@ -214,6 +224,7 @@ export function useOfframpTransaction() {
             console.error("Transaction error:", err);
             onError?.(err);
             setIsProcessing(false);
+            isProcessingRef.current = false;
             setPendingTxData(null);
         }
     }, [

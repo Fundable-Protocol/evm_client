@@ -163,7 +163,7 @@ export default function OfframpModule() {
                 amount: amount,
                 country: formState.country,
                 currency: currency,
-                network: "polygon", // Default for EVM chains
+                network: getCurrentNetwork(),
             });
 
             console.log("[Offramp] Quote result:", result);
@@ -212,7 +212,7 @@ export default function OfframpModule() {
             transactionReference: quote.transactionReference,
             inputSnapshot: { ...formState },
             quoteData: quote,
-            network: "polygon", // Current network
+            network: getCurrentNetwork(),
             lockedAt: Date.now(),
         });
         setIsQuoteLocked(true);

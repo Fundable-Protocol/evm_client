@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { X, Copy, CheckCircle2, Loader2, XCircle, Clock } from "lucide-react";
 import toast from "react-hot-toast";
@@ -27,6 +27,7 @@ export default function OfframpSuccessModal({
     const [payoutStatus, setPayoutStatus] = useState<PayoutStatus>("pending");
     const [payoutMessage, setPayoutMessage] = useState<string | null>(null);
     const [isPolling, setIsPolling] = useState(false);
+    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     // Poll for payout status
     const pollPayoutStatus = useCallback(async () => {
@@ -46,6 +47,10 @@ export default function OfframpSuccessModal({
                 // Stop polling if completed or failed
                 if (status === "completed" || status === "failed" || status === "expired") {
                     setIsPolling(false);
+                    if (intervalRef.current) {
+                        clearInterval(intervalRef.current);
+                        intervalRef.current = null;
+                    }
 
                     if (status === "completed") {
                         toast.success("Payout completed successfully! 🎉");
@@ -70,10 +75,13 @@ export default function OfframpSuccessModal({
             pollPayoutStatus();
 
             // Poll every 8 seconds
-            const interval = setInterval(pollPayoutStatus, 8000);
+            intervalRef.current = setInterval(pollPayoutStatus, 8000);
 
             return () => {
-                clearInterval(interval);
+                if (intervalRef.current) {
+                    clearInterval(intervalRef.current);
+                    intervalRef.current = null;
+                }
                 setIsPolling(false);
             };
         }

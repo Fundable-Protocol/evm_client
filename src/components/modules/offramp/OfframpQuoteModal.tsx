@@ -1,9 +1,20 @@
 "use client";
 
+import { useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, X } from "lucide-react";
 
 import type { OfframpQuoteData, OfframpFormState } from "@/types/offramp";
+
+// Currency symbols - extracted outside component for performance
+const CURRENCY_SYMBOLS: Record<string, string> = {
+    NGN: "₦",
+    GHS: "₵",
+    KES: "KSh ",
+};
+
+const getCurrencySymbol = (currency: string) =>
+    CURRENCY_SYMBOLS[currency] || currency + " ";
 
 interface OfframpQuoteModalProps {
     isOpen: boolean;
@@ -22,19 +33,34 @@ export default function OfframpQuoteModal({
     onConfirm,
     isLoading,
 }: OfframpQuoteModalProps) {
+    // Handle Escape key to close modal
+    const handleKeyDown = useCallback((e: KeyboardEvent) => {
+        if (e.key === "Escape" && !isLoading) {
+            onClose();
+        }
+    }, [isLoading, onClose]);
+
+    useEffect(() => {
+        if (isOpen) {
+            document.addEventListener("keydown", handleKeyDown);
+            return () => document.removeEventListener("keydown", handleKeyDown);
+        }
+    }, [isOpen, handleKeyDown]);
+
     if (!isOpen || !quote) return null;
 
-    const getCurrencySymbol = (currency: string) => {
-        const symbols: Record<string, string> = {
-            NGN: "₦",
-            GHS: "₵",
-            KES: "KSh ",
-        };
-        return symbols[currency] || currency + " ";
+    // Handle backdrop click
+    const handleBackdropClick = (e: React.MouseEvent) => {
+        if (e.target === e.currentTarget && !isLoading) {
+            onClose();
+        }
     };
 
     return (
-        <div className="fixed inset-0 bg-fundable-dark/80 backdrop-blur-sm flex justify-center items-center z-50">
+        <div
+            className="fixed inset-0 bg-fundable-dark/80 backdrop-blur-sm flex justify-center items-center z-50"
+            onClick={handleBackdropClick}
+        >
             <div className="bg-fundable-mid-dark border border-fundable-purple rounded-2xl p-6 w-full max-w-md mx-4 relative">
                 {/* Close Button */}
                 <button
