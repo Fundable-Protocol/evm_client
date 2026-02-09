@@ -298,11 +298,12 @@ export const cashwyreService = {
     ): Promise<{
         success: boolean;
         data?: {
-            id: number;
+            id: string;
             transactionReference: string;
             status: string;
-            cashwyreStatus: string | null;
-            cashwyreMessage: string | null;
+            providerStatus: string | null;
+            providerMessage: string | null;
+            providerId: string;
             payoutCompletedAt: string | null;
         };
         error?: string;
@@ -330,6 +331,138 @@ export const cashwyreService = {
             return {
                 success: false,
                 error: error instanceof Error ? error.message : "Failed to get quote status",
+            };
+        }
+    },
+
+    // ==================== MULTI-PROVIDER METHODS ====================
+
+    /**
+     * Get aggregated rates from all compatible providers
+     * Returns best rate and all provider rates for comparison
+     */
+    async getAggregatedRates(params: {
+        token: string;
+        amount: number;
+        country: string;
+        currency: string;
+        network?: string;
+    }): Promise<{
+        success: boolean;
+        data?: {
+            best: {
+                providerId: string;
+                displayName: string;
+                cryptoAmount: number;
+                fiatAmount: number;
+                rate: number;
+                fee: number;
+                currency: string;
+                token: string;
+                network: string;
+            } | null;
+            all: Array<{
+                providerId: string;
+                displayName: string;
+                cryptoAmount: number;
+                fiatAmount: number;
+                rate: number;
+                fee: number;
+                currency: string;
+                token: string;
+                network: string;
+            }>;
+            errors: Array<{ providerId: string; error: string }>;
+            timestamp: string;
+        };
+        error?: string;
+    }> {
+        try {
+            const queryParams = new URLSearchParams({
+                token: params.token,
+                amount: params.amount.toString(),
+                country: params.country,
+                currency: params.currency,
+                ...(params.network ? { network: params.network } : {}),
+            });
+
+            const res = await fetch(`${OFFRAMP_API_BASE}/rates?${queryParams}`, {
+                method: "GET",
+                headers: getHeaders(),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                return {
+                    success: false,
+                    error: data.message || data.error || "Failed to get rates",
+                };
+            }
+
+            return { success: true, data };
+        } catch (error) {
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : "Failed to get rates",
+            };
+        }
+    },
+
+    /**
+     * Create offramp using selected provider
+     * Provider with best rate should be used by default
+     */
+    async createOfframp(
+        request: {
+            providerId: string;
+            token: string;
+            amount: number;
+            country: string;
+            currency: string;
+            network: string;
+            bankCode: string;
+            accountNumber: string;
+            accountName: string;
+        },
+        walletId: string
+    ): Promise<{
+        success: boolean;
+        data?: {
+            providerId: string;
+            reference: string;
+            depositAddress: string;
+            depositAmount: number;
+            depositToken: string;
+            depositNetwork: string;
+            fiatAmount: number;
+            currency: string;
+            status: string;
+            expiresAt?: string;
+        };
+        error?: string;
+    }> {
+        try {
+            const res = await fetch(`${OFFRAMP_API_BASE}/create`, {
+                method: "POST",
+                headers: getHeaders(walletId),
+                body: JSON.stringify(request),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                return {
+                    success: false,
+                    error: data.message || data.error || "Failed to create offramp",
+                };
+            }
+
+            return { success: true, data };
+        } catch (error) {
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : "Failed to create offramp",
             };
         }
     },

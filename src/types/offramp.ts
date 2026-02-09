@@ -191,15 +191,74 @@ export const TOKEN_CONTRACTS: Record<string, Record<string, string>> = {
 // Supported chain IDs for offramp
 export const OFFRAMP_CHAIN_IDS = [137, 56]; // Polygon, BSC
 
-// Quote status from webhook polling
+// ==================== MULTI-PROVIDER TYPES ====================
+
+// Provider identifiers
+export type OfframpProviderId = "cashwyre" | "autoramp";
+
+// Provider rate from aggregator
+export interface ProviderRate {
+    providerId: OfframpProviderId;
+    displayName: string;
+    cryptoAmount: number;
+    fiatAmount: number;
+    rate: number;
+    fee: number;
+    currency: string;
+    token: string;
+    network: string;
+    expiresAt?: string;
+}
+
+// Aggregated rates response from backend
+export interface AggregatedRatesResponse {
+    best: ProviderRate | null;
+    all: ProviderRate[];
+    errors: { providerId: string; error: string }[];
+    timestamp: string;
+}
+
+// Create offramp request (provider-agnostic)
+export interface CreateOfframpRequest {
+    providerId: OfframpProviderId;
+    token: string;
+    amount: number;
+    country: string;
+    currency: string;
+    network: string;
+    bankCode: string;
+    accountNumber: string;
+    accountName: string;
+}
+
+// Create offramp response
+export interface CreateOfframpResponse {
+    success: boolean;
+    data?: {
+        providerId: OfframpProviderId;
+        reference: string;
+        depositAddress: string;
+        depositAmount: number;
+        depositToken: string;
+        depositNetwork: string;
+        fiatAmount: number;
+        currency: string;
+        status: string;
+        expiresAt?: string;
+    };
+    error?: string;
+}
+
+// Quote status from webhook polling (provider-agnostic)
 export type PayoutStatus = "pending" | "processing" | "confirmed" | "completed" | "failed" | "expired";
 
 export interface QuoteStatusData {
-    id: number;
+    id: string;
     transactionReference: string;
     status: PayoutStatus;
-    cashwyreStatus: string | null;
-    cashwyreMessage: string | null;
+    providerStatus: string | null;
+    providerMessage: string | null;
+    providerId: string;
     payoutCompletedAt: string | null;
 }
 
@@ -208,3 +267,4 @@ export interface QuoteStatusResponse {
     data?: QuoteStatusData;
     error?: string;
 }
+

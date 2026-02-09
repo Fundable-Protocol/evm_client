@@ -40,8 +40,8 @@ export default function OfframpSuccessModal({
                 const status = result.data.status as PayoutStatus;
                 setPayoutStatus(status);
 
-                if (result.data.cashwyreMessage) {
-                    setPayoutMessage(result.data.cashwyreMessage);
+                if (result.data.providerMessage) {
+                    setPayoutMessage(result.data.providerMessage);
                 }
 
                 // Stop polling if completed or failed
