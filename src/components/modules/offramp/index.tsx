@@ -88,6 +88,9 @@ export default function OfframpModule() {
 
     // Fetch banks when country changes
     useEffect(() => {
+        const abortController = new AbortController();
+        let isCancelled = false;
+
         const fetchBanks = async () => {
             setIsLoadingBanks(true);
             setBanks([]);
@@ -98,23 +101,38 @@ export default function OfframpModule() {
                 accountName: "",
             }));
 
-            const result = await cashwyreService.getBankList(formState.country);
+            try {
+                const result = await cashwyreService.getBankList(formState.country);
 
-            if (result.success && result.data) {
-                // Deduplicate banks by code to prevent key collisions
-                const uniqueBanks = result.data.filter(
-                    (bank, index, self) =>
-                        index === self.findIndex((b) => b.code === bank.code)
-                );
-                setBanks(uniqueBanks);
-            } else {
-                toast.error(result.error || "Failed to load banks");
+                if (isCancelled) return;
+
+                if (result.success && result.data) {
+                    // Deduplicate banks by code to prevent key collisions
+                    const uniqueBanks = result.data.filter(
+                        (bank, index, self) =>
+                            index === self.findIndex((b) => b.code === bank.code)
+                    );
+                    setBanks(uniqueBanks);
+                } else {
+                    toast.error(result.error || "Failed to load banks");
+                }
+            } catch (error) {
+                if (!isCancelled) {
+                    toast.error("Failed to load banks");
+                }
+            } finally {
+                if (!isCancelled) {
+                    setIsLoadingBanks(false);
+                }
             }
-
-            setIsLoadingBanks(false);
         };
 
         fetchBanks();
+
+        return () => {
+            isCancelled = true;
+            abortController.abort();
+        };
     }, [formState.country]);
 
     // Verify bank account when bank and account number are provided
@@ -124,25 +142,30 @@ export default function OfframpModule() {
         }
 
         setIsVerifyingAccount(true);
-        const result = await cashwyreService.verifyBankAccount(
-            formState.bankCode,
-            formState.accountNumber,
-            formState.country
-        );
+        try {
+            const result = await cashwyreService.verifyBankAccount(
+                formState.bankCode,
+                formState.accountNumber,
+                formState.country
+            );
 
-        if (result.success && result.data) {
-            setFormState((prev) => ({
-                ...prev,
-                accountName: result.data!.accountName,
-            }));
-        } else {
-            setFormState((prev) => ({ ...prev, accountName: "" }));
-            if (formState.accountNumber.length >= 10) {
-                toast.error(result.error || "Could not verify account");
+            if (result.success && result.data) {
+                setFormState((prev) => ({
+                    ...prev,
+                    accountName: result.data!.accountName,
+                }));
+            } else {
+                setFormState((prev) => ({ ...prev, accountName: "" }));
+                if (formState.accountNumber.length >= 10) {
+                    toast.error(result.error || "Could not verify account");
+                }
             }
+        } catch (error) {
+            setFormState((prev) => ({ ...prev, accountName: "" }));
+            toast.error(error instanceof Error ? error.message : "Could not verify account");
+        } finally {
+            setIsVerifyingAccount(false);
         }
-
-        setIsVerifyingAccount(false);
     }, [formState.bankCode, formState.accountNumber, formState.country]);
 
     useEffect(() => {
@@ -186,33 +209,34 @@ export default function OfframpModule() {
 
         const fetchQuote = async () => {
             setIsLoadingQuote(true);
-            console.log("[Offramp] Fetching quote for:", { token: formState.token, amount, country: formState.country, currency });
+            try {
+                const result = await cashwyreService.getOfframpQuote({
+                    token: formState.token,
+                    amount: amount,
+                    country: formState.country,
+                    currency: currency,
+                    network: getCurrentNetwork(),
+                });
 
-            const result = await cashwyreService.getOfframpQuote({
-                token: formState.token,
-                amount: amount,
-                country: formState.country,
-                currency: currency,
-                network: getCurrentNetwork(),
-            });
-
-            console.log("[Offramp] Quote result:", result);
-
-            if (result.success && result.data) {
-                setQuote(result.data);
-                setQuoteError(null);
-            } else {
-                console.error("[Offramp] Quote error:", result.error);
+                if (result.success && result.data) {
+                    setQuote(result.data);
+                    setQuoteError(null);
+                } else {
+                    setQuote(null);
+                    setQuoteError(result.error || "Failed to get quote");
+                }
+            } catch (error) {
                 setQuote(null);
-                setQuoteError(result.error || "Failed to get quote");
+                setQuoteError(error instanceof Error ? error.message : "Failed to get quote");
+            } finally {
+                setIsLoadingQuote(false);
             }
-            setIsLoadingQuote(false);
         };
 
         // Debounce quote fetching by 500ms
         const timer = setTimeout(fetchQuote, 500);
         return () => clearTimeout(timer);
-    }, [formState.amount, formState.token, formState.country, isQuoteLocked]);
+    }, [formState.amount, formState.token, formState.country, isQuoteLocked, getCurrentNetwork]);
 
     // Proceed to confirmation (quote is already fetched in real-time)
     const handleProceedToConfirm = () => {

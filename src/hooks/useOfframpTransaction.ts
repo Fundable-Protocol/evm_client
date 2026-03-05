@@ -78,7 +78,11 @@ export function useOfframpTransaction() {
 
     // Get token decimals for current chain
     const getTokenDecimals = useCallback((token: "USDC" | "USDT") => {
-        return TOKEN_DECIMALS[String(chainId)]?.[token] ?? 6;
+        const decimals = TOKEN_DECIMALS[String(chainId)]?.[token];
+        if (decimals === undefined) {
+            throw new Error(`Token decimals not configured for ${token} on chain ${chainId}`);
+        }
+        return decimals;
     }, [chainId]);
 
     // Switch to supported chain

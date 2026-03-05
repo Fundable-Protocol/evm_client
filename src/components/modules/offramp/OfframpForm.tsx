@@ -72,7 +72,7 @@ export default function OfframpForm({ formState, onChange, maxBalance, onMaxClic
                         <button
                             type="button"
                             onClick={onMaxClick}
-                            disabled={!maxBalance}
+                            disabled={!maxBalance || !onMaxClick}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-fundable-purple text-sm font-medium hover:text-fundable-violet disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Max

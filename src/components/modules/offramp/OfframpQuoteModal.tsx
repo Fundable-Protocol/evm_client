@@ -87,7 +87,7 @@ export default function OfframpQuoteModal({
                     <div className="bg-fundable-dark p-4 rounded-lg">
                         <p className="text-fundable-light-grey text-sm">You Receive</p>
                         <p className="text-white text-xl font-semibold">
-                            {getCurrencySymbol(quote.currency)}{quote.payoutAmountInLocalCurrency?.toLocaleString()}
+                            {getCurrencySymbol(quote.currency)}{quote.payoutAmountInLocalCurrency?.toLocaleString() ?? "—"}
                         </p>
                     </div>
 
@@ -96,7 +96,7 @@ export default function OfframpQuoteModal({
                         <div className="flex justify-between">
                             <span className="text-fundable-light-grey">Exchange Rate</span>
                             <span className="text-white">
-                                1 {formState.token} = {getCurrencySymbol(quote.rateCurrency)}{quote.cryptoRate?.toLocaleString()}
+                                1 {formState.token} = {getCurrencySymbol(quote.rateCurrency)}{quote.cryptoRate?.toLocaleString() ?? "—"}
                             </span>
                         </div>
                         <div className="flex justify-between">

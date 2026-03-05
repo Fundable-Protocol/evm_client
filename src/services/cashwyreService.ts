@@ -177,7 +177,11 @@ export const cashwyreService = {
      */
     async getRateInfo(cryptoAsset: string, currency: string): Promise<RateInfoResponse> {
         try {
-            const url = `${OFFRAMP_API_BASE}/rate?cryptoAsset=${cryptoAsset}&currency=${currency}`;
+            const queryParams = new URLSearchParams({
+                cryptoAsset,
+                currency,
+            });
+            const url = `${OFFRAMP_API_BASE}/rate?${queryParams}`;
 
             const res = await fetch(url, {
                 method: "GET",
@@ -400,7 +404,7 @@ export const cashwyreService = {
                 };
             }
 
-            return { success: true, data };
+            return { success: true, data: data.data || data };
         } catch (error) {
             return {
                 success: false,

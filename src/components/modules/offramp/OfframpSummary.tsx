@@ -57,7 +57,7 @@ export default function OfframpSummary({
                         <div className="flex justify-between text-sm">
                             <span className="text-fundable-light-grey">Exchange Rate</span>
                             <span className="text-white">
-                                1 {formState.token} = {quote.rateCurrency} {quote.cryptoRate?.toLocaleString()}
+                                1 {formState.token} = {quote.rateCurrency} {quote.cryptoRate?.toLocaleString() ?? "N/A"}
                             </span>
                         </div>
                         <div className="flex justify-between text-sm">

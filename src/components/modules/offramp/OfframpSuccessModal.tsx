@@ -28,6 +28,7 @@ export default function OfframpSuccessModal({
     const [payoutMessage, setPayoutMessage] = useState<string | null>(null);
     const [isPolling, setIsPolling] = useState(false);
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const copyTimeoutRef = useRef<number | null>(null);
 
     // Poll for payout status
     const pollPayoutStatus = useCallback(async () => {
@@ -56,6 +57,8 @@ export default function OfframpSuccessModal({
                         toast.success("Payout completed successfully! 🎉");
                     } else if (status === "failed") {
                         toast.error("Payout failed. Please contact support.");
+                    } else if (status === "expired") {
+                        toast.error("Payout expired. Please try again.");
                     }
                 }
             }
@@ -94,11 +97,29 @@ export default function OfframpSuccessModal({
             await navigator.clipboard.writeText(data.depositAddress);
             setCopied(true);
             toast.success("Address copied!");
-            setTimeout(() => setCopied(false), 2000);
+            // Clear any existing timeout before setting a new one
+            if (copyTimeoutRef.current) {
+                clearTimeout(copyTimeoutRef.current);
+                copyTimeoutRef.current = null;
+            }
+            copyTimeoutRef.current = window.setTimeout(() => {
+                setCopied(false);
+                copyTimeoutRef.current = null;
+            }, 2000);
         } catch {
             toast.error("Failed to copy");
         }
     };
+
+    // Cleanup copy timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (copyTimeoutRef.current) {
+                clearTimeout(copyTimeoutRef.current);
+                copyTimeoutRef.current = null;
+            }
+        };
+    }, []);
 
     // Get status display info
     const getStatusDisplay = () => {
@@ -163,6 +184,8 @@ export default function OfframpSuccessModal({
                             <CheckCircle2 className="h-10 w-10 text-green-500" />
                         ) : payoutStatus === "failed" ? (
                             <XCircle className="h-10 w-10 text-red-500" />
+                        ) : payoutStatus === "expired" ? (
+                            <Clock className="h-10 w-10 text-gray-500" />
                         ) : (
                             <Loader2 className="h-10 w-10 text-blue-500 animate-spin" />
                         )}
@@ -174,14 +197,18 @@ export default function OfframpSuccessModal({
                         ? "Payout Complete! 🎉"
                         : payoutStatus === "failed"
                             ? "Payout Failed"
-                            : "Offramp Processing"}
+                            : payoutStatus === "expired"
+                                ? "Payout Expired"
+                                : "Offramp Processing"}
                 </h3>
                 <p className="text-fundable-light-grey text-center text-sm mb-6">
                     {payoutStatus === "completed"
                         ? "Your funds have been sent to your bank account"
                         : payoutStatus === "failed"
                             ? payoutMessage || "There was an issue with your payout. Please contact support."
-                            : "Your transaction is being processed. This page will update automatically."}
+                            : payoutStatus === "expired"
+                                ? "This transaction has expired. Please try again."
+                                : "Your transaction is being processed. This page will update automatically."}
                 </p>
 
                 <div className="space-y-4">
