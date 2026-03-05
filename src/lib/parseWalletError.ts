@@ -20,7 +20,7 @@ function extractRawMessage(err: unknown): string {
     if (!(err instanceof Error)) return "An unexpected error occurred";
 
     // viem ContractFunctionExecutionError nests the actual reason in `cause`
-    const cause = (err as any).cause;
+    const cause = (err as { cause?: unknown }).cause;
     if (cause instanceof Error) {
         return extractRawMessage(cause);
     }

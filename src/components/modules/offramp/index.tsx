@@ -117,7 +117,7 @@ export default function OfframpModule() {
                 } else {
                     toast.error(result.error || "Failed to load banks");
                 }
-            } catch (error) {
+            } catch {
                 if (!isCancelled) {
                     toast.error("Failed to load banks");
                 }
