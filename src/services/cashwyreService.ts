@@ -231,6 +231,10 @@ export const cashwyreService = {
             expiresAt?: string;
             amountUsd?: number;
             amountLocal?: number;
+            // Bridge tracking (populated for non-Cashwyre-native chains)
+            sourceChainId?: string;
+            bridgeProvider?: string;
+            bridgeTxHash?: string;
         },
         walletId?: string
     ): Promise<{ success: boolean; data?: unknown; error?: string }> {

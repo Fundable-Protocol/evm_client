@@ -186,10 +186,30 @@ export const TOKEN_CONTRACTS: Record<string, Record<string, string>> = {
         USDC: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
         USDT: "0x55d398326f99059fF775485246999027B3197955",
     },
+    // Lisk Mainnet (bridged via Across → Polygon)
+    "1135": {
+        USDC: "0xF242275d3a6527d877f2c927a82D9b057609cc71",
+        USDT: "0x05D032ac25d322df992303dCa074EE7392C117b9",
+    },
 };
 
-// Supported chain IDs for offramp
-export const OFFRAMP_CHAIN_IDS = [137, 56]; // Polygon, BSC
+// Chains Cashwyre accepts deposits on directly
+export const CASHWYRE_NATIVE_CHAIN_IDS = [137, 56] as const; // Polygon, BSC
+
+// Chains that require an Across bridge hop to a Cashwyre-native chain first
+export const BRIDGE_REQUIRED_CHAIN_IDS = [1135, 1, 8453, 42161] as const; // Lisk, Ethereum, Base, Arbitrum
+
+// All chain IDs the offramp feature supports (native + bridge)
+export const OFFRAMP_CHAIN_IDS = [
+    ...CASHWYRE_NATIVE_CHAIN_IDS,
+    ...BRIDGE_REQUIRED_CHAIN_IDS,
+] as const;
+
+// Across always bridges to Polygon (most liquid Cashwyre network)
+export const ACROSS_BRIDGE_TARGET_CHAIN_ID = 137; // Polygon
+
+// Bridge status for UI polling (client polls backend quote status endpoint)
+export type BridgeStatus = "idle" | "pending" | "filled" | "failed";
 
 // ==================== MULTI-PROVIDER TYPES ====================
 

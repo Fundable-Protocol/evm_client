@@ -55,6 +55,7 @@ export default function OfframpModule() {
         address,
         isConnected,
         isSupportedChain,
+        requiresBridge,
         getCurrentNetwork,
         sendOfframpTransaction,
     } = useOfframpTransaction();
@@ -273,11 +274,12 @@ export default function OfframpModule() {
         setShowQuoteModal(true);
     };
 
-    // Handle modal close - unlock quote
+    // Handle modal close - always resets confirming state so X / backdrop / Cancel always work
     const handleCloseModal = () => {
         setShowQuoteModal(false);
         setIsQuoteLocked(false);
         setLockedQuote(null);
+        setIsConfirming(false);
     };
 
     // Confirm quote and trigger TX signing
@@ -290,7 +292,7 @@ export default function OfframpModule() {
         }
 
         if (!isSupportedChain) {
-            toast.error("Please switch to Polygon or BSC");
+            toast.error("Please switch to a supported network to offramp");
             return;
         }
 
@@ -343,6 +345,11 @@ export default function OfframpModule() {
                     expiresAt: quote.expireOn,
                     amountUsd: quote.amountInCryptoAsset,
                     amountLocal: quote.amountInLocalCurrency,
+                    // Bridge metadata: populated when on Lisk / non-Cashwyre-native chain
+                    ...(requiresBridge && {
+                        sourceChainId: chainId.toString(),
+                        bridgeProvider: "across",
+                    }),
                 },
                 address
             );
@@ -369,7 +376,6 @@ export default function OfframpModule() {
                     setIsConfirming(false);
                 },
                 onError: () => {
-                    toast.error("Transaction failed. You can try again.");
                     setIsConfirming(false);
                 },
             });

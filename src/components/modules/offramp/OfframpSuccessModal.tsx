@@ -90,6 +90,17 @@ export default function OfframpSuccessModal({
         }
     }, [isOpen, transactionReference, pollPayoutStatus]);
 
+    // Cleanup copy timeout on unmount — must be above the early return
+    // so hooks are always called in the same order on every render.
+    useEffect(() => {
+        return () => {
+            if (copyTimeoutRef.current) {
+                clearTimeout(copyTimeoutRef.current);
+                copyTimeoutRef.current = null;
+            }
+        };
+    }, []);
+
     if (!isOpen || !data) return null;
 
     const handleCopy = async () => {
@@ -111,17 +122,7 @@ export default function OfframpSuccessModal({
         }
     };
 
-    // Cleanup copy timeout on unmount
-    useEffect(() => {
-        return () => {
-            if (copyTimeoutRef.current) {
-                clearTimeout(copyTimeoutRef.current);
-                copyTimeoutRef.current = null;
-            }
-        };
-    }, []);
 
-    // Get status display info
     const getStatusDisplay = () => {
         switch (payoutStatus) {
             case "completed":
