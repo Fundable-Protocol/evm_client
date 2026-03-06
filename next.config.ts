@@ -12,15 +12,20 @@ const nextConfig: NextConfig = {
     "ethers",
   ],
 
-  webpack: (config) => {
-    // Add node built-in fallbacks for browser bundles
-    // (required by some sub-packages of viem/ethers)
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
-      net: false,
-      tls: false,
-    };
+  webpack: (config, { isServer }) => {
+    // Add node built-in fallbacks for browser bundles only.
+    // (required by some sub-packages of viem/ethers in the client bundle)
+    // Server bundles must NOT have these stubbed out — src/lib/utils/index.ts
+    // uses Node's crypto module (randomUUID, randomBytes) server-side.
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        crypto: false,
+      };
+    }
     return config;
   },
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState, useEffect, useRef } from "react";
-import { useAccount, useChainId, useSwitchChain, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useAccount, useChainId, useSwitchChain, useWriteContract, useWaitForTransactionReceipt, usePublicClient } from "wagmi";
 import { parseUnits, isAddress } from "viem";
 import toast from "react-hot-toast";
 
@@ -76,6 +76,7 @@ export function useOfframpTransaction() {
     const { address, isConnected } = useAccount();
     const chainId = useChainId();
     const { switchChain } = useSwitchChain();
+    const publicClient = usePublicClient();
     const [isProcessing, setIsProcessing] = useState(false);
     const [txHash, setTxHash] = useState<string | null>(null);
     const [pendingTxData, setPendingTxData] = useState<{
@@ -239,17 +240,37 @@ export function useOfframpTransaction() {
                 const inputToken = getTokenContract(token);
                 const outputToken = POLYGON_TOKEN_ADDRESSES[token];
 
-                if (!inputToken) {
+                if (!inputToken || !isAddress(inputToken)) {
                     toast.error(`${token} not configured on chain ${chainId}`);
                     setIsProcessing(false);
                     isProcessingRef.current = false;
                     return;
                 }
-                if (!outputToken) {
+                if (!outputToken || !isAddress(outputToken)) {
                     toast.error(`${token} output address not configured for Polygon`);
                     setIsProcessing(false);
                     isProcessingRef.current = false;
                     return;
+                }
+
+                // Verify both token addresses are deployed contracts
+                if (publicClient) {
+                    const [inputCode, outputCode] = await Promise.all([
+                        publicClient.getCode({ address: inputToken as `0x${string}` }),
+                        publicClient.getCode({ address: outputToken }),
+                    ]);
+                    if (!inputCode || inputCode === "0x") {
+                        toast.error(`${token} contract not found on this network`);
+                        setIsProcessing(false);
+                        isProcessingRef.current = false;
+                        return;
+                    }
+                    if (!outputCode || outputCode === "0x") {
+                        toast.error(`${token} contract not found on Polygon — cannot bridge`);
+                        setIsProcessing(false);
+                        isProcessingRef.current = false;
+                        return;
+                    }
                 }
 
                 // Apply 0.05% Fundable markup on top of the Cashwyre deposit amount
@@ -305,7 +326,7 @@ export function useOfframpTransaction() {
         }
     }, [
         isConnected, address, isSupportedChain, isNativeChain, requiresBridge,
-        chainId, getTokenContract, getTokenDecimals, switchToSupportedChain,
+        chainId, publicClient, getTokenContract, getTokenDecimals, switchToSupportedChain,
         writeContract, executeAcrossBridge,
     ]);
 
