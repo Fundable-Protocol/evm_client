@@ -1,14 +1,21 @@
 "use client";
 
 import { useCallback, useState, useEffect, useRef } from "react";
-import { useAccount, useChainId, useSwitchChain, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useAccount, useChainId, useSwitchChain, useWriteContract, useWaitForTransactionReceipt, usePublicClient } from "wagmi";
 import { parseUnits, isAddress } from "viem";
 import toast from "react-hot-toast";
 
-import { TOKEN_CONTRACTS, OFFRAMP_CHAIN_IDS } from "@/types/offramp";
+import {
+    TOKEN_CONTRACTS,
+    OFFRAMP_CHAIN_IDS,
+    CASHWYRE_NATIVE_CHAIN_IDS,
+    BRIDGE_REQUIRED_CHAIN_IDS,
+} from "@/types/offramp";
 import { cashwyreService } from "@/services/cashwyreService";
+import { useAcrossBridge, applyBridgeMarkup, POLYGON_TOKEN_ADDRESSES } from "@/hooks/useAcrossBridge";
+import { parseWalletError } from "@/lib/parseWalletError";
 
-// ERC20 transfer ABI
+// ─── ERC20 transfer ABI (used for direct Cashwyre deposit on Polygon / BSC) ──
 const ERC20_ABI = [
     {
         name: "transfer",
@@ -21,22 +28,45 @@ const ERC20_ABI = [
     },
 ] as const;
 
-// Token decimals per chain (verified from actual contracts)
+// ─── Token decimals per chain ─────────────────────────────────────────────
 const TOKEN_DECIMALS: Record<string, Record<string, number>> = {
-    "137": { USDC: 6, USDT: 6 },   // Polygon
-    "56": { USDC: 18, USDT: 18 },  // BSC
+    "137": { USDC: 6, USDT: 6 }, // Polygon
+    "56": { USDC: 18, USDT: 18 }, // BSC
+    "1135": { USDC: 6, USDT: 6 }, // Lisk
+    "1": { USDC: 6, USDT: 6 }, // Ethereum
+    "8453": { USDC: 6, USDT: 6 }, // Base
+    "42161": { USDC: 6, USDT: 6 }, // Arbitrum
 };
 
-// Chain ID to network mapping for Cashwyre API
+// ─── Chain ID → Cashwyre network name ────────────────────────────────────
+// For bridged chains we always report "polygon" since Across delivers there.
 const CHAIN_TO_NETWORK: Record<number, string> = {
     137: "polygon",
-    56: "bsc",
+    56: "binance_smart_chain",
+    // Bridge chains: Cashwyre receives on Polygon via Across
+    1135: "polygon",
+    1: "polygon",
+    8453: "polygon",
+    42161: "polygon",
 };
+
+// ─── Chain ID → display name (for toasts) ────────────────────────────────
+const CHAIN_DISPLAY_NAME: Record<number, string> = {
+    137: "Polygon",
+    56: "BNB Smart Chain",
+    1135: "Lisk",
+    1: "Ethereum",
+    8453: "Base",
+    42161: "Arbitrum",
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 interface UseOfframpTransactionProps {
     transactionReference: string;
     token: "USDC" | "USDT";
-    amount: string;  // Use string to avoid floating-point precision issues
+    /** Human-readable amount (string to avoid float precision issues) */
+    amount: string;
     cryptoAssetAddress: string;
     onSuccess?: (txHash: string) => void;
     onError?: (error: Error) => void;
@@ -46,6 +76,7 @@ export function useOfframpTransaction() {
     const { address, isConnected } = useAccount();
     const chainId = useChainId();
     const { switchChain } = useSwitchChain();
+    const publicClient = usePublicClient();
     const [isProcessing, setIsProcessing] = useState(false);
     const [txHash, setTxHash] = useState<string | null>(null);
     const [pendingTxData, setPendingTxData] = useState<{
@@ -53,30 +84,35 @@ export function useOfframpTransaction() {
         onSuccess?: (txHash: string) => void;
     } | null>(null);
 
-    const { writeContract, data: hash, isPending: isWritePending, error: writeError } = useWriteContract();
     const isProcessingRef = useRef(false);
 
-    // Wait for transaction receipt
-    const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
-        hash,
-    });
+    // Across bridge hook (only used for non-native chains)
+    const {
+        executeAcrossBridge,
+        isApproving,
+        isDepositing,
+        bridgeStep,
+    } = useAcrossBridge();
 
-    // Check if user is on a supported chain
-    const isSupportedChain = OFFRAMP_CHAIN_IDS.includes(chainId);
+    // Direct ERC20 transfer (Polygon / BSC)
+    const { writeContract, data: hash, isPending: isWritePending, error: writeError } = useWriteContract();
 
-    // Get current network name for Cashwyre API
-    const getCurrentNetwork = useCallback(() => {
-        return CHAIN_TO_NETWORK[chainId] || "polygon";
-    }, [chainId]);
+    // Wait for on-chain confirmation of the direct transfer
+    const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
 
-    // Get token contract address for current chain
+    // ── Derived state ──────────────────────────────────────────────────────
+    const isSupportedChain = (OFFRAMP_CHAIN_IDS as readonly number[]).includes(chainId);
+    const requiresBridge = (BRIDGE_REQUIRED_CHAIN_IDS as readonly number[]).includes(chainId);
+    const isNativeChain = (CASHWYRE_NATIVE_CHAIN_IDS as readonly number[]).includes(chainId);
+
+    const getCurrentNetwork = useCallback(() => CHAIN_TO_NETWORK[chainId] ?? "polygon", [chainId]);
+
     const getTokenContract = useCallback((token: "USDC" | "USDT") => {
         const chainContracts = TOKEN_CONTRACTS[String(chainId)];
         if (!chainContracts) return null;
         return chainContracts[token] as `0x${string}` | null;
     }, [chainId]);
 
-    // Get token decimals for current chain
     const getTokenDecimals = useCallback((token: "USDC" | "USDT") => {
         const decimals = TOKEN_DECIMALS[String(chainId)]?.[token];
         if (decimals === undefined) {
@@ -85,16 +121,11 @@ export function useOfframpTransaction() {
         return decimals;
     }, [chainId]);
 
-    // Switch to supported chain
-    const switchToSupportedChain = useCallback(async (targetChainId: number = 56) => {
-        if (!switchChain) {
-            toast.error("Chain switching not supported");
-            return false;
-        }
-
+    const switchToSupportedChain = useCallback(async (targetChainId = 137) => {
+        if (!switchChain) { toast.error("Chain switching not supported"); return false; }
         try {
             await switchChain({ chainId: targetChainId });
-            toast.success(`Switched to ${targetChainId === 137 ? "Polygon" : "BSC"}`);
+            toast.success(`Switched to ${CHAIN_DISPLAY_NAME[targetChainId] ?? "supported chain"}`);
             return true;
         } catch {
             toast.error("Failed to switch network");
@@ -102,32 +133,26 @@ export function useOfframpTransaction() {
         }
     }, [switchChain]);
 
-    // Handle TX confirmation
+    // ── Handle confirmation for direct transfers ───────────────────────────
     useEffect(() => {
         if (isConfirmed && hash && pendingTxData) {
             toast.dismiss("tx-confirming");
             toast.success("Transaction confirmed on-chain!");
 
-            // Update backend with confirmed TX
             cashwyreService.updateQuoteTxHash(
                 pendingTxData.transactionReference,
                 hash,
-                address || ""
-            ).catch(err => {
-                console.error("Failed to update TX hash after confirmation:", err);
-            });
+                address ?? ""
+            ).catch(err => console.error("Failed to update TX hash:", err));
 
-            // Call success callback
             pendingTxData.onSuccess?.(hash);
-
-            // Clean up
             setPendingTxData(null);
             setIsProcessing(false);
             isProcessingRef.current = false;
         }
     }, [isConfirmed, hash, pendingTxData, address]);
 
-    // Send ERC20 transfer
+    // ── Main entry point ──────────────────────────────────────────────────
     const sendOfframpTransaction = useCallback(async ({
         transactionReference,
         token,
@@ -136,40 +161,21 @@ export function useOfframpTransaction() {
         onSuccess,
         onError,
     }: UseOfframpTransactionProps) => {
-        // Prevent duplicate submissions
         if (isProcessingRef.current) {
             toast("Transaction already in progress", { icon: "⏳" });
             return;
         }
-
-        // Validation: Wallet connected
         if (!isConnected || !address) {
             toast.error("Please connect your wallet");
             return;
         }
-
-        // Validation: Supported chain
         if (!isSupportedChain) {
-            toast.error("Please switch to Polygon or BSC");
-            const switched = await switchToSupportedChain();
-            if (switched) {
-                toast("Chain switched. Please confirm again.", { icon: "ℹ️" });
-            }
-            // Always return after chain switch - let state update
+            toast.error(`Unsupported network. Please switch to a supported chain.`);
+            await switchToSupportedChain();
             return;
         }
-
-        // Validation: Token contract exists
-        const tokenContract = getTokenContract(token);
-        if (!tokenContract) {
-            toast.error(`${token} not supported on this network`);
-            return;
-        }
-
-        // Validation: Valid deposit address
         if (!cryptoAssetAddress || !isAddress(cryptoAssetAddress)) {
             toast.error("Invalid deposit address received");
-            console.error("Invalid address:", cryptoAssetAddress);
             return;
         }
 
@@ -177,68 +183,143 @@ export function useOfframpTransaction() {
         isProcessingRef.current = true;
 
         try {
-            // Get correct decimals for token on this chain
-            const decimals = getTokenDecimals(token);
-            const amountInWei = parseUnits(amount, decimals);
-
-            // Store pending TX data for confirmation callback
-            setPendingTxData({ transactionReference, onSuccess });
-
-            toast.loading("Please sign the transaction...", { id: "tx-signing" });
-
-            // Send the transaction
-            writeContract({
-                address: tokenContract,
-                abi: ERC20_ABI,
-                functionName: "transfer",
-                args: [cryptoAssetAddress as `0x${string}`, amountInWei],
-            }, {
-                onSuccess: async (hash) => {
-                    toast.dismiss("tx-signing");
-                    toast.loading("Transaction submitted, waiting for confirmation...", { id: "tx-confirming" });
-                    setTxHash(hash);
-
-                    // Optimistically update backend with TX hash
-                    try {
-                        await cashwyreService.updateQuoteTxHash(
-                            transactionReference,
-                            hash,
-                            address
-                        );
-                    } catch (err) {
-                        console.error("Failed to update TX hash:", err);
-                    }
-
-                    // Note: onSuccess will be called after confirmation via useEffect
-                },
-                onError: (error) => {
-                    toast.dismiss("tx-signing");
-                    toast.error("Transaction failed: " + error.message);
-                    console.error("Transaction failed:", error);
-                    onError?.(error);
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // PATH A: Direct ERC20 transfer (Polygon or BSC)
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            if (isNativeChain) {
+                const tokenContract = getTokenContract(token);
+                if (!tokenContract) {
+                    toast.error(`${token} not supported on this network`);
                     setIsProcessing(false);
                     isProcessingRef.current = false;
-                    setPendingTxData(null);
-                },
-            });
+                    return;
+                }
+
+                const decimals = getTokenDecimals(token);
+                const amountInWei = parseUnits(amount, decimals);
+
+                setPendingTxData({ transactionReference, onSuccess });
+                toast.loading("Please sign the transaction…", { id: "tx-signing" });
+
+                writeContract({
+                    address: tokenContract,
+                    abi: ERC20_ABI,
+                    functionName: "transfer",
+                    args: [cryptoAssetAddress as `0x${string}`, amountInWei],
+                }, {
+                    onSuccess: async (txHash) => {
+                        toast.dismiss("tx-signing");
+                        toast.loading("Waiting for confirmation…", { id: "tx-confirming" });
+                        setTxHash(txHash);
+                        try {
+                            await cashwyreService.updateQuoteTxHash(transactionReference, txHash, address);
+                        } catch (err) {
+                            console.error("Failed to update TX hash:", err);
+                        }
+                    },
+                    onError: (error) => {
+                        toast.dismiss("tx-signing");
+                        const msg = parseWalletError(error);
+                        if (msg !== "Transaction cancelled") {
+                            toast.error(msg);
+                        }
+                        onError?.(error);
+                        setIsProcessing(false);
+                        isProcessingRef.current = false;
+                        setPendingTxData(null);
+                    },
+                });
+
+                // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                // PATH B: Bridge via Across Protocol (Lisk, Ethereum, Base, Arbitrum)
+                // The Across relayer delivers directly to cryptoAssetAddress on Polygon,
+                // so no second transfer is required after bridging.
+                // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            } else if (requiresBridge) {
+                const decimals = getTokenDecimals(token);
+                const inputToken = getTokenContract(token);
+                const outputToken = POLYGON_TOKEN_ADDRESSES[token];
+
+                if (!inputToken || !isAddress(inputToken)) {
+                    toast.error(`${token} not configured on chain ${chainId}`);
+                    setIsProcessing(false);
+                    isProcessingRef.current = false;
+                    return;
+                }
+                if (!outputToken || !isAddress(outputToken)) {
+                    toast.error(`${token} output address not configured for Polygon`);
+                    setIsProcessing(false);
+                    isProcessingRef.current = false;
+                    return;
+                }
+
+                // Verify source token address is a deployed contract
+                if (publicClient) {
+                    const inputCode = await publicClient.getCode({ address: inputToken as `0x${string}` });
+                    if (!inputCode || inputCode === "0x") {
+                        toast.error(`${token} contract not found on this network`);
+                        setIsProcessing(false);
+                        isProcessingRef.current = false;
+                        return;
+                    }
+                }
+
+                // Apply 0.05% Fundable markup on top of the Cashwyre deposit amount
+                const inputAmountRaw = applyBridgeMarkup(amount, decimals);
+
+                const depositTxHash = await executeAcrossBridge({
+                    depositorAddress: address,
+                    recipientAddress: cryptoAssetAddress as `0x${string}`,
+                    inputTokenAddress: inputToken as `0x${string}`,
+                    outputTokenAddress: outputToken,
+                    inputAmountRaw,
+                    decimals,
+                    displayAmount: `${amount} ${token}`,
+                    sourceChainId: chainId,
+                });
+
+                if (!depositTxHash) {
+                    // executeAcrossBridge already showed the error toast
+                    onError?.(new Error("Bridge transaction failed"));
+                    setIsProcessing(false);
+                    isProcessingRef.current = false;
+                    return;
+                }
+
+                setTxHash(depositTxHash);
+
+                // Report bridge tx hash to backend → backend polls Across for fill
+                try {
+                    await cashwyreService.updateQuoteTxHash(
+                        transactionReference,
+                        depositTxHash,
+                        address
+                    );
+                } catch (err) {
+                    console.error("Failed to report bridge tx hash:", err);
+                }
+
+                toast.success("Bridge submitted! Funds arriving on Polygon shortly.");
+                onSuccess?.(depositTxHash);
+                setIsProcessing(false);
+                isProcessingRef.current = false;
+            }
         } catch (error) {
             toast.dismiss("tx-signing");
-            const err = error instanceof Error ? error : new Error("Transaction failed");
-            toast.error(err.message);
-            console.error("Transaction error:", err);
+            const msg = parseWalletError(error);
+            if (msg !== "Transaction cancelled") {
+                toast.error(msg);
+            }
+            const err = error instanceof Error ? error : new Error(msg);
             onError?.(err);
             setIsProcessing(false);
             isProcessingRef.current = false;
             setPendingTxData(null);
         }
     }, [
-        isConnected,
-        address,
-        isSupportedChain,
-        getTokenContract,
-        getTokenDecimals,
-        switchToSupportedChain,
-        writeContract,
+        isConnected, address, isSupportedChain, isNativeChain, requiresBridge,
+        chainId, publicClient, getTokenContract, getTokenDecimals, switchToSupportedChain,
+        writeContract, executeAcrossBridge,
     ]);
 
     return {
@@ -246,13 +327,15 @@ export function useOfframpTransaction() {
         isConnected,
         chainId,
         isSupportedChain,
+        requiresBridge,
         getCurrentNetwork,
         switchToSupportedChain,
         sendOfframpTransaction,
-        isProcessing: isProcessing || isWritePending,
+        isProcessing: isProcessing || isWritePending || isApproving || isDepositing,
         isConfirming,
         isConfirmed,
         txHash: hash || txHash,
+        bridgeStep,
         writeError,
     };
 }

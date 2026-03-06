@@ -186,10 +186,45 @@ export const TOKEN_CONTRACTS: Record<string, Record<string, string>> = {
         USDC: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
         USDT: "0x55d398326f99059fF775485246999027B3197955",
     },
+    // Lisk Mainnet (bridged via Across → Polygon)
+    "1135": {
+        USDC: "0xF242275d3a6527d877f2c927a82D9b057609cc71",
+        USDT: "0x05D032ac25d322df992303dCa074EE7392C117b9",
+    },
+    // Ethereum Mainnet (bridged via Across → Polygon)
+    "1": {
+        USDC: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        USDT: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    },
+    // Base Mainnet (bridged via Across → Polygon)
+    "8453": {
+        USDC: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        USDT: "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2",
+    },
+    // Arbitrum One (bridged via Across → Polygon)
+    "42161": {
+        USDC: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+        USDT: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+    },
 };
 
-// Supported chain IDs for offramp
-export const OFFRAMP_CHAIN_IDS = [137, 56]; // Polygon, BSC
+// Chains Cashwyre accepts deposits on directly
+export const CASHWYRE_NATIVE_CHAIN_IDS = [137, 56] as const; // Polygon, BSC
+
+// Chains that require an Across bridge hop to a Cashwyre-native chain first
+export const BRIDGE_REQUIRED_CHAIN_IDS = [1135, 1, 8453, 42161] as const; // Lisk, Ethereum, Base, Arbitrum
+
+// All chain IDs the offramp feature supports (native + bridge)
+export const OFFRAMP_CHAIN_IDS = [
+    ...CASHWYRE_NATIVE_CHAIN_IDS,
+    ...BRIDGE_REQUIRED_CHAIN_IDS,
+] as const;
+
+// Across always bridges to Polygon (most liquid Cashwyre network)
+export const ACROSS_BRIDGE_TARGET_CHAIN_ID = 137; // Polygon
+
+// Bridge status for UI polling (client polls backend quote status endpoint)
+export type BridgeStatus = "idle" | "pending" | "filled" | "failed";
 
 // ==================== MULTI-PROVIDER TYPES ====================
 
