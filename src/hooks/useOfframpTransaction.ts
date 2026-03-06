@@ -253,20 +253,11 @@ export function useOfframpTransaction() {
                     return;
                 }
 
-                // Verify both token addresses are deployed contracts
+                // Verify source token address is a deployed contract
                 if (publicClient) {
-                    const [inputCode, outputCode] = await Promise.all([
-                        publicClient.getCode({ address: inputToken as `0x${string}` }),
-                        publicClient.getCode({ address: outputToken }),
-                    ]);
+                    const inputCode = await publicClient.getCode({ address: inputToken as `0x${string}` });
                     if (!inputCode || inputCode === "0x") {
                         toast.error(`${token} contract not found on this network`);
-                        setIsProcessing(false);
-                        isProcessingRef.current = false;
-                        return;
-                    }
-                    if (!outputCode || outputCode === "0x") {
-                        toast.error(`${token} contract not found on Polygon — cannot bridge`);
                         setIsProcessing(false);
                         isProcessingRef.current = false;
                         return;
@@ -289,6 +280,7 @@ export function useOfframpTransaction() {
 
                 if (!depositTxHash) {
                     // executeAcrossBridge already showed the error toast
+                    onError?.(new Error("Bridge transaction failed"));
                     setIsProcessing(false);
                     isProcessingRef.current = false;
                     return;
