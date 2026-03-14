@@ -48,7 +48,7 @@ function AppProvider({ children, cookies }: { children: ReactNode; cookies: stri
     <WagmiProvider config={wagmiAdapter.wagmiConfig as Config} initialState={initialState}>
       <QueryClientProvider client={queryClient}>
         <MiniKitContextProvider>
-          <MiniKitInit />
+          <MiniKitInit>
           <SidebarProvider>
             <AppSidebar />
             <main className="flex flex-col h-dvh w-full overflow-hidden">
@@ -128,6 +128,7 @@ function AppProvider({ children, cookies }: { children: ReactNode; cookies: stri
               </Toaster>
             </main>
           </SidebarProvider>
+          </MiniKitInit>
         </MiniKitContextProvider>
       </QueryClientProvider>
     </WagmiProvider>
