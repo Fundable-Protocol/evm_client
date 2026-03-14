@@ -9,6 +9,7 @@ import { cookieToInitialState, WagmiProvider, type Config } from 'wagmi'
 import { Toaster, ToastBar, toast } from "react-hot-toast"
 import { CheckCircle2, XCircle, Loader2, X } from "lucide-react"
 import { MiniKitContextProvider } from './minikit-provider'
+import { MiniKitInit } from '@/components/MiniKitInit'
 import { SidebarProvider } from '@/components/ui/sidebar'
 import AdminNavbar from '@/components/organisms/AdminNavbar'
 import { AppSidebar } from '@/components/ui/app-sidebar'
@@ -47,6 +48,7 @@ function AppProvider({ children, cookies }: { children: ReactNode; cookies: stri
     <WagmiProvider config={wagmiAdapter.wagmiConfig as Config} initialState={initialState}>
       <QueryClientProvider client={queryClient}>
         <MiniKitContextProvider>
+          <MiniKitInit />
           <SidebarProvider>
             <AppSidebar />
             <main className="flex flex-col h-dvh w-full overflow-hidden">
