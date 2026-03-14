@@ -25,7 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
       icon: "/favicon_io/favicon.ico",
     },
     other: {
-      "fc:frame": JSON.stringify({
+      "fc:miniapp": JSON.stringify({
         version: "next",
         imageUrl: process.env.NEXT_PUBLIC_APP_HERO_IMAGE,
         button: {
