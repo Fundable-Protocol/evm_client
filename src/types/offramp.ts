@@ -71,6 +71,10 @@ export interface OfframpQuoteData {
     expireOn: string;
     expireInMinutes: number;
     country: OfframpCountry;
+    /** Fundable fee amount in crypto */
+    fundableFee?: number;
+    /** Fundable fee percentage */
+    fundableFeePercent?: number;
 }
 
 export interface OfframpQuoteResponse {

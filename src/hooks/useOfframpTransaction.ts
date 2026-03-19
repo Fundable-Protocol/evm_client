@@ -12,7 +12,8 @@ import {
     BRIDGE_REQUIRED_CHAIN_IDS,
 } from "@/types/offramp";
 import { cashwyreService } from "@/services/cashwyreService";
-import { useAcrossBridge, applyBridgeMarkup, POLYGON_TOKEN_ADDRESSES } from "@/hooks/useAcrossBridge";
+import { calculateOfframpFee } from "@/utils/offramp-fee";
+import { useAcrossBridge, POLYGON_TOKEN_ADDRESSES } from "@/hooks/useAcrossBridge";
 import { parseWalletError } from "@/lib/parseWalletError";
 
 // ─── ERC20 transfer ABI (used for direct Cashwyre deposit on Polygon / BSC) ──
@@ -196,7 +197,9 @@ export function useOfframpTransaction() {
                 }
 
                 const decimals = getTokenDecimals(token);
-                const amountInWei = parseUnits(amount, decimals);
+                // Apply Fundable tiered fee on top of the Cashwyre deposit amount
+                const feeResult = calculateOfframpFee(parseFloat(amount));
+                const amountInWei = parseUnits(feeResult.totalDebit.toFixed(decimals), decimals);
 
                 setPendingTxData({ transactionReference, onSuccess });
                 toast.loading("Please sign the transaction…", { id: "tx-signing" });
@@ -264,8 +267,9 @@ export function useOfframpTransaction() {
                     }
                 }
 
-                // Apply 0.05% Fundable markup on top of the Cashwyre deposit amount
-                const inputAmountRaw = applyBridgeMarkup(amount, decimals);
+                // Apply Fundable tiered fee on top of the Cashwyre deposit amount
+                const feeResult = calculateOfframpFee(parseFloat(amount));
+                const inputAmountRaw = parseUnits(feeResult.totalDebit.toFixed(decimals), decimals);
 
                 const depositTxHash = await executeAcrossBridge({
                     depositorAddress: address,

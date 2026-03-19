@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef    } from "react";
 import toast from "react-hot-toast";
 import { useBalance, useChainId } from "wagmi";
 import { formatUnits } from "viem";
+import { calculateOfframpFee } from "@/utils/offramp-fee";
 
 import { OfframpForm } from "./OfframpForm";
 import BankDetailsCard from "./BankDetailsCard";
@@ -295,6 +296,9 @@ export default function OfframpModule() {
 
                 if (result.success && result.data?.best) {
                     const best = result.data.best;
+                    // Calculate Fundable platform fee
+                    const feeResult = calculateOfframpFee(best.cryptoAmount);
+
                     // Map ProviderRate to the internal OfframpQuoteData format for legacy compatibility
                     // while moving towards the dynamic aggregator model.
                     setQuote({
@@ -304,14 +308,15 @@ export default function OfframpModule() {
                         currency: best.currency,
                         amountInLocalCurrency: best.fiatAmount,
                         payoutAmountInLocalCurrency: best.fiatAmount,
-                        totalDepositInCryptoAsset: best.cryptoAmount, // Assuming no extra bridge fee here
+                        totalDepositInCryptoAsset: feeResult.totalDebit, // Amount + Fundable fee
                         cryptoRate: best.rate,
                         rateCurrency: best.currency,
-                        feeType: "receiver",
                         expireOn: best.expiresAt || new Date(Date.now() + 15 * 60 * 1000).toISOString(),
                         expireInMinutes: 15,
                         country: formState.country,
                         reference: best.quoteReference || "",
+                        fundableFee: feeResult.feeAmount,
+                        fundableFeePercent: feeResult.feePercent,
                     } as unknown as OfframpQuoteData);
                     setQuoteError(null);
                 } else {

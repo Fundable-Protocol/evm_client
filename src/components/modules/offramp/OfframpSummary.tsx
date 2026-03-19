@@ -55,6 +55,16 @@ export default function OfframpSummary({
                                 {quote.amountInCryptoAsset} {formState.token}
                             </span>
                         </div>
+                        {quote.fundableFee != null && quote.fundableFee > 0 && (
+                            <div className="flex justify-between text-sm">
+                                <span className="text-fundable-light-grey">
+                                    Fundable Fee ({quote.fundableFeePercent}%)
+                                </span>
+                                <span className="text-yellow-400">
+                                    +{quote.fundableFee} {formState.token}
+                                </span>
+                            </div>
+                        )}
                         <div className="flex justify-between text-sm">
                             <span className="text-fundable-light-grey">Exchange Rate</span>
                             <span className="text-white">

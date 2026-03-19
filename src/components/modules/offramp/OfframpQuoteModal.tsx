@@ -120,10 +120,16 @@ export default function OfframpQuoteModal({
                                 1 {formState.token} = {getCurrencySymbol(quote.rateCurrency)}{quote.cryptoRate?.toLocaleString() ?? "—"}
                             </span>
                         </div>
-                        <div className="flex justify-between">
-                            <span className="text-fundable-light-grey">Fee Type</span>
-                            <span className="text-white capitalize">{quote.feeType}</span>
-                        </div>
+                        {quote.fundableFee != null && quote.fundableFee > 0 && (
+                            <div className="flex justify-between">
+                                <span className="text-fundable-light-grey">
+                                    Fundable Fee ({quote.fundableFeePercent}%)
+                                </span>
+                                <span className="text-yellow-400">
+                                    {quote.fundableFee} {formState.token}
+                                </span>
+                            </div>
+                        )}
                         <div className="flex justify-between">
                             <span className="text-fundable-light-grey">Expires In</span>
                             <span className="text-fundable-purple">{quote.expireInMinutes} minutes</span>
