@@ -1,8 +1,8 @@
 // Types for Cashwyre Offramp Integration
 
 // Supported countries for offramp
-export type OfframpCountry = "NG" | "GH" | "KE";
-export type OfframpCurrency = "NGN" | "GHS" | "KES";
+export type OfframpCountry = string;
+export type OfframpCurrency = string;
 
 export interface CountryInfo {
     code: OfframpCountry;
@@ -143,9 +143,11 @@ export interface OfframpFormState {
     token: OfframpToken;
     amount: string;
     country: OfframpCountry;
+    currency: OfframpCurrency;
     bankCode: string;
     accountNumber: string;
     accountName: string;
+    email: string;
 }
 
 export interface OfframpQuoteState {
@@ -242,6 +244,7 @@ export interface ProviderRate {
     currency: string;
     token: string;
     network: string;
+    quoteReference: string;
     expiresAt?: string;
 }
 

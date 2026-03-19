@@ -10,6 +10,8 @@ import type {
     VerifyBankAccountResponse,
     RateInfoResponse,
     OfframpCountry,
+    CountryInfo,
+    AggregatedRatesResponse,
 } from "@/types/offramp";
 
 const OFFRAMP_API_BASE = `${backendBaseUrl}/api/offramp`;
@@ -342,6 +344,33 @@ export const cashwyreService = {
             };
         }
     },
+    
+    /**
+     * Get list of supported countries for offramp
+     */
+    async getCountries(): Promise<{ success: boolean; data?: CountryInfo[]; error?: string }> {
+        try {
+            const res = await fetch(`${OFFRAMP_API_BASE}/countries`, {
+                method: "GET",
+                headers: getHeaders(),
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                return {
+                    success: false,
+                    error: data.message || data.error || "Failed to fetch countries",
+                };
+            }
+
+            return { success: true, data: data.data || data };
+        } catch (error) {
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : "Failed to fetch countries",
+            };
+        }
+    },
 
     // ==================== MULTI-PROVIDER METHODS ====================
 
@@ -357,32 +386,7 @@ export const cashwyreService = {
         network?: string;
     }): Promise<{
         success: boolean;
-        data?: {
-            best: {
-                providerId: string;
-                displayName: string;
-                cryptoAmount: number;
-                fiatAmount: number;
-                rate: number;
-                fee: number;
-                currency: string;
-                token: string;
-                network: string;
-            } | null;
-            all: Array<{
-                providerId: string;
-                displayName: string;
-                cryptoAmount: number;
-                fiatAmount: number;
-                rate: number;
-                fee: number;
-                currency: string;
-                token: string;
-                network: string;
-            }>;
-            errors: Array<{ providerId: string; error: string }>;
-            timestamp: string;
-        };
+        data?: AggregatedRatesResponse;
         error?: string;
     }> {
         try {

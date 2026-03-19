@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef    } from "react";
 import toast from "react-hot-toast";
 import { useBalance, useChainId } from "wagmi";
 import { formatUnits } from "viem";
 
-import OfframpForm from "./OfframpForm";
+import { OfframpForm } from "./OfframpForm";
 import BankDetailsCard from "./BankDetailsCard";
 import OfframpSummary from "./OfframpSummary";
 import OfframpQuoteModal from "./OfframpQuoteModal";
@@ -19,25 +19,51 @@ import type {
     OfframpConfirmResponse,
     Bank,
     LockedQuote,
+    CountryInfo,
 } from "@/types/offramp";
 import { SUPPORTED_COUNTRIES, TOKEN_CONTRACTS } from "@/types/offramp";
+
+const CACHE_KEY = "fundable:evm:offramp:form";
 
 const initialFormState: OfframpFormState = {
     token: "USDC",
     amount: "",
     country: "NG",
+    currency: "NGN",
     bankCode: "",
     accountNumber: "",
     accountName: "",
+    email: "",
 };
 
 export default function OfframpModule() {
-    const [formState, setFormState] = useState<OfframpFormState>(initialFormState);
+    const [formState, setFormState] = useState<OfframpFormState>(() => {
+        // Hydrate from localStorage if running in browser
+        if (typeof window !== "undefined") {
+            try {
+                const cached = localStorage.getItem(CACHE_KEY);
+                if (cached) {
+                    const parsed = JSON.parse(cached) as OfframpFormState;
+                    // Migration: if currency is missing (legacy cache), set it based on country
+                    if (!parsed.currency && parsed.country) {
+                        const countryInfo = countries.find(c => c.code === parsed.country);
+                        parsed.currency = countryInfo?.currency || (parsed.country === "NG" ? "NGN" : parsed.country === "GH" ? "GHS" : "KES");
+                    }
+                    return parsed;
+                }
+            } catch (e) {
+                console.error("Failed to parse cached offramp form state", e);
+            }
+        }
+        return initialFormState;
+    });
     const [banks, setBanks] = useState<Bank[]>([]);
     const [isLoadingBanks, setIsLoadingBanks] = useState(false);
     const [isVerifyingAccount, setIsVerifyingAccount] = useState(false);
     const [isLoadingQuote, setIsLoadingQuote] = useState(false);
     const [isConfirming, setIsConfirming] = useState(false);
+    const [countries, setCountries] = useState<CountryInfo[]>(SUPPORTED_COUNTRIES);
+    const [isLoadingCountries, setIsLoadingCountries] = useState(false);
 
     const [quote, setQuote] = useState<OfframpQuoteData | null>(null);
     const [quoteError, setQuoteError] = useState<string | null>(null);
@@ -45,6 +71,8 @@ export default function OfframpModule() {
     const [confirmResult, setConfirmResult] = useState<OfframpConfirmResponse["data"] | null>(null);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [successTransactionReference, setSuccessTransactionReference] = useState<string | null>(null);
+    const [timedOut, setTimedOut] = useState(false);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     // Quote locking state
     const [isQuoteLocked, setIsQuoteLocked] = useState(false);
@@ -83,9 +111,37 @@ export default function OfframpModule() {
     // Handle Max button click
     const handleMaxClick = useCallback(() => {
         if (maxBalance) {
-            setFormState(prev => ({ ...prev, amount: maxBalance }));
+            setFormState(prev => {
+                const newState = { ...prev, amount: maxBalance };
+                if (typeof window !== "undefined") {
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(newState));
+                }
+                return newState;
+            });
+            // Clear quote when amount changes
+            setQuote(null);
         }
     }, [maxBalance]);
+
+    // Fetch supported countries on mount
+    useEffect(() => {
+        const fetchCountries = async () => {
+            setIsLoadingCountries(true);
+            try {
+                const result = await cashwyreService.getCountries();
+                if (result.success && result.data && result.data.length > 0) {
+                    setCountries(result.data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch countries:", error);
+                // Fallback to static SUPPORTED_COUNTRIES (already set as initial state)
+            } finally {
+                setIsLoadingCountries(false);
+            }
+        };
+
+        fetchCountries();
+    }, []);
 
     // Fetch banks when country changes
     useEffect(() => {
@@ -179,14 +235,31 @@ export default function OfframpModule() {
 
     // Handle form field changes
     const handleFormChange = (field: keyof OfframpFormState, value: string) => {
-        setFormState((prev) => ({
-            ...prev,
-            [field]: value,
-            // Reset account name when bank or account number changes
-            ...(field === "bankCode" || field === "accountNumber"
-                ? { accountName: "" }
-                : {}),
-        }));
+        setFormState((prev: OfframpFormState) => {
+            let currency = prev.currency;
+            if (field === "country") {
+                const country = countries.find(c => c.code === value);
+                if (country) {
+                    currency = country.currency;
+                }
+            }
+
+            const newState = {
+                ...prev,
+                [field]: value,
+                ...(field === "country" ? { currency } : {}),
+                // Reset account name when bank or account number changes
+                ...(field === "bankCode" || field === "accountNumber"
+                    ? { accountName: "" }
+                    : {}),
+            };
+
+            // Persist to localStorage
+            if (typeof window !== "undefined") {
+                localStorage.setItem(CACHE_KEY, JSON.stringify(newState));
+            }
+            return newState;
+        });
 
         // Clear quote when amount changes (will be refetched by the effect)
         if (field === "amount") {
@@ -205,13 +278,14 @@ export default function OfframpModule() {
             return;
         }
 
-        const selectedCountry = SUPPORTED_COUNTRIES.find(c => c.code === formState.country);
-        const currency = selectedCountry?.currency || "NGN";
+        const selectedCountry = countries.find(c => c.code === formState.country);
+        const currency = selectedCountry?.currency || formState.currency || "NGN";
 
-        const fetchQuote = async () => {
+        const fetchQuote = async (retries = 3) => {
             setIsLoadingQuote(true);
             try {
-                const result = await cashwyreService.getOfframpQuote({
+                // Use getAggregatedRates to support all countries/providers as per stellar_client pattern
+                const result = await cashwyreService.getAggregatedRates({
                     token: formState.token,
                     amount: amount,
                     country: formState.country,
@@ -219,14 +293,40 @@ export default function OfframpModule() {
                     network: getCurrentNetwork(),
                 });
 
-                if (result.success && result.data) {
-                    setQuote(result.data);
+                if (result.success && result.data?.best) {
+                    const best = result.data.best;
+                    // Map ProviderRate to the internal OfframpQuoteData format for legacy compatibility
+                    // while moving towards the dynamic aggregator model.
+                    setQuote({
+                        transactionReference: best.quoteReference || "", // Aggregator uses quoteReference
+                        cryptoAsset: best.token,
+                        amountInCryptoAsset: best.cryptoAmount,
+                        currency: best.currency,
+                        amountInLocalCurrency: best.fiatAmount,
+                        payoutAmountInLocalCurrency: best.fiatAmount,
+                        totalDepositInCryptoAsset: best.cryptoAmount, // Assuming no extra bridge fee here
+                        cryptoRate: best.rate,
+                        rateCurrency: best.currency,
+                        feeType: "integrated",
+                        expireOn: best.expiresAt || new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+                        expireInMinutes: 15,
+                        country: formState.country,
+                        reference: best.quoteReference || "",
+                    } as unknown as OfframpQuoteData);
                     setQuoteError(null);
                 } else {
+                    if (retries > 0) {
+                        setTimeout(() => fetchQuote(retries - 1), 1000);
+                        return;
+                    }
                     setQuote(null);
-                    setQuoteError(result.error || "Failed to get quote");
+                    setQuoteError(result.error || "Failed to get rates from any provider");
                 }
             } catch (error) {
+                if (retries > 0) {
+                    setTimeout(() => fetchQuote(retries - 1), 1000);
+                    return;
+                }
                 setQuote(null);
                 setQuoteError(error instanceof Error ? error.message : "Failed to get quote");
             } finally {
@@ -280,6 +380,7 @@ export default function OfframpModule() {
         setIsQuoteLocked(false);
         setLockedQuote(null);
         setIsConfirming(false);
+        setTimedOut(false);
     };
 
     // Confirm quote and trigger TX signing
@@ -297,6 +398,17 @@ export default function OfframpModule() {
         }
 
         setIsConfirming(true);
+        setTimedOut(false);
+
+        // Start 5-minute timeout
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        timeoutRef.current = setTimeout(() => {
+            if (isConfirming) {
+                setTimedOut(true);
+                setIsConfirming(false);
+                toast.error("Transaction timed out. Please try again.", { id: "tx-timeout" });
+            }
+        }, 5 * 60 * 1000);
 
         try {
             // Step 1: Confirm quote with Cashwyre to get deposit address
@@ -361,6 +473,11 @@ export default function OfframpModule() {
                 amount: quote.totalDepositInCryptoAsset?.toString() || formState.amount,
                 cryptoAssetAddress,
                 onSuccess: () => {
+                    // Clear timeout on success
+                    if (timeoutRef.current) {
+                        clearTimeout(timeoutRef.current);
+                        timeoutRef.current = null;
+                    }
                     toast.dismiss("tx-confirming");
                     toast.success("Transaction submitted successfully!");
                     // Set success state before clearing quote data
@@ -400,6 +517,8 @@ export default function OfframpModule() {
                     <OfframpForm
                         formState={formState}
                         onChange={handleFormChange}
+                        countries={countries}
+                        isLoadingCountries={isLoadingCountries}
                         maxBalance={maxBalance}
                         onMaxClick={handleMaxClick}
                     />
@@ -417,6 +536,7 @@ export default function OfframpModule() {
 
                     <OfframpSummary
                         formState={formState}
+                        countries={countries}
                         quote={quote}
                         quoteError={quoteError}
                         onProceed={handleProceedToConfirm}
@@ -427,12 +547,13 @@ export default function OfframpModule() {
 
             {/* Quote Confirmation Modal */}
             <OfframpQuoteModal
-                isOpen={showQuoteModal}
+                isOpen={showQuoteModal || timedOut}
                 quote={quote}
                 formState={formState}
                 onClose={handleCloseModal}
                 onConfirm={handleConfirmQuote}
                 isLoading={isConfirming}
+                timedOut={timedOut}
             />
 
             {/* Success Modal */}

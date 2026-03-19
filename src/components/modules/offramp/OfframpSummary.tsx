@@ -3,11 +3,12 @@
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
-import type { OfframpFormState, OfframpQuoteData } from "@/types/offramp";
+import type { CountryInfo, OfframpFormState, OfframpQuoteData } from "@/types/offramp";
 import { SUPPORTED_COUNTRIES } from "@/types/offramp";
 
 interface OfframpSummaryProps {
     formState: OfframpFormState;
+    countries: CountryInfo[];
     quote: OfframpQuoteData | null;
     quoteError?: string | null;
     onProceed: () => void;
@@ -16,12 +17,13 @@ interface OfframpSummaryProps {
 
 export default function OfframpSummary({
     formState,
+    countries,
     quote,
     quoteError,
     onProceed,
     isLoading,
 }: OfframpSummaryProps) {
-    const selectedCountry = SUPPORTED_COUNTRIES.find(
+    const selectedCountry = countries.find(
         (c) => c.code === formState.country
     );
     const isFormValid =
@@ -61,10 +63,6 @@ export default function OfframpSummary({
                             </span>
                         </div>
                         <div className="flex justify-between text-sm">
-                            <span className="text-fundable-light-grey">Fee Type</span>
-                            <span className="text-white capitalize">{quote.feeType}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
                             <span className="text-fundable-light-grey">Expires In</span>
                             <span className="text-fundable-purple">{quote.expireInMinutes} minutes</span>
                         </div>
@@ -95,10 +93,7 @@ export default function OfframpSummary({
                             {quote ? (
                                 <>
                                     <p className="text-2xl font-bold text-white">
-                                        {selectedCountry?.currency === "NGN" ? "₦" :
-                                            selectedCountry?.currency === "GHS" ? "₵" :
-                                                selectedCountry?.currency === "KES" ? "KSh " : ""}
-                                        {quote.payoutAmountInLocalCurrency?.toLocaleString()}
+                                        {selectedCountry?.currency} {quote.payoutAmountInLocalCurrency?.toLocaleString()}
                                     </p>
                                     <p className="text-fundable-light-grey text-xs">
                                         Total Required: {quote.totalDepositInCryptoAsset} {formState.token}
@@ -107,7 +102,7 @@ export default function OfframpSummary({
                             ) : (
                                 <>
                                     <p className="text-2xl font-bold text-fundable-light-grey">
-                                        {selectedCountry?.currency || "---"}
+                                        {formState.currency || selectedCountry?.currency || "---"}
                                     </p>
                                     <p className="text-fundable-light-grey text-sm">
                                         Enter amount for quote

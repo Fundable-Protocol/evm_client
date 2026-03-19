@@ -6,7 +6,7 @@ import { Loader2, X } from "lucide-react";
 
 import type { OfframpQuoteData, OfframpFormState } from "@/types/offramp";
 
-// Currency symbols - extracted outside component for performance
+// Known currency symbols - keep for common ones, fallback to code for others
 const CURRENCY_SYMBOLS: Record<string, string> = {
     NGN: "₦",
     GHS: "₵",
@@ -14,7 +14,7 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
 };
 
 const getCurrencySymbol = (currency: string) =>
-    CURRENCY_SYMBOLS[currency] || currency + " ";
+    CURRENCY_SYMBOLS[currency] ? CURRENCY_SYMBOLS[currency] : currency + " ";
 
 interface OfframpQuoteModalProps {
     isOpen: boolean;
@@ -23,6 +23,7 @@ interface OfframpQuoteModalProps {
     onClose: () => void;
     onConfirm: () => void;
     isLoading: boolean;
+    timedOut?: boolean;
 }
 
 export default function OfframpQuoteModal({
@@ -32,6 +33,7 @@ export default function OfframpQuoteModal({
     onClose,
     onConfirm,
     isLoading,
+    timedOut = false,
 }: OfframpQuoteModalProps) {
     // Handle Escape key to close modal
     const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -47,7 +49,8 @@ export default function OfframpQuoteModal({
         }
     }, [isOpen, handleKeyDown]);
 
-    if (!isOpen || !quote) return null;
+    if (!isOpen) return null;
+    if (!quote && !timedOut) return null;
 
     // Handle backdrop click
     const handleBackdropClick = (e: React.MouseEvent) => {
@@ -72,11 +75,29 @@ export default function OfframpQuoteModal({
                 </button>
 
                 <h3 className="text-xl font-syne font-semibold text-white mb-6">
-                    Confirm Offramp
+                    {timedOut ? "Transaction Timed Out" : "Confirm Offramp"}
                 </h3>
 
-                <div className="space-y-4">
-                    {/* Amount Section */}
+                {timedOut ? (
+                    <div className="space-y-6">
+                        <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-6 text-center">
+                            <p className="text-red-400 mb-2 font-medium">Something went wrong</p>
+                            <p className="text-fundable-light-grey text-sm">
+                                The transaction is taking longer than expected. Please check your wallet or try again.
+                            </p>
+                        </div>
+                        <Button
+                            onClick={onClose}
+                            variant="gradient"
+                            size="lg"
+                            className="w-full"
+                        >
+                            Try Again
+                        </Button>
+                    </div>
+                ) : quote && (
+                    <div className="space-y-4">
+                        {/* Amount Section */}
                     <div className="bg-fundable-dark p-4 rounded-lg">
                         <p className="text-fundable-light-grey text-sm">You Send</p>
                         <p className="text-white text-xl font-semibold">
@@ -148,7 +169,8 @@ export default function OfframpQuoteModal({
                             )}
                         </Button>
                     </div>
-                </div>
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -10,17 +10,19 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
-import type { OfframpFormState, OfframpToken, OfframpCountry } from "@/types/offramp";
-import { SUPPORTED_COUNTRIES, SUPPORTED_OFFRAMP_TOKENS } from "@/types/offramp";
+import type { OfframpFormState, OfframpToken, OfframpCountry, CountryInfo } from "@/types/offramp";
+import { SUPPORTED_OFFRAMP_TOKENS } from "@/types/offramp";
 
 interface OfframpFormProps {
     formState: OfframpFormState;
     onChange: (field: keyof OfframpFormState, value: string) => void;
+    countries: CountryInfo[];
+    isLoadingCountries?: boolean;
     maxBalance?: string;
     onMaxClick?: () => void;
 }
 
-export default function OfframpForm({ formState, onChange, maxBalance, onMaxClick }: OfframpFormProps) {
+export function OfframpForm({ formState, onChange, countries, isLoadingCountries, maxBalance, onMaxClick }: OfframpFormProps) {
     return (
         <div className="bg-fundable-mid-dark rounded-2xl p-6 border border-gray-800">
             <h2 className="text-xl font-syne font-semibold text-white mb-6">
@@ -63,10 +65,14 @@ export default function OfframpForm({ formState, onChange, maxBalance, onMaxClic
                     <div className="relative">
                         <Input
                             id="amount"
-                            type="number"
+                            type="text"
+                            inputMode="decimal"
                             placeholder="0.00"
                             value={formState.amount}
-                            onChange={(e) => onChange("amount", e.target.value)}
+                            onChange={(e) => {
+                                const val = e.target.value.replace(/[^0-9.]/g, "");
+                                if (val.split(".").length <= 2) onChange("amount", val);
+                            }}
                             className="bg-fundable-dark border-gray-700 text-white h-12 pr-16"
                         />
                         <button
@@ -90,10 +96,10 @@ export default function OfframpForm({ formState, onChange, maxBalance, onMaxClic
                         onValueChange={(value) => onChange("country", value as OfframpCountry)}
                     >
                         <SelectTrigger id="country" className="bg-fundable-dark border-gray-700 text-white h-12">
-                            <SelectValue placeholder="Select country" />
+                            <SelectValue placeholder={isLoadingCountries ? "Loading countries..." : "Select country"} />
                         </SelectTrigger>
                         <SelectContent className="bg-fundable-dark border-gray-700">
-                            {SUPPORTED_COUNTRIES.map((country) => (
+                            {countries.map((country) => (
                                 <SelectItem
                                     key={country.code}
                                     value={country.code}
@@ -110,6 +116,25 @@ export default function OfframpForm({ formState, onChange, maxBalance, onMaxClic
                             ))}
                         </SelectContent>
                     </Select>
+                </div>
+
+                {/* Email Notification (Optional) */}
+                <div className="space-y-2">
+                    <Label htmlFor="email" className="text-fundable-light-grey text-sm">
+                        Email for Notifications{" "}
+                        <span className="text-gray-500 text-xs">(optional)</span>
+                    </Label>
+                    <Input
+                        id="email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={formState.email}
+                        onChange={(e) => onChange("email", e.target.value)}
+                        className="bg-fundable-dark border-gray-700 text-white h-12"
+                    />
+                    <p className="text-gray-500 text-xs">
+                        Get notified when your payout arrives in your bank account.
+                    </p>
                 </div>
             </div>
         </div>

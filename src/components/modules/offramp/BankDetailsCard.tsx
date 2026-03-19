@@ -248,7 +248,7 @@ export default function BankDetailsCard({
                     </div>
                 </div>
 
-                {/* Account Name (auto-filled) */}
+                {/* Account Name (auto-filled or manual) */}
                 <div className="space-y-2">
                     <Label className="text-fundable-light-grey text-sm">
                         Account Name
@@ -256,17 +256,17 @@ export default function BankDetailsCard({
                     <div className="relative">
                         <Input
                             type="text"
-                            placeholder="Account name will appear here"
+                            placeholder="Account name"
                             value={formState.accountName}
-                            readOnly
+                            onChange={(e) => onChange("accountName", e.target.value)}
                             className="bg-fundable-dark border-gray-700 text-white h-12 pr-10"
                         />
-                        {formState.accountName && (
+                        {formState.accountName && !isVerifyingAccount && (
                             <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
                         )}
                     </div>
-                    {formState.accountName && (
-                        <p className="text-green-500 text-xs">Account verified ✓</p>
+                    {formState.accountName && !isVerifyingAccount && (
+                        <p className="text-green-500 text-xs text-right">Verified lookup or manual entry</p>
                     )}
                 </div>
             </div>
