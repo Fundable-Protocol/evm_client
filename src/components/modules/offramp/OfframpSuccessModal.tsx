@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { X, Copy, CheckCircle2, Loader2, XCircle, Clock } from "lucide-react";
+import { X, CheckCircle2, Loader2, XCircle, Clock } from "lucide-react";
 import toast from "react-hot-toast";
 
 import type { OfframpConfirmResponse, PayoutStatus } from "@/types/offramp";
@@ -23,12 +23,10 @@ export default function OfframpSuccessModal({
     walletId,
     onClose,
 }: OfframpSuccessModalProps) {
-    const [copied, setCopied] = useState(false);
     const [payoutStatus, setPayoutStatus] = useState<PayoutStatus>("pending");
     const [payoutMessage, setPayoutMessage] = useState<string | null>(null);
     const [isPolling, setIsPolling] = useState(false);
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-    const copyTimeoutRef = useRef<number | null>(null);
 
     // Poll for payout status
     const pollPayoutStatus = useCallback(async () => {
@@ -90,37 +88,7 @@ export default function OfframpSuccessModal({
         }
     }, [isOpen, transactionReference, pollPayoutStatus]);
 
-    // Cleanup copy timeout on unmount — must be above the early return
-    // so hooks are always called in the same order on every render.
-    useEffect(() => {
-        return () => {
-            if (copyTimeoutRef.current) {
-                clearTimeout(copyTimeoutRef.current);
-                copyTimeoutRef.current = null;
-            }
-        };
-    }, []);
-
     if (!isOpen || !data) return null;
-
-    const handleCopy = async () => {
-        try {
-            await navigator.clipboard.writeText(data.depositAddress);
-            setCopied(true);
-            toast.success("Address copied!");
-            // Clear any existing timeout before setting a new one
-            if (copyTimeoutRef.current) {
-                clearTimeout(copyTimeoutRef.current);
-                copyTimeoutRef.current = null;
-            }
-            copyTimeoutRef.current = window.setTimeout(() => {
-                setCopied(false);
-                copyTimeoutRef.current = null;
-            }, 2000);
-        } catch {
-            toast.error("Failed to copy");
-        }
-    };
 
 
     const getStatusDisplay = () => {
@@ -180,69 +148,37 @@ export default function OfframpSuccessModal({
 
                 {/* Status Icon */}
                 <div className="flex justify-center mb-4">
-                    <div className={`h-16 w-16 rounded-full ${statusDisplay.bgColor} flex items-center justify-center`}>
-                        {payoutStatus === "completed" ? (
-                            <CheckCircle2 className="h-10 w-10 text-green-500" />
-                        ) : payoutStatus === "failed" ? (
+                    <div className={`h-16 w-16 rounded-full ${payoutStatus === "failed" ? "bg-red-500/20" : payoutStatus === "expired" ? "bg-gray-500/20" : "bg-green-500/20"} flex items-center justify-center`}>
+                        {payoutStatus === "failed" ? (
                             <XCircle className="h-10 w-10 text-red-500" />
                         ) : payoutStatus === "expired" ? (
                             <Clock className="h-10 w-10 text-gray-500" />
                         ) : (
-                            <Loader2 className="h-10 w-10 text-blue-500 animate-spin" />
+                            <CheckCircle2 className="h-10 w-10 text-green-500" />
                         )}
                     </div>
                 </div>
 
                 <h3 className="text-xl font-syne font-semibold text-white text-center mb-2">
-                    {payoutStatus === "completed"
-                        ? "Payout Complete! 🎉"
-                        : payoutStatus === "failed"
-                            ? "Payout Failed"
-                            : payoutStatus === "expired"
-                                ? "Payout Expired"
-                                : "Offramp Processing"}
+                    {payoutStatus === "failed"
+                        ? "Payout Failed"
+                        : payoutStatus === "expired"
+                            ? "Payout Expired"
+                            : "Transaction Completed ✅"}
                 </h3>
                 <p className="text-fundable-light-grey text-center text-sm mb-6">
-                    {payoutStatus === "completed"
-                        ? "Your funds have been sent to your bank account"
-                        : payoutStatus === "failed"
-                            ? payoutMessage || "There was an issue with your payout. Please contact support."
-                            : payoutStatus === "expired"
-                                ? "This transaction has expired. Please try again."
-                                : "Your transaction is being processed. This page will update automatically."}
+                    {payoutStatus === "failed"
+                        ? payoutMessage || "There was an issue with your payout. Please contact support."
+                        : payoutStatus === "expired"
+                            ? "This transaction has expired. Please try again."
+                            : "Your transaction is on the way to your bank account."}
                 </p>
 
                 <div className="space-y-4">
-                    {/* Deposit Address - Only show if pending */}
-                    {!isTerminalStatus && (
-                        <div className="bg-fundable-dark p-4 rounded-lg">
-                            <p className="text-fundable-light-grey text-sm mb-2">
-                                Deposit Address
-                            </p>
-                            <div className="flex items-center gap-2">
-                                <code className="text-white text-sm break-all flex-1 bg-fundable-mid-grey p-2 rounded">
-                                    {data.depositAddress}
-                                </code>
-                                <Button
-                                    onClick={handleCopy}
-                                    variant="ghost"
-                                    size="icon"
-                                    className="shrink-0 text-fundable-purple hover:text-white hover:bg-fundable-violet"
-                                >
-                                    {copied ? (
-                                        <CheckCircle2 className="h-5 w-5 text-green-500" />
-                                    ) : (
-                                        <Copy className="h-5 w-5" />
-                                    )}
-                                </Button>
-                            </div>
-                        </div>
-                    )}
-
                     {/* Amount */}
                     <div className="bg-fundable-dark p-4 rounded-lg">
                         <p className="text-fundable-light-grey text-sm">
-                            {isTerminalStatus ? "Amount Sent" : "Amount to Send"}
+                            Amount Sent
                         </p>
                         <p className="text-white text-xl font-semibold">
                             {data.depositAmount} {data.depositToken}
@@ -278,16 +214,6 @@ export default function OfframpSuccessModal({
                         </div>
                     )}
 
-                    {/* Warning - only show when pending */}
-                    {!isTerminalStatus && (
-                        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
-                            <p className="text-yellow-500 text-sm">
-                                ⚠️ Only send {data.depositToken} to this address. Sending other
-                                tokens may result in permanent loss.
-                            </p>
-                        </div>
-                    )}
-
                     {/* Close Button */}
                     <Button
                         onClick={onClose}
@@ -295,7 +221,7 @@ export default function OfframpSuccessModal({
                         size="lg"
                         className="w-full mt-4"
                     >
-                        {isTerminalStatus ? "Done" : "Close"}
+                        Done
                     </Button>
                 </div>
             </div>
