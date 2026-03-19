@@ -307,7 +307,7 @@ export default function OfframpModule() {
                         totalDepositInCryptoAsset: best.cryptoAmount, // Assuming no extra bridge fee here
                         cryptoRate: best.rate,
                         rateCurrency: best.currency,
-                        feeType: "integrated",
+                        feeType: "receiver",
                         expireOn: best.expiresAt || new Date(Date.now() + 15 * 60 * 1000).toISOString(),
                         expireInMinutes: 15,
                         country: formState.country,
