@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
 import type { CountryInfo, OfframpFormState, OfframpQuoteData } from "@/types/offramp";
-import { SUPPORTED_COUNTRIES } from "@/types/offramp";
 
 interface OfframpSummaryProps {
     formState: OfframpFormState;

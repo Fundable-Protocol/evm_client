@@ -337,7 +337,7 @@ export default function OfframpModule() {
         // Debounce quote fetching by 500ms
         const timer = setTimeout(fetchQuote, 500);
         return () => clearTimeout(timer);
-    }, [formState.amount, formState.token, formState.country, isQuoteLocked, getCurrentNetwork]);
+    }, [formState.amount, formState.token, formState.country, formState.currency, countries, isQuoteLocked, getCurrentNetwork]);
 
     // Proceed to confirmation (quote is already fetched in real-time)
     const handleProceedToConfirm = () => {
