@@ -215,10 +215,10 @@ export const TOKEN_CONTRACTS: Record<string, Record<string, string>> = {
 };
 
 // Chains Cashwyre accepts deposits on directly
-export const CASHWYRE_NATIVE_CHAIN_IDS = [137, 56] as const; // Polygon, BSC
+export const CASHWYRE_NATIVE_CHAIN_IDS = [137] as const; // Polygon
 
 // Chains that require an Across bridge hop to a Cashwyre-native chain first
-export const BRIDGE_REQUIRED_CHAIN_IDS = [1135, 1, 8453, 42161] as const; // Lisk, Ethereum, Base, Arbitrum
+export const BRIDGE_REQUIRED_CHAIN_IDS = [1135, 1, 8453, 42161, 56] as const; // Lisk, Ethereum, Base, Arbitrum, BSC
 
 // All chain IDs the offramp feature supports (native + bridge)
 export const OFFRAMP_CHAIN_IDS = [

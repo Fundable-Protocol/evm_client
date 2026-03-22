@@ -68,7 +68,7 @@ const SPOKE_POOL_ADDRESSES: Record<number, `0x${string}`> = {
     8453: "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64", // Base
     42161: "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A", // Arbitrum
     137: "0x9295ee1d8C5b022Be115A2AD3c30C72E34e7F096", // Polygon (source too)
-    56: "0x000000000000000000000000000000000000000", // BSC (no spoke pool needed, native)
+    56: "0x4e8E101924eDE233C13e2D8622DC8aED2872d505", // BSC
 };
 
 // ─── Across Suggested Fees API ─────────────────────────────────────────────

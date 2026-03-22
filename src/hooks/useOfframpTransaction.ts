@@ -43,12 +43,12 @@ const TOKEN_DECIMALS: Record<string, Record<string, number>> = {
 // For bridged chains we always report "polygon" since Across delivers there.
 const CHAIN_TO_NETWORK: Record<number, string> = {
     137: "polygon",
-    56: "binance_smart_chain",
     // Bridge chains: Cashwyre receives on Polygon via Across
     1135: "polygon",
     1: "polygon",
     8453: "polygon",
     42161: "polygon",
+    56: "polygon",
 };
 
 // ─── Chain ID → display name (for toasts) ────────────────────────────────
@@ -140,18 +140,12 @@ export function useOfframpTransaction() {
             toast.dismiss("tx-confirming");
             toast.success("Transaction confirmed on-chain!");
 
-            cashwyreService.updateQuoteTxHash(
-                pendingTxData.transactionReference,
-                hash,
-                address ?? ""
-            ).catch(err => console.error("Failed to update TX hash:", err));
-
             pendingTxData.onSuccess?.(hash);
             setPendingTxData(null);
             setIsProcessing(false);
             isProcessingRef.current = false;
         }
-    }, [isConfirmed, hash, pendingTxData, address]);
+    }, [isConfirmed, hash, pendingTxData]);
 
     // ── Main entry point ──────────────────────────────────────────────────
     const sendOfframpTransaction = useCallback(async ({
