@@ -158,6 +158,7 @@ export function useAcrossBridge(): UseAcrossBridgeReturn {
                 originChainId: sourceChainId.toString(),
                 destinationChainId: ACROSS_BRIDGE_TARGET_CHAIN_ID.toString(),
                 amount: inputAmountRaw.toString(),
+                allowUnmatchedDecimals: "true",
             });
 
             const res = await fetch(`${ACROSS_API_BASE}/suggested-fees?${params}`);
