@@ -179,7 +179,7 @@ export function useOfframpTransaction() {
 
         try {
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            // PATH A: Direct ERC20 transfer (Polygon or BSC)
+            // PATH A: Direct ERC20 transfer (Polygon)
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             if (isNativeChain) {
                 const tokenContract = getTokenContract(token);
@@ -274,6 +274,8 @@ export function useOfframpTransaction() {
                     decimals,
                     displayAmount: `${amount} ${token}`,
                     sourceChainId: chainId,
+                    baseAmount: amount,
+                    fundableFeeAmount: parseUnits(feeResult.feeAmount.toFixed(decimals), decimals).toString(),
                 });
 
                 if (!depositTxHash) {

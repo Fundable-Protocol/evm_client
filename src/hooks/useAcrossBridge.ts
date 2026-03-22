@@ -5,7 +5,7 @@ import {
     useWriteContract,
     usePublicClient,
 } from "wagmi";
-import { parseUnits, maxUint256 } from "viem";
+import { parseUnits, maxUint256, formatUnits } from "viem";
 import toast from "react-hot-toast";
 
 import { ACROSS_BRIDGE_TARGET_CHAIN_ID } from "@/types/offramp";
@@ -103,6 +103,10 @@ export interface AcrossBridgeParams {
     displayAmount: string;
     /** Source chain ID */
     sourceChainId: number;
+    /** Original base amount (for logging) */
+    baseAmount?: string;
+    /** Fundable fee amount (for logging) */
+    fundableFeeAmount?: string;
 }
 
 export type AcrossBridgeStep = "idle" | "approving" | "depositing" | "submitted";
@@ -207,6 +211,9 @@ export function useAcrossBridge(): UseAcrossBridgeReturn {
         inputAmountRaw,
         displayAmount,
         sourceChainId,
+        decimals,
+        baseAmount,
+        fundableFeeAmount,
     }: AcrossBridgeParams): Promise<string | null> => {
         setBridgeError(null);
         const spokePool = SPOKE_POOL_ADDRESSES[sourceChainId];
@@ -262,6 +269,21 @@ export function useAcrossBridge(): UseAcrossBridgeReturn {
             if (!quote) {
                 throw new Error("Failed to fetch Across bridge quote");
             }
+            
+            // ── Log the complete fee breakdown ──────────────────────────
+            const [, tokenSymbol] = displayAmount.split(" ");
+            const symbol = tokenSymbol || "Token";
+            const acrossFeeRaw = quote.inputAmount - quote.outputAmount;
+            
+            console.log("\n================ FEE BREAKDOWN ================");
+            if (baseAmount && fundableFeeAmount) {
+                console.log(`Base Amount to Offramp:        ${baseAmount} ${symbol}`);
+                console.log(`Fundable Platform Fee (added): ${formatUnits(BigInt(fundableFeeAmount), decimals)} ${symbol}`);
+            }
+            console.log(`Total Source Amount Sent:      ${formatUnits(quote.inputAmount, decimals)} ${symbol}`);
+            console.log(`Across Bridge Fee (deducted):  ${formatUnits(acrossFeeRaw, decimals)} ${symbol}`);
+            console.log(`Total Destination Received:    ${formatUnits(quote.outputAmount, decimals)} ${symbol} (to Cashwyre)`);
+            console.log("=================================================\n");
 
             // ── Step C: Call SpokePool.depositV3 ────────────────────────
             setBridgeStep("depositing");
