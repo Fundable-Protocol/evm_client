@@ -1,19 +1,13 @@
-import { cn } from "@/lib/utils";
-
 import PlusIcon from "@/components/svgs/PlusIcon";
 import UserIcon from "@/components/svgs/UserIcon";
 import ViewIcon from "@/components/svgs/ViewIcon";
 
 import { TransactionCardProps } from "@/types/dashboard";
 
-import PercentageDecreaseIcon from "@/components/svgs/PercentageDecreaseIcon";
-import PercentageIncreaseIcon from "@/components/svgs/PercentageIncreaseIcon";
-
 const TransactionCard = ({
   type,
   title,
   amount,
-  percentage,
 }: TransactionCardProps) => {
   const Icon =
     type === "amount" ? (
@@ -23,9 +17,6 @@ const TransactionCard = ({
     ) : (
       <PlusIcon />
     );
-
-  const isPercentageIncreased = percentage && percentage > 0;
-  const isPercentageDecreased = percentage && percentage < 0;
 
   return (
     <div className="py-10 px-7 bg-fundable-mid-dark rounded-lg flex flex-col gap-y-10">

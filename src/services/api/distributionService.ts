@@ -97,7 +97,7 @@ class _DistributionApiService {
       queryString ? `?${queryString}` : ""
     }`;
 
-    return baseApiService.makeRequest<any>(
+    return baseApiService.makeRequest<unknown>(
       endpoint,
       { method: "GET" },
       walletId
