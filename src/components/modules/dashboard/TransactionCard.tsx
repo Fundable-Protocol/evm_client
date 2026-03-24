@@ -35,7 +35,7 @@ const TransactionCard = ({
           <span className="text-[#AEB9E1]">{title}</span>
         </div>
 
-        <div className="flex items-center gap-x-1">
+        <div className="flex items-center gap-x-1 opacity-40 group-hover:opacity-100 transition-opacity">
           <span className="bg-[#AEB9E1] size-1 rounded-full" />
           <span className="bg-[#AEB9E1] size-1 rounded-full" />
           <span className="bg-[#AEB9E1] size-1 rounded-full" />
@@ -43,23 +43,9 @@ const TransactionCard = ({
       </div>
 
       <div className="flex items-center gap-x-3">
-        <span className="text-3xl font-bold text-white font-geist-sans">
+        <span className="text-4xl font-bold text-white font-geist-sans tracking-tight leading-none">
           {amount}
         </span>
-        <div
-          className={cn({
-            "flex items-center gap-x-1 text-xs py-1 px-1.5 rounded border":
-              true,
-            "bg-[#05c1692c] border-[#05c16945] text-[#05C168]":
-              isPercentageIncreased,
-            "bg-[#ff5a6530] border-[#ff5a6530] text-[#FF5A65]":
-              isPercentageDecreased,
-          })}
-        >
-          <span className="">{percentage}%</span>
-          {isPercentageIncreased ? <PercentageIncreaseIcon /> : null}
-          {isPercentageDecreased ? <PercentageDecreaseIcon /> : null}
-        </div>
       </div>
     </div>
   );

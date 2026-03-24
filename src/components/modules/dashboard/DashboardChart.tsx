@@ -32,16 +32,35 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 function DashboardChart() {
   const { address } = useAccount();
+  const currentYear = new Date().getFullYear();
+  const [selectedYear, setSelectedYear] = React.useState(
+    currentYear.toString()
+  );
+
+  // Generate years from 2025 to currentYear
+  const years = Array.from(
+    { length: currentYear - 2025 + 1 },
+    (_, i) => (2025 + i).toString()
+  );
 
   const { data: transactionData = [], isFetching } = useQuery<
     ITransactionDataPoint[]
   >({
-    queryKey: ["transactionChartData", address],
+    queryKey: ["transactionChartData", address, selectedYear],
     queryFn: async () => {
       const response = await DistributionApiService.getDistributionChartData(
-        address!
+        address!,
+        parseInt(selectedYear)
       );
 
       return (response.data as unknown as ITransactionDataPoint[]) || [];
@@ -67,58 +86,73 @@ function DashboardChart() {
   );
 
   return (
-    <ChartContainer
-      config={chartConfig}
-      className="max-h-[24rem] w-full bg-fundable-mid-grey/30 rounded-md pt-2 pr-4"
-    >
-      <LineChart
-        accessibilityLayer
-        data={transactionData}
-        margin={{
-          top: 20,
-          right: 30,
-          left: 0,
-          bottom: 20,
-        }}
-      >
-        <XAxis dataKey="time" />
-        <YAxis domain={[minValue, maxValue]} />
-        <ChartTooltip content={<ChartTooltipContent />} />
-        <ChartLegend
-          content={<ChartLegendContent />}
-          align="left"
-          verticalAlign="top"
-          className="text-white mb-2 justify-start ml-6"
-        />
+    <div className="flex flex-col gap-y-4 w-full bg-fundable-mid-grey/30 rounded-md p-4">
+      <div className="flex items-center justify-between px-2">
+        <h3 className="text-white font-medium">Distribution Activity</h3>
+        <Select value={selectedYear} onValueChange={setSelectedYear}>
+          <SelectTrigger className="w-[120px] bg-fundable-mid-dark border-fundable-light-dark/30 text-white">
+            <SelectValue placeholder="Year" />
+          </SelectTrigger>
+          <SelectContent className="bg-fundable-mid-dark border-fundable-light-dark/30 text-white">
+            {years.map((year) => (
+              <SelectItem key={year} value={year}>
+                {year}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-        <Line
-          type="monotone"
-          dataKey="STRK"
-          stroke={chartConfig.STRK.color}
-          strokeWidth={2}
-          dot={{ r: 4 }}
-          activeDot={{ r: 6 }}
-        />
+      <ChartContainer config={chartConfig} className="max-h-[24rem] w-full pt-2">
+        <LineChart
+          accessibilityLayer
+          data={transactionData}
+          margin={{
+            top: 20,
+            right: 30,
+            left: 0,
+            bottom: 20,
+          }}
+        >
+          <XAxis dataKey="time" />
+          <YAxis domain={[minValue, maxValue]} />
+          <ChartTooltip content={<ChartTooltipContent />} />
+          <ChartLegend
+            content={<ChartLegendContent />}
+            align="left"
+            verticalAlign="top"
+            className="text-white mb-2 justify-start ml-6"
+          />
 
-        <Line
-          type="monotone"
-          dataKey="USDT"
-          stroke={chartConfig.USDT.color}
-          strokeWidth={2}
-          dot={{ r: 4 }}
-          activeDot={{ r: 6 }}
-        />
+          <Line
+            type="monotone"
+            dataKey="STRK"
+            stroke={chartConfig.STRK.color}
+            strokeWidth={2}
+            dot={{ r: 4 }}
+            activeDot={{ r: 6 }}
+          />
 
-        <Line
-          type="monotone"
-          dataKey="USDC"
-          stroke={chartConfig.USDC.color}
-          strokeWidth={2}
-          dot={{ r: 4 }}
-          activeDot={{ r: 6 }}
-        />
-      </LineChart>
-    </ChartContainer>
+          <Line
+            type="monotone"
+            dataKey="USDT"
+            stroke={chartConfig.USDT.color}
+            strokeWidth={2}
+            dot={{ r: 4 }}
+            activeDot={{ r: 6 }}
+          />
+
+          <Line
+            type="monotone"
+            dataKey="USDC"
+            stroke={chartConfig.USDC.color}
+            strokeWidth={2}
+            dot={{ r: 4 }}
+            activeDot={{ r: 6 }}
+          />
+        </LineChart>
+      </ChartContainer>
+    </div>
   );
 }
 

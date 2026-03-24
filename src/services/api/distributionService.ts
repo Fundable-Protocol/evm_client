@@ -87,12 +87,18 @@ class _DistributionApiService {
     }>(`/distributions/stats`, { method: "GET" }, walletId);
   }
 
-  async getDistributionChartData(walletId: string) {
-    return baseApiService.makeRequest<{
-      success: boolean;
-      chartData: unknown;
-    }>(
-      `/distributions/chart-data?user_address=${walletId}`,
+  async getDistributionChartData(walletId: string, year?: number) {
+    const params = new URLSearchParams();
+    params.append("user_address", walletId);
+    if (year) params.append("year", year.toString());
+
+    const queryString = params.toString();
+    const endpoint = `/distributions/chart-data${
+      queryString ? `?${queryString}` : ""
+    }`;
+
+    return baseApiService.makeRequest<any>(
+      endpoint,
       { method: "GET" },
       walletId
     );
