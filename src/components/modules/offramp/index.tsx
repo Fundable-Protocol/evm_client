@@ -564,10 +564,10 @@ export default function OfframpModule() {
             {/* Success Modal */}
             <OfframpSuccessModal
                 isOpen={showSuccessModal}
+                onClose={handleCloseSuccess}
                 data={confirmResult}
                 transactionReference={successTransactionReference || undefined}
                 walletId={address}
-                onClose={handleCloseSuccess}
             />
         </>
     );
