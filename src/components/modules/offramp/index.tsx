@@ -563,14 +563,11 @@ export default function OfframpModule() {
 
             {/* Success Modal */}
             <OfframpSuccessModal
-                isOpen={true} // FORCES MODAL OPEN
-                onClose={() => console.log("close clicked")}
-                data={{
-                    depositAmount: "2500",
-                    depositToken: "USDC",
-                    transactionId: "0x1234567890abcdef1234567890abcdef12345678"
-                } as any}
-                transactionReference="REF-987654321"
+                isOpen={showSuccessModal}
+                onClose={handleCloseSuccess}
+                data={confirmResult}
+                transactionReference={successTransactionReference || undefined}
+                walletId={address}
             />
         </>
     );
