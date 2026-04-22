@@ -136,7 +136,7 @@ export default function OfframpSuccessModal({
     const isTerminalStatus = payoutStatus === "completed" || payoutStatus === "failed" || payoutStatus === "expired";
 
     const shareUrl = typeof window !== "undefined" ? window.location.origin : "";
-    const shareText = "I just successfully offramped using Fundable! 🚀";
+    const shareText = "I just successfully offramped using @FundableHQ! 🚀";
 
     const handleCopyLink = async () => {
         try {
@@ -160,23 +160,34 @@ export default function OfframpSuccessModal({
 
                 {/* Status Icon */}
                 <div className="flex justify-center mb-6">
-                    <div className={`h-20 w-20 rounded-full ${payoutStatus === "failed" ? "bg-red-500/10" : payoutStatus === "expired" ? "bg-gray-500/10" : "bg-green-500/10"} flex items-center justify-center`}>
-                        {payoutStatus === "failed" ? (
-                            <XCircle className="h-10 w-10 text-red-500" />
-                        ) : payoutStatus === "expired" ? (
-                            <Clock className="h-10 w-10 text-gray-500" />
-                        ) : (
-                            <CheckCircle2 className="h-10 w-10 text-green-500" />
-                        )}
+                    <div className={`h-16 w-16 rounded-full ${payoutStatus === "failed" ? "bg-red-500/20" : payoutStatus === "expired" ? "bg-gray-500/20" : "bg-green-500/20"} flex items-center justify-center`}>
+                        <div className={`h-10 w-10 rounded-full ${payoutStatus === "failed" ? "bg-red-500" : payoutStatus === "expired" ? "bg-gray-500" : "bg-green-500"} flex items-center justify-center`}>
+                            {payoutStatus === "failed" ? (
+                                <X className="h-6 w-6 text-white" strokeWidth={3} />
+                            ) : payoutStatus === "expired" ? (
+                                <Clock className="h-6 w-6 text-white" strokeWidth={3} />
+                            ) : (
+                                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                            )}
+                        </div>
                     </div>
                 </div>
 
-                <h3 className="text-2xl font-syne font-bold text-white text-center mb-2">
+                <h3 className="text-2xl font-syne font-bold text-white text-center mb-2 flex items-center justify-center gap-2">
                     {payoutStatus === "failed"
                         ? "Payout Failed"
                         : payoutStatus === "expired"
                             ? "Payout Expired"
                             : "Transaction Completed"}
+                    {payoutStatus !== "failed" && payoutStatus !== "expired" && (
+                        <div className="bg-[#4ADE80] rounded-[4px] p-0.5">
+                            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                    )}
                 </h3>
                 <p className="text-fundable-light-grey text-center text-sm mb-8">
                     {payoutStatus === "failed"
@@ -188,11 +199,11 @@ export default function OfframpSuccessModal({
 
                 <div className="space-y-6">
                     {/* Amount Box */}
-                    <div className="bg-[#1A1A2E] p-5 rounded-xl border border-gray-800 flex justify-between items-center">
-                        <span className="text-xs text-fundable-light-grey uppercase tracking-wider font-semibold">
+                    <div className="bg-[#151529] p-5 rounded-xl border border-indigo-500/20 flex justify-between items-center">
+                        <span className="text-[10px] text-fundable-light-grey uppercase tracking-widest font-bold">
                             Amount Sent
                         </span>
-                        <span className="text-white text-xl font-bold">
+                        <span className="text-white text-2xl font-bold">
                             {data.depositAmount} {data.depositToken}
                         </span>
                     </div>
@@ -230,17 +241,17 @@ export default function OfframpSuccessModal({
 
                     {/* Share Section */}
                     <div className="pt-4 border-t border-gray-800">
-                        <p className="text-center text-xs text-fundable-light-grey uppercase tracking-widest font-semibold mb-4">
+                        <p className="text-[10px] text-fundable-light-grey uppercase tracking-widest font-bold mb-4">
                             Share Your Success
                         </p>
-                        <div className="flex justify-center gap-4">
+                        <div className="flex justify-between gap-2">
                             <a
                                 href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="w-10 h-10 rounded-full bg-[#1A1A2E] border border-gray-800 flex items-center justify-center text-gray-400 hover:text-white hover:border-gray-600 transition-all"
+                                className="w-[72px] h-12 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 hover:bg-blue-500/20 transition-all"
                             >
-                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                                 </svg>
                             </a>
@@ -248,25 +259,25 @@ export default function OfframpSuccessModal({
                                 href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="w-10 h-10 rounded-full bg-[#1A1A2E] border border-gray-800 flex items-center justify-center text-gray-400 hover:text-[#0A66C2] hover:border-[#0A66C2] transition-all"
+                                className="w-[72px] h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 hover:bg-indigo-500/20 transition-all"
                             >
-                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path fillRule="evenodd" d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" clipRule="evenodd" />
                                 </svg>
                             </a>
                             <a
                                 href={`mailto:?subject=${encodeURIComponent("Successfully offramped using Fundable!")}&body=${encodeURIComponent(shareText + " " + shareUrl)}`}
-                                className="w-10 h-10 rounded-full bg-[#1A1A2E] border border-gray-800 flex items-center justify-center text-gray-400 hover:text-white hover:border-gray-600 transition-all"
+                                className="w-[72px] h-12 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 hover:bg-red-500/20 transition-all"
                             >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
                             </a>
                             <button
                                 onClick={handleCopyLink}
-                                className="w-10 h-10 rounded-full bg-[#1A1A2E] border border-gray-800 flex items-center justify-center text-gray-400 hover:text-white hover:border-gray-600 transition-all"
+                                className="w-[72px] h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 hover:bg-purple-500/20 transition-all"
                             >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                                 </svg>
                             </button>
