@@ -143,7 +143,7 @@ export default function OfframpSuccessModal({
             await navigator.clipboard.writeText(shareUrl);
             toast.success("Link copied to clipboard!");
         } catch (err) {
-            toast.error("Failed to copy link");
+            toast.error(`Failed to copy link ${err}`);
         }
     };
 
