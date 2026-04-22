@@ -135,20 +135,32 @@ export default function OfframpSuccessModal({
     const statusDisplay = getStatusDisplay();
     const isTerminalStatus = payoutStatus === "completed" || payoutStatus === "failed" || payoutStatus === "expired";
 
+    const shareUrl = typeof window !== "undefined" ? window.location.origin : "";
+    const shareText = "I just successfully offramped using Fundable! 🚀";
+
+    const handleCopyLink = async () => {
+        try {
+            await navigator.clipboard.writeText(shareUrl);
+            toast.success("Link copied to clipboard!");
+        } catch (err) {
+            toast.error("Failed to copy link");
+        }
+    };
+
     return (
-        <div className="fixed inset-0 bg-fundable-dark/80 backdrop-blur-sm flex justify-center items-center z-50">
-            <div className="bg-fundable-mid-dark border border-green-500/50 rounded-2xl p-6 w-full max-w-md mx-4 relative">
+        <div className="fixed inset-0 bg-[#0A0A1A]/80 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+            <div className="bg-[#0A0A1A] border border-gray-800 rounded-2xl p-6 w-full max-w-md mx-auto relative shadow-2xl">
                 {/* Close Button */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+                    className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"
                 >
                     <X className="h-5 w-5" />
                 </button>
 
                 {/* Status Icon */}
-                <div className="flex justify-center mb-4">
-                    <div className={`h-16 w-16 rounded-full ${payoutStatus === "failed" ? "bg-red-500/20" : payoutStatus === "expired" ? "bg-gray-500/20" : "bg-green-500/20"} flex items-center justify-center`}>
+                <div className="flex justify-center mb-6">
+                    <div className={`h-20 w-20 rounded-full ${payoutStatus === "failed" ? "bg-red-500/10" : payoutStatus === "expired" ? "bg-gray-500/10" : "bg-green-500/10"} flex items-center justify-center`}>
                         {payoutStatus === "failed" ? (
                             <XCircle className="h-10 w-10 text-red-500" />
                         ) : payoutStatus === "expired" ? (
@@ -159,14 +171,14 @@ export default function OfframpSuccessModal({
                     </div>
                 </div>
 
-                <h3 className="text-xl font-syne font-semibold text-white text-center mb-2">
+                <h3 className="text-2xl font-syne font-bold text-white text-center mb-2">
                     {payoutStatus === "failed"
                         ? "Payout Failed"
                         : payoutStatus === "expired"
                             ? "Payout Expired"
-                            : "Transaction Completed ✅"}
+                            : "Transaction Completed"}
                 </h3>
-                <p className="text-fundable-light-grey text-center text-sm mb-6">
+                <p className="text-fundable-light-grey text-center text-sm mb-8">
                     {payoutStatus === "failed"
                         ? payoutMessage || "There was an issue with your payout. Please contact support."
                         : payoutStatus === "expired"
@@ -174,52 +186,97 @@ export default function OfframpSuccessModal({
                             : "Your transaction is on the way to your bank account."}
                 </p>
 
-                <div className="space-y-4">
-                    {/* Amount */}
-                    <div className="bg-fundable-dark p-4 rounded-lg">
-                        <p className="text-fundable-light-grey text-sm">
+                <div className="space-y-6">
+                    {/* Amount Box */}
+                    <div className="bg-[#1A1A2E] p-5 rounded-xl border border-gray-800 flex justify-between items-center">
+                        <span className="text-xs text-fundable-light-grey uppercase tracking-wider font-semibold">
                             Amount Sent
-                        </p>
-                        <p className="text-white text-xl font-semibold">
+                        </span>
+                        <span className="text-white text-xl font-bold">
                             {data.depositAmount} {data.depositToken}
-                        </p>
-                    </div>
-
-                    {/* Transaction ID */}
-                    <div className="flex justify-between text-sm">
-                        <span className="text-fundable-light-grey">Transaction ID</span>
-                        <span className="text-white font-mono">
-                            {data.transactionId.slice(0, 8)}...
                         </span>
                     </div>
 
-                    {/* Payout Status */}
-                    <div className="flex justify-between text-sm items-center">
-                        <span className="text-fundable-light-grey">Payout Status</span>
-                        <span className={`${statusDisplay.color} capitalize flex items-center gap-2`}>
-                            {statusDisplay.icon}
-                            {statusDisplay.text}
-                            {isPolling && !isTerminalStatus && (
-                                <span className="text-xs text-fundable-light-grey">(updating...)</span>
-                            )}
-                        </span>
+                    <div className="space-y-4">
+                        {/* Transaction ID */}
+                        <div className="flex justify-between text-sm items-center">
+                            <span className="text-fundable-light-grey">Transaction ID</span>
+                            <span className="text-white font-mono bg-[#1A1A2E] px-3 py-1 rounded-md">
+                                {data.transactionId.slice(0, 8)}...
+                            </span>
+                        </div>
+
+                        {/* Payout Status */}
+                        <div className="flex justify-between text-sm items-center">
+                            <span className="text-fundable-light-grey">Payout Status</span>
+                            <span className={`${statusDisplay.color} capitalize flex items-center gap-2 font-medium`}>
+                                {statusDisplay.icon}
+                                {statusDisplay.text}
+                                {isPolling && !isTerminalStatus && (
+                                    <span className="text-xs text-fundable-light-grey ml-1">(updating...)</span>
+                                )}
+                            </span>
+                        </div>
                     </div>
 
                     {/* Status Message */}
                     {payoutMessage && isTerminalStatus && (
                         <div className={`${payoutStatus === "completed" ? "bg-green-500/10 border-green-500/30" : "bg-red-500/10 border-red-500/30"} border rounded-lg p-3`}>
-                            <p className={`${payoutStatus === "completed" ? "text-green-400" : "text-red-400"} text-sm`}>
+                            <p className={`${payoutStatus === "completed" ? "text-green-400" : "text-red-400"} text-sm text-center`}>
                                 {payoutMessage}
                             </p>
                         </div>
                     )}
 
+                    {/* Share Section */}
+                    <div className="pt-4 border-t border-gray-800">
+                        <p className="text-center text-xs text-fundable-light-grey uppercase tracking-widest font-semibold mb-4">
+                            Share Your Success
+                        </p>
+                        <div className="flex justify-center gap-4">
+                            <a
+                                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-10 h-10 rounded-full bg-[#1A1A2E] border border-gray-800 flex items-center justify-center text-gray-400 hover:text-white hover:border-gray-600 transition-all"
+                            >
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                                </svg>
+                            </a>
+                            <a
+                                href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-10 h-10 rounded-full bg-[#1A1A2E] border border-gray-800 flex items-center justify-center text-gray-400 hover:text-[#0A66C2] hover:border-[#0A66C2] transition-all"
+                            >
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path fillRule="evenodd" d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" clipRule="evenodd" />
+                                </svg>
+                            </a>
+                            <a
+                                href={`mailto:?subject=${encodeURIComponent("Successfully offramped using Fundable!")}&body=${encodeURIComponent(shareText + " " + shareUrl)}`}
+                                className="w-10 h-10 rounded-full bg-[#1A1A2E] border border-gray-800 flex items-center justify-center text-gray-400 hover:text-white hover:border-gray-600 transition-all"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                            </a>
+                            <button
+                                onClick={handleCopyLink}
+                                className="w-10 h-10 rounded-full bg-[#1A1A2E] border border-gray-800 flex items-center justify-center text-gray-400 hover:text-white hover:border-gray-600 transition-all"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
                     {/* Close Button */}
                     <Button
                         onClick={onClose}
-                        variant="gradient"
-                        size="lg"
-                        className="w-full mt-4"
+                        className="w-full h-12 rounded-xl font-bold text-white bg-gradient-to-r from-fundable-purple-2 to-purple-500 hover:opacity-90 active:scale-[0.98] transition-all"
                     >
                         Done
                     </Button>
