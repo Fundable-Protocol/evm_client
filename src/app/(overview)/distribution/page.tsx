@@ -343,7 +343,7 @@ const DistributePage = () => {
       };
 
       const distributionAbi = [{
-        name: distributionInfo.type === 'equal' ? 'distribute' : 'distribute_weighted',
+        name: distributionInfo.type === 'equal' ? 'distribute' : 'distributeWeighted',
         type: 'function',
         stateMutability: 'nonpayable',
         inputs: distributionInfo.type === 'equal'
@@ -364,7 +364,7 @@ const DistributePage = () => {
         to: CONTRACT_ADDRESS as `0x${string}`,
         data: encodeFunctionData({
           abi: distributionAbi,
-          functionName: distributionInfo.type === 'equal' ? 'distribute' : 'distribute_weighted',
+          functionName: distributionInfo.type === 'equal' ? 'distribute' : 'distributeWeighted',
           args: distributionInfo.type === 'equal'
             ? [amounts![0], recipients, selectedToken.address as `0x${string}`]
             : [amounts!, recipients, selectedToken.address as `0x${string}`]
@@ -396,7 +396,7 @@ const DistributePage = () => {
        const distributeHash = await writeContractAsync({
          address: CONTRACT_ADDRESS as `0x${string}`,
          abi: distributionAbi,
-         functionName: distributionInfo.type === 'equal' ? 'distribute' : 'distribute_weighted',
+         functionName: distributionInfo.type === 'equal' ? 'distribute' : 'distributeWeighted',
          args: distributionInfo.type === 'equal'
            ? [amounts![0], recipients, selectedToken.address as `0x${string}`]
            : [amounts!, recipients, selectedToken.address as `0x${string}`]
