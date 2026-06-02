@@ -83,7 +83,7 @@ export const SUPPORTED_TOKENS: Record<
 };
 
 export const CONTRACT_ADDRESS =
-  "0xaa0939b802060785c541553911caa6781c41f5d5";
+  "0xe2c73814A3840F3d32887a57Ec955a58Aba02E65";
 
 export const distributionState = [
   "process-started",
