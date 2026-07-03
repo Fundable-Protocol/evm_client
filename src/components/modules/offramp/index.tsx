@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef    } from "react";
 import toast from "react-hot-toast";
 import { useBalance, useChainId } from "wagmi";
 import { formatUnits } from "viem";
-import { calculateOfframpFee } from "@/utils/offramp-fee";
+import { calculateOfframpFee, calculateMaxOfframpAmount } from "@/utils/offramp-fee";
 
 import { OfframpForm } from "./OfframpForm";
 import BankDetailsCard from "./BankDetailsCard";
@@ -112,8 +112,9 @@ export default function OfframpModule() {
     // Handle Max button click
     const handleMaxClick = useCallback(() => {
         if (maxBalance) {
+            const maxAmount = calculateMaxOfframpAmount(parseFloat(maxBalance));
             setFormState(prev => {
-                const newState = { ...prev, amount: maxBalance };
+                const newState = { ...prev, amount: maxAmount.toString() };
                 if (typeof window !== "undefined") {
                     localStorage.setItem(CACHE_KEY, JSON.stringify(newState));
                 }
@@ -475,7 +476,7 @@ export default function OfframpModule() {
             await sendOfframpTransaction({
                 transactionReference: quote.transactionReference,
                 token: formState.token as "USDC" | "USDT",
-                amount: quote.totalDepositInCryptoAsset?.toString() || formState.amount,
+                amount: quote.amountInCryptoAsset?.toString() || formState.amount,
                 cryptoAssetAddress,
                 onSuccess: () => {
                     // Clear timeout on success
