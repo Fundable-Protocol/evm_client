@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 
-import { User2 } from "lucide-react";
+import { ArrowDownToLine, User2 } from "lucide-react";
 import { Sidebar, useSidebar } from "@/components/ui/sidebar";
 import Logo from "../../../public/svgs/fundable_logo.svg";
 
@@ -39,6 +39,11 @@ const items = [
     title: "Payment Stream",
     url: "/payment-stream",
     icon: <StreamIcon aria-hidden="true" />,
+  },
+  {
+    title: "Offramp",
+    url: "/offramp",
+    icon: <ArrowDownToLine aria-hidden="true" className="size-5 text-white" />,
   },
   {
     title: "Airdrop",
@@ -78,6 +83,11 @@ const mobileItems = [
     title: "History",
     url: "/history",
     icon: <User2 aria-hidden="true" className="text-white size-5" />,
+  },
+  {
+    title: "Offramp",
+    url: "/offramp",
+    icon: <ArrowDownToLine aria-hidden="true" className="size-5" />,
   },
 ];
 
