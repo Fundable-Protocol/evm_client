@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 
-import { ArrowDownToLine, User2 } from "lucide-react";
+import { ArrowDownToLine, Banknote, User2 } from "lucide-react";
 import { Sidebar, useSidebar } from "@/components/ui/sidebar";
 import Logo from "../../../public/svgs/fundable_logo.svg";
 

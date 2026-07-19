@@ -9,7 +9,6 @@ import type {
     BankListResponse,
     VerifyBankAccountResponse,
     RateInfoResponse,
-    OfframpCountry,
 } from "@/types/offramp";
 
 const OFFRAMP_API_BASE = `${backendBaseUrl}/api/offramp`;
@@ -101,7 +100,7 @@ export const cashwyreService = {
      * Get list of supported banks for a country
      */
     async getBankList(
-        country: OfframpCountry,
+        country: string,
         walletId?: string
     ): Promise<BankListResponse> {
         try {
