@@ -455,6 +455,15 @@ export default function OfframpExperience() {
     );
   }, [flow.chainId]);
 
+  if (flow.isRestoringOrder) {
+    return (
+      <div className="flex min-h-56 items-center justify-center gap-3 text-sm text-gray-400">
+        <LoaderCircle className="size-5 animate-spin" aria-hidden="true" />
+        Restoring your transfer
+      </div>
+    );
+  }
+
   if (flow.order) return <OrderProgress flow={flow} />;
 
   return (

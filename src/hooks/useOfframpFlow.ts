@@ -12,6 +12,7 @@ import {
   OFFRAMP_MESSAGES,
   OFFRAMP_POLLING,
   OFFRAMP_STORAGE_KEYS,
+  OFFRAMP_URL_KEYS,
 } from "@/lib/offramp/offramp.constants";
 import {
   getOfframpBalanceState,
@@ -66,6 +67,8 @@ export function useOfframpFlow() {
     useState<OfframpPublicStatus | null>(null);
   const [txHash, setTxHash] = useState<`0x${string}` | null>(null);
   const [remainingSeconds, setRemainingSeconds] = useState(0);
+  const [isRestoringOrder, setIsRestoringOrder] = useState(true);
+  const [statusRefreshNonce, setStatusRefreshNonce] = useState(0);
   const [isLoadingDiscovery, setIsLoadingDiscovery] = useState(true);
   const [isLoadingBanks, setIsLoadingBanks] = useState(false);
   const [isLoadingRate, setIsLoadingRate] = useState(false);
@@ -303,33 +306,93 @@ export function useOfframpFlow() {
     };
   }, [accountNumber, bankCode, selectedCountry]);
 
+  const persistManualOrder = useCallback(
+    (stored: StoredManualOfframp) => {
+      const serialized = JSON.stringify(stored);
+      try {
+        window.sessionStorage.setItem(OFFRAMP_STORAGE_KEYS.manualOrder, serialized);
+      } catch {
+        // Some mobile/private browser contexts disable session storage.
+      }
+      try {
+        window.localStorage.setItem(OFFRAMP_STORAGE_KEYS.manualOrder, serialized);
+      } catch {
+        // The URL reference still preserves navigation context if storage is blocked.
+      }
+    },
+    [],
+  );
+
+  const removePersistedManualOrder = useCallback(() => {
+    try {
+      window.sessionStorage.removeItem(OFFRAMP_STORAGE_KEYS.manualOrder);
+    } catch {
+      // Storage may be unavailable in restricted browser contexts.
+    }
+    try {
+      window.localStorage.removeItem(OFFRAMP_STORAGE_KEYS.manualOrder);
+    } catch {
+      // Storage may be unavailable in restricted browser contexts.
+    }
+  }, []);
+
+  const setOrderReferenceInUrl = useCallback((reference: string | null) => {
+    const url = new URL(window.location.href);
+    if (reference) {
+      url.searchParams.set(OFFRAMP_URL_KEYS.reference, reference);
+    } else {
+      url.searchParams.delete(OFFRAMP_URL_KEYS.reference);
+    }
+    window.history.replaceState(window.history.state, "", url);
+  }, []);
+
   useEffect(() => {
-    const stored = window.sessionStorage.getItem(OFFRAMP_STORAGE_KEYS.manualOrder);
-    if (!stored) return;
+    let stored: string | null = null;
+    try {
+      stored = window.sessionStorage.getItem(OFFRAMP_STORAGE_KEYS.manualOrder);
+    } catch {
+      // Fall through to durable storage.
+    }
+    if (!stored) {
+      try {
+        stored = window.localStorage.getItem(OFFRAMP_STORAGE_KEYS.manualOrder);
+      } catch {
+        // Storage is unavailable in this browser context.
+      }
+    }
+    if (!stored) {
+      setIsRestoringOrder(false);
+      return;
+    }
 
     try {
       const parsed = JSON.parse(stored) as StoredManualOfframp;
       if (
         parsed.order?.transactionReference &&
-        parsed.order.accessToken &&
-        getRemainingSeconds(parsed.order.expiresAt) > 0
+        parsed.order.accessToken
       ) {
         setModeState(OFFRAMP_MODES.manual);
         setOrder(parsed.order);
         setAccessToken(parsed.order.accessToken);
-        setPublicStatus({
-          transactionReference: parsed.order.transactionReference,
-          status: "pending",
-          stage: OFFRAMP_PUBLIC_STAGES.awaitingDeposit,
-          expiresAt: parsed.order.expiresAt || null,
-        });
+        setPublicStatus(
+          parsed.publicStatus || {
+            transactionReference: parsed.order.transactionReference,
+            status: "pending",
+            stage: OFFRAMP_PUBLIC_STAGES.awaitingDeposit,
+            expiresAt: parsed.order.expiresAt || null,
+          },
+        );
+        persistManualOrder(parsed);
+        setOrderReferenceInUrl(parsed.order.transactionReference);
       } else {
-        window.sessionStorage.removeItem(OFFRAMP_STORAGE_KEYS.manualOrder);
+        removePersistedManualOrder();
       }
     } catch {
-      window.sessionStorage.removeItem(OFFRAMP_STORAGE_KEYS.manualOrder);
+      removePersistedManualOrder();
+    } finally {
+      setIsRestoringOrder(false);
     }
-  }, []);
+  }, [persistManualOrder, removePersistedManualOrder, setOrderReferenceInUrl]);
 
   useEffect(() => {
     if (!order?.expiresAt || isTerminalOfframpStatus(publicStatus?.status || "")) {
@@ -340,15 +403,6 @@ export function useOfframpFlow() {
     const updateCountdown = () => {
       const remaining = getRemainingSeconds(order.expiresAt);
       setRemainingSeconds(remaining);
-      if (remaining === 0) {
-        setPublicStatus({
-          transactionReference: order.transactionReference,
-          status: "expired",
-          stage: OFFRAMP_PUBLIC_STAGES.expired,
-          expiresAt: order.expiresAt || null,
-        });
-        window.sessionStorage.removeItem(OFFRAMP_STORAGE_KEYS.manualOrder);
-      }
     };
 
     updateCountdown();
@@ -386,8 +440,15 @@ export function useOfframpFlow() {
         setPublicStatus(nextStatus);
         setStatusError("");
 
+        if (mode === OFFRAMP_MODES.manual) {
+          persistManualOrder({
+            order: order as StoredManualOfframp["order"],
+            publicStatus: nextStatus,
+            savedAt: Date.now(),
+          });
+        }
+
         if (isTerminalOfframpStatus(nextStatus.status)) {
-          window.sessionStorage.removeItem(OFFRAMP_STORAGE_KEYS.manualOrder);
           return;
         }
       } catch (error) {
@@ -402,13 +463,41 @@ export function useOfframpFlow() {
       }
     };
 
-    timeout = window.setTimeout(poll, OFFRAMP_POLLING.fastIntervalMs);
+    timeout = window.setTimeout(
+      poll,
+      statusRefreshNonce > 0 ? 0 : OFFRAMP_POLLING.fastIntervalMs,
+    );
 
     return () => {
       active = false;
       if (timeout) window.clearTimeout(timeout);
     };
-  }, [accessToken, address, mode, order, publicStatus?.status]);
+  }, [
+    accessToken,
+    address,
+    mode,
+    order,
+    persistManualOrder,
+    publicStatus?.status,
+    statusRefreshNonce,
+  ]);
+
+  useEffect(() => {
+    if (!order || isTerminalOfframpStatus(publicStatus?.status || "")) return;
+
+    const resumePolling = () => {
+      if (document.visibilityState === "visible") {
+        setStatusRefreshNonce((current) => current + 1);
+      }
+    };
+
+    document.addEventListener("visibilitychange", resumePolling);
+    window.addEventListener("pageshow", resumePolling);
+    return () => {
+      document.removeEventListener("visibilitychange", resumePolling);
+      window.removeEventListener("pageshow", resumePolling);
+    };
+  }, [order, publicStatus?.status]);
 
   const sendConnectedDeposit = useCallback(
     async (activeOrder: OfframpOrder) => {
@@ -487,10 +576,8 @@ export function useOfframpFlow() {
           order: walletlessOrder,
           savedAt: Date.now(),
         };
-        window.sessionStorage.setItem(
-          OFFRAMP_STORAGE_KEYS.manualOrder,
-          JSON.stringify(stored),
-        );
+        persistManualOrder(stored);
+        setOrderReferenceInUrl(walletlessOrder.transactionReference);
       } else {
         const created = await offrampService.createConnected(params, address!);
         setOrder(created);
@@ -519,6 +606,8 @@ export function useOfframpFlow() {
     selectedAsset,
     selectedCountry,
     sendConnectedDeposit,
+    persistManualOrder,
+    setOrderReferenceInUrl,
     verifiedAccount,
   ]);
 
@@ -532,12 +621,17 @@ export function useOfframpFlow() {
         accessToken,
       );
       setPublicStatus(nextStatus);
+      persistManualOrder({
+        order: order as StoredManualOfframp["order"],
+        publicStatus: nextStatus,
+        savedAt: Date.now(),
+      });
     } catch (error) {
       setStatusError((error as Error).message);
     } finally {
       setIsConfirmingDeposit(false);
     }
-  }, [accessToken, order]);
+  }, [accessToken, order, persistManualOrder]);
 
   const resetOrder = useCallback(() => {
     setOrder(null);
@@ -546,8 +640,9 @@ export function useOfframpFlow() {
     setTxHash(null);
     setActionError("");
     setStatusError("");
-    window.sessionStorage.removeItem(OFFRAMP_STORAGE_KEYS.manualOrder);
-  }, []);
+    removePersistedManualOrder();
+    setOrderReferenceInUrl(null);
+  }, [removePersistedManualOrder, setOrderReferenceInUrl]);
 
   const setMode = useCallback(
     (nextMode: OfframpMode) => {
@@ -599,6 +694,7 @@ export function useOfframpFlow() {
     isLoadingBanks,
     isLoadingDiscovery,
     isLoadingRate,
+    isRestoringOrder,
     isSendingDeposit,
     isVerifyingAccount,
     mode,

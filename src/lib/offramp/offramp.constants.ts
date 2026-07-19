@@ -32,6 +32,10 @@ export const OFFRAMP_STORAGE_KEYS = {
   manualOrder: "fundable:paycrest-manual-order",
 } as const;
 
+export const OFFRAMP_URL_KEYS = {
+  reference: "offrampReference",
+} as const;
+
 export const OFFRAMP_MESSAGES = {
   unavailable: "Offramp is temporarily unavailable. Please try again shortly.",
   assetsUnavailable:

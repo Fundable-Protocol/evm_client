@@ -124,4 +124,5 @@ export interface OfframpPublicStatus {
 export interface StoredManualOfframp {
   order: ManualOfframpOrder;
   savedAt: number;
+  publicStatus?: OfframpPublicStatus;
 }
