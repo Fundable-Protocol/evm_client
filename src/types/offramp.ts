@@ -126,3 +126,153 @@ export interface StoredManualOfframp {
   savedAt: number;
   publicStatus?: OfframpPublicStatus;
 }
+
+// ---------------------------------------------------------------------------
+// Form & UI types
+// ---------------------------------------------------------------------------
+
+export interface OfframpFormState {
+  token: string;
+  amount: string;
+  country: string;
+  bankCode: string;
+  accountNumber: string;
+  accountName: string;
+}
+
+export type OfframpToken = string;
+
+export interface OfframpTokenInfo {
+  symbol: string;
+  name: string;
+}
+
+// ---------------------------------------------------------------------------
+// Cashwyre quote / confirm response types
+// ---------------------------------------------------------------------------
+
+export interface OfframpQuoteData {
+  transactionReference: string;
+  totalDepositInCryptoAsset: number;
+  payoutAmountInLocalCurrency: number;
+  cryptoRate: number;
+  rateCurrency: string;
+  currency: string;
+  feeType: string;
+  expireInMinutes: number;
+  depositAddress: string;
+  cryptoAssetAddress: string;
+  expireOn?: string;
+  amountInCryptoAsset?: number;
+  amountInLocalCurrency?: number;
+  [key: string]: unknown;
+}
+
+export interface OfframpQuoteRequest {
+  token: string;
+  amount: number;
+  country: string;
+  currency: string;
+  network: string;
+}
+
+export interface OfframpQuoteResponse {
+  success: boolean;
+  data?: OfframpQuoteData;
+  error?: string;
+}
+
+export interface OfframpConfirmResponse {
+  success: boolean;
+  data?: {
+    depositAddress: string;
+    depositAmount: number;
+    depositToken: string;
+    transactionId: string;
+    [key: string]: unknown;
+  };
+  error?: string;
+}
+
+export type PayoutStatus =
+  | "pending"
+  | "confirmed"
+  | "processing"
+  | "completed"
+  | "failed"
+  | "expired";
+
+// ---------------------------------------------------------------------------
+// Bank types
+// ---------------------------------------------------------------------------
+
+export interface Bank {
+  code: string;
+  name: string;
+}
+
+export interface BankListResponse {
+  success: boolean;
+  data?: Bank[];
+  error?: string;
+}
+
+export interface VerifyBankAccountResponse {
+  success: boolean;
+  data?: {
+    accountName: string;
+    accountNumber: string;
+    bankCode: string;
+    [key: string]: unknown;
+  };
+  error?: string;
+}
+
+export interface RateInfoResponse {
+  success: boolean;
+  data?: {
+    rate: number;
+    [key: string]: unknown;
+  };
+  error?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Locked quote (used during confirmation flow)
+// ---------------------------------------------------------------------------
+
+export interface LockedQuote {
+  transactionReference: string;
+  inputSnapshot: OfframpFormState;
+  quoteData: OfframpQuoteData;
+  network: string;
+  lockedAt: number;
+}
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+export const SUPPORTED_COUNTRIES: OfframpCountry[] = [
+  { code: "NG", name: "Nigeria", currency: "NGN", flag: "🇳🇬" },
+  { code: "GH", name: "Ghana", currency: "GHS", flag: "🇬🇭" },
+  { code: "KE", name: "Kenya", currency: "KES", flag: "🇰🇪" },
+];
+
+export const SUPPORTED_OFFRAMP_TOKENS: OfframpTokenInfo[] = [
+  { symbol: "USDC", name: "USD Coin" },
+  { symbol: "USDT", name: "Tether" },
+];
+
+export const TOKEN_CONTRACTS: Record<string, Record<string, string>> = {
+  "137": {
+    USDC: "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+    USDT: "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+  },
+  "56": {
+    USDC: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+    USDT: "0x55d398326f99059fF775485246999027B3197955",
+  },
+};
+
+export const OFFRAMP_CHAIN_IDS: number[] = [137, 56];

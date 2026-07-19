@@ -10,7 +10,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
-import type { OfframpFormState, OfframpToken, OfframpCountry } from "@/types/offramp";
+import type { OfframpFormState } from "@/types/offramp";
 import { SUPPORTED_COUNTRIES, SUPPORTED_OFFRAMP_TOKENS } from "@/types/offramp";
 
 interface OfframpFormProps {
@@ -33,7 +33,7 @@ export default function OfframpForm({ formState, onChange, maxBalance, onMaxClic
                     <Label htmlFor="token" className="text-fundable-light-grey text-sm">Select Token</Label>
                     <Select
                         value={formState.token}
-                        onValueChange={(value) => onChange("token", value as OfframpToken)}
+                        onValueChange={(value) => onChange("token", value)}
                     >
                         <SelectTrigger id="token" className="bg-fundable-dark border-gray-700 text-white h-12">
                             <SelectValue placeholder="Select token" />
@@ -87,7 +87,7 @@ export default function OfframpForm({ formState, onChange, maxBalance, onMaxClic
                     </Label>
                     <Select
                         value={formState.country}
-                        onValueChange={(value) => onChange("country", value as OfframpCountry)}
+                        onValueChange={(value) => onChange("country", value)}
                     >
                         <SelectTrigger id="country" className="bg-fundable-dark border-gray-700 text-white h-12">
                             <SelectValue placeholder="Select country" />
