@@ -21,8 +21,15 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME || "Fundable",
     description: process.env.NEXT_PUBLIC_APP_DESCRIPTION || "A decentralized funding application.",
+    manifest: "/manifest.json",
     icons: {
       icon: "/favicon_io/favicon.ico",
+      apple: "/favicon_io/apple-touch-icon.png",
+    },
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "black-translucent",
+      title: process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME || "Fundable",
     },
     other: {
       "fc:frame": JSON.stringify({
