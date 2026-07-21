@@ -89,11 +89,6 @@ const mobileItems = [
     url: "/history",
     icon: <User2 aria-hidden="true" className="text-white size-5" />,
   },
-  {
-    title: "Offramp",
-    url: "/offramp",
-    icon: <ArrowDownToLine aria-hidden="true" className="size-5" />,
-  },
 ];
 
 export function AppSidebar() {
