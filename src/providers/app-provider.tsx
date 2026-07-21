@@ -11,6 +11,7 @@ import { CheckCircle2, XCircle, Loader2, X } from "lucide-react"
 import { MiniKitContextProvider } from './minikit-provider'
 import { SidebarProvider } from '@/components/ui/sidebar'
 import AdminNavbar from '@/components/organisms/AdminNavbar'
+import PwaInstallBanner from '@/components/organisms/PwaInstallBanner'
 import { AppSidebar } from '@/components/ui/app-sidebar'
 
 // Set up queryClient
@@ -50,6 +51,7 @@ function AppProvider({ children, cookies }: { children: ReactNode; cookies: stri
           <SidebarProvider>
             <AppSidebar />
             <main className="flex flex-col h-dvh w-full overflow-hidden">
+              <PwaInstallBanner />
               <AdminNavbar />
               <div className="px-4 py-4 overflow-hidden pb-16 sm:pb-20 md:pb-4">{children}</div>
               <Toaster
